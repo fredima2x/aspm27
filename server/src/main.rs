@@ -43,7 +43,7 @@ mod db {
         )
         .execute(&pool)
         .await
-        .expect("Failed to create users table");
+        .unwrap();
     }
     async fn get_pool() -> SqlitePool {
         let pool = SqlitePool::connect(SQLITE_DB_ADDRESS).await.unwrap();
