@@ -1,8 +1,5 @@
 // Global Imports
-use axum::{
-    Router,
-    routing::{delete, get},
-};
+use axum::{Router, routing::get};
 use serde::{Deserialize, Serialize};
 
 // Configuration
@@ -10,7 +7,7 @@ const SERVER_ADDRESS: &'static str = "127.0.0.1:3000";
 const SQLITE_DB_ADDRESS: &'static str = "sqlite:db.sqlite3";
 
 // Data Structures
-#[derive(Serialize, Debug, sqlx::FromRow)]
+#[derive(Serialize, Deserialize, Debug, sqlx::FromRow)]
 struct User {
     id: i64,
     username: String,
@@ -82,6 +79,16 @@ mod db {
             .await
             .expect("Failed to Delete User!");
     }
+
+    pub async fn get_user_by_id(id: i64) -> User {
+        let pool = get_pool().await;
+        let result: User = sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = ?")
+            .bind(id)
+            .fetch_one(&pool)
+            .await
+            .expect("Failed to get User!");
+        result
+    }
 }
 
 // Request Handler
@@ -101,6 +108,10 @@ mod handler {
     pub async fn delete_user(Path(id): Path<i64>) {
         db::delete_user(id).await;
     }
+    pub async fn get_user(Path(id): Path<i64>) -> Json<User> {
+        let user: User = db::get_user_by_id(id).await;
+        Json(user)
+    }
 }
 
 // Entry Point
@@ -108,7 +119,10 @@ mod handler {
 async fn main() {
     let app = Router::new()
         .route("/users", get(handler::get_users).post(handler::create_user))
-        .route("/users/{id}", delete(handler::delete_user));
+        .route(
+            "/users/{id}",
+            get(handler::get_user).delete(handler::delete_user),
+        );
     let listener = tokio::net::TcpListener::bind(SERVER_ADDRESS).await.unwrap();
 
     db::setup().await;
