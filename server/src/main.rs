@@ -11,12 +11,12 @@ const SQLITE_DB_ADDRESS: &'static str = "sqlite:db.sqlite3";
 struct User {
     id: i64,
     username: String,
-    password: String,
+    password_hash: String,
 }
 
 // Request Structures
 #[derive(Deserialize)]
-struct CreateUserRequest {
+struct SendUserRequest {
     username: String,
     password: String,
 }
@@ -25,10 +25,32 @@ struct CreateUserResponse {
     id: i64,
 }
 
+mod auth {
+    use argon2::{
+        Argon2, PasswordHash, PasswordVerifier,
+        password_hash::{PasswordHasher, SaltString, rand_core::OsRng},
+    };
+
+    pub fn hash_password(password: &str) -> String {
+        let salt = SaltString::generate(&mut OsRng);
+        let argon2 = Argon2::default();
+        argon2
+            .hash_password(password.as_bytes(), &salt)
+            .unwrap()
+            .to_string()
+    }
+    pub fn verify_password(password: &str, password_hash: &str) -> bool {
+        let parsed_hash = PasswordHash::new(password_hash).unwrap();
+        Argon2::default()
+            .verify_password(password.as_bytes(), &parsed_hash)
+            .is_ok()
+    }
+}
+
 // Database Handler
 mod db {
 
-    use crate::{SQLITE_DB_ADDRESS, User};
+    use crate::{SQLITE_DB_ADDRESS, User, auth::hash_password};
 
     use sqlx::SqlitePool;
 
@@ -38,7 +60,7 @@ mod db {
             "CREATE TABLE IF NOT EXISTS users (
                 id       INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL UNIQUE,
-                password TEXT NOT NULL
+                password_hash TEXT NOT NULL
             )",
         )
         .execute(&pool)
@@ -61,9 +83,9 @@ mod db {
 
     pub async fn create_user(username: &str, password: &str) -> i64 {
         let pool = get_pool().await;
-        let result = sqlx::query("INSERT INTO users (username, password) VALUES (?, ?)")
+        let result = sqlx::query("INSERT INTO users (username, password_hash) VALUES (?, ?)")
             .bind(username)
-            .bind(password)
+            .bind(hash_password(password))
             .execute(&pool)
             .await
             .expect("Failed to Create User in Databse!");
@@ -93,14 +115,14 @@ mod db {
 
 // Request Handler
 mod handler {
-    use crate::{CreateUserRequest, CreateUserResponse, User, db};
+    use crate::{CreateUserResponse, SendUserRequest, User, db};
     use axum::{Json, extract::Path};
 
     pub async fn get_users() -> Json<Vec<User>> {
         let users = db::get_users().await;
         Json(users)
     }
-    pub async fn create_user(Json(body): Json<CreateUserRequest>) -> Json<CreateUserResponse> {
+    pub async fn create_user(Json(body): Json<SendUserRequest>) -> Json<CreateUserResponse> {
         let id: i64 = db::create_user(&body.username, &body.password).await;
         let response = CreateUserResponse { id: id };
         Json(response)
@@ -112,6 +134,7 @@ mod handler {
         let user: User = db::get_user_by_id(id).await;
         Json(user)
     }
+    pub async fn login(Json(body): Json<SendUserRequest>) -> Json<CreateUserResponse> {}
 }
 
 // Entry Point
