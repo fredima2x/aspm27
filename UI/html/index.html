@@ -7,30 +7,13 @@
     <title>aspm</title>
     <link rel="stylesheet" href="/UI/css/contacts-window.css">
     <link rel="stylesheet" href="/UI/css/general.css">
-    <style>
-        .chat-window {
-            background-color: lightblue;
-            flex: 1;
-            height: 100%;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 10px;
-        }
-
-        .chat-area {
-            background-color: lightpink;
-            width: 100px;
-            height: 100px;
-        }
-    </style>
+    <link rel="stylesheet" href="/UI/css/chat-window.css">
 </head>
 
 <body>
     <div class="contacts-window">
         <div class="top-contact-bar">
-            <input type="search" class="contact-search-bar">
+            <input type="search" class="contact-search-bar" placeholder="Search Contatcs">
         </div>
         <div class="contacts">
             <div class="contact">
@@ -59,7 +42,7 @@
         </div>
     </div>
     <div class="chat-window">
-        <div class="contact">
+        <div class="opened-contact">
             <div class="contact-picture-cont">
                 <img src="/UI/imgs/kreise.pdf" class="contact-picture">
             </div>
@@ -70,10 +53,28 @@
             </div>
         </div>
         <div class="chat-area">
-
+            <div class="message-them">
+                <p class="sender">Max Mustermann</p>
+                <div class="message-cont">
+                    <p class="message">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui nostrum vero harum
+                        natus dignissimos deserunt consequatur rem? Impedit debitis sequi quos reprehenderit nihil ab
+                        ipsum vitae facilis cumque, ducimus possimus!</p>
+                </div>
+            </div>
+            <div class="message-me">
+                <p class="sender">Du</p>
+                <div class="message-cont">
+                    <p class="message">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ex deleniti delectus
+                        incidunt sunt, quam, fugit tenetur neque reiciendis eos odit vitae nobis. Earum eligendi autem
+                        harum
+                        sit nemo quisquam sunt.</p>
+                </div>
+            </div>
         </div>
-        <div>
-
+        <div class="message-bar">
+            <input type="text" class="message-text-bar" placeholder="Message">
+            <button class="send-button">Send</button>
+            <button class="actions-button">+</button>
         </div>
 
     </div>
