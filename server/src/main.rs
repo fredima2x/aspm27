@@ -1,10 +1,11 @@
 // Global Imports
-use axum::{Router, routing::get};
+use axum::{Router, http::StatusCode, routing::get};
 use serde::{Deserialize, Serialize};
 
 // Configuration
 const SERVER_ADDRESS: &'static str = "127.0.0.1:3000";
 const SQLITE_DB_ADDRESS: &'static str = "sqlite:db.sqlite3";
+const TOKEN_SECRET: &'static str = "ub+MdZ4ieRpxtlYEZghNhg";
 
 // Data Structures
 #[derive(Serialize, Deserialize, Debug, sqlx::FromRow)]
@@ -24,12 +25,41 @@ struct SendUserRequest {
 struct CreateUserResponse {
     id: i64,
 }
+#[derive(Serialize)]
+struct LoginResponse {
+    token_string: String,
+}
+
+// Extractors
+pub struct AuthenticatedUser {
+    pub id: i64,
+}
+//impl<S> axum::extract::FromRequestParts<S> for AuthenticatedUser
+//where
+//    S: Send + Sync,
+//{
+//    type Rejection = StatusCode;
+
+//    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+// dein Code kommt hier rein
+//    }
+//}
 
 mod auth {
     use argon2::{
         Argon2, PasswordHash, PasswordVerifier,
         password_hash::{PasswordHasher, SaltString, rand_core::OsRng},
     };
+    use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
+    use serde::{Deserialize, Serialize};
+
+    use crate::TOKEN_SECRET;
+
+    #[derive(Serialize, Deserialize)]
+    pub struct Claims {
+        pub sub: i64,
+        pub exp: usize,
+    }
 
     pub fn hash_password(password: &str) -> String {
         let salt = SaltString::generate(&mut OsRng);
@@ -44,6 +74,30 @@ mod auth {
         Argon2::default()
             .verify_password(password.as_bytes(), &parsed_hash)
             .is_ok()
+    }
+    pub fn create_token(user_id: i64) -> String {
+        let exp_time = chrono::Utc::now()
+            .checked_add_signed(chrono::Duration::hours(24))
+            .unwrap()
+            .timestamp() as usize;
+        let claims = Claims {
+            sub: user_id,
+            exp: exp_time,
+        };
+        jsonwebtoken::encode(
+            &Header::default(),
+            &claims,
+            &EncodingKey::from_secret(TOKEN_SECRET.as_bytes().as_ref()),
+        )
+        .unwrap()
+    }
+    pub fn verify_token(token_string: &str) -> Result<Claims, jsonwebtoken::errors::Error> {
+        let token_data = jsonwebtoken::decode::<Claims>(
+            &token_string,
+            &DecodingKey::from_secret(TOKEN_SECRET.as_bytes()),
+            &Validation::default(),
+        )?;
+        Ok(token_data.claims)
     }
 }
 
@@ -111,12 +165,21 @@ mod db {
             .expect("Failed to get User!");
         result
     }
+    pub async fn get_user_by_username(username: &str) -> User {
+        let pool = get_pool().await;
+        let result: User = sqlx::query_as::<_, User>("SELECT * FROM users WHERE username = ?")
+            .bind(username)
+            .fetch_one(&pool)
+            .await
+            .expect("Failed to get User!");
+        result
+    }
 }
 
 // Request Handler
 mod handler {
-    use crate::{CreateUserResponse, SendUserRequest, User, db};
-    use axum::{Json, extract::Path};
+    use crate::{CreateUserResponse, LoginResponse, SendUserRequest, User, auth, db};
+    use axum::{Json, extract::Path, http::StatusCode};
 
     pub async fn get_users() -> Json<Vec<User>> {
         let users = db::get_users().await;
@@ -134,7 +197,19 @@ mod handler {
         let user: User = db::get_user_by_id(id).await;
         Json(user)
     }
-    // pub async fn login(Json(body): Json<SendUserRequest>) -> Json<CreateUserResponse> {}
+    pub async fn login(
+        Json(body): Json<SendUserRequest>,
+    ) -> Result<Json<LoginResponse>, StatusCode> {
+        let user: User = db::get_user_by_username(&body.username).await;
+        let result: bool = auth::verify_password(&body.password, &user.password_hash);
+        if result {
+            return Ok(Json(LoginResponse {
+                token_string: auth::create_token(user.id),
+            }));
+        } else {
+            return Err(StatusCode::UNAUTHORIZED);
+        }
+    }
 }
 
 // Entry Point
@@ -145,7 +220,8 @@ async fn main() {
         .route(
             "/users/{id}",
             get(handler::get_user).delete(handler::delete_user),
-        );
+        )
+        .route("/login", get(handler::login));
     let listener = tokio::net::TcpListener::bind(SERVER_ADDRESS).await.unwrap();
 
     db::setup().await;
