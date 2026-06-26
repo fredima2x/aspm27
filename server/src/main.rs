@@ -15,6 +15,7 @@ mod models;
 #[tokio::main]
 async fn main() {
     let app = Router::new()
+        .route("/", get(handler::hi))
         .route(
             "/chats",
             get(handler::get_user_chats).post(handler::create_chat),
