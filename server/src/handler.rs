@@ -2,6 +2,7 @@ use axum::{Json, extract::Path, http::StatusCode};
 
 use crate::auth;
 use crate::db;
+use crate::models::CreateChatRequest;
 use crate::models::{
     AuthenticatedUser, Chat, CreateUserResponse, LoginResponse, SendUserRequest, User,
 };
@@ -44,7 +45,14 @@ pub async fn get_chats(user: AuthenticatedUser) -> Json<Vec<Chat>> {
     Json(db::user_get_chats(user.id).await)
 }
 
-pub async fn create_chat(user: AuthenticatedUser) {}
+pub async fn create_chat(
+    user: AuthenticatedUser,
+    Json(body): Json<CreateChatRequest>,
+) -> Json<Chat> {
+    let chat_id: i64 = db::chat_create(&body.chat_name).await;
+    db::chat_add_user(chat_id, user.id).await;
+    Json(db::chat_get(chat_id).await)
+}
 
 pub async fn get_chat(Path(id): Path<i64>) -> Json<Chat> {
     Json(db::chat_get(id).await)

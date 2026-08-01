@@ -137,7 +137,7 @@ pub async fn chat_delete(chat_id: &str) {
         .unwrap();
 }
 
-pub async fn chat_add_user(chat_id: i64, user_id: &str) {
+pub async fn chat_add_user(chat_id: i64, user_id: i64) {
     let pool = get_pool().await;
     sqlx::query("INSERT INTO chat_members (chat_id, user_id) VALUES (?, ?)")
         .bind(chat_id)

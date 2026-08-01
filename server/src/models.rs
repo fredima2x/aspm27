@@ -31,6 +31,11 @@ pub struct CreateUserResponse {
     pub id: i64,
 }
 
+#[derive(Deserialize)]
+pub struct CreateChatRequest {
+    pub chat_name: String,
+}
+
 #[derive(Serialize)]
 pub struct LoginResponse {
     pub token_string: String,
