@@ -70,6 +70,7 @@ function saveMessages() {
 }
 
 function renderMessages() {
+  chatArea.innerHTML = "";
 
   messages.forEach((entry) => {
     const messageWrapper = document.createElement("div");
