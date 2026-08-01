@@ -109,13 +109,23 @@ pub async fn user_get_chats(user_id: i64) -> Vec<Chat> {
     .unwrap()
 }
 
-pub async fn chat_create(chat_name: &str) {
+pub async fn chat_create(chat_name: &str) -> i64 {
     let pool = get_pool().await;
-    sqlx::query("INSERT INTO chats (chat_name) VALUES (?)")
+    let result = sqlx::query("INSERT INTO chats (chat_name) VALUES (?)")
         .bind(chat_name)
         .execute(&pool)
         .await
         .unwrap();
+    result.last_insert_rowid()
+}
+
+pub async fn chat_get(chat_id: i64) -> Chat {
+    let pool = get_pool().await;
+    sqlx::query_as::<_, Chat>("SELECT FROM chats WHERE id = ?")
+        .bind(chat_id)
+        .fetch_one(&pool)
+        .await
+        .unwrap()
 }
 
 pub async fn chat_delete(chat_id: &str) {

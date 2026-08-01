@@ -43,8 +43,12 @@ pub async fn login(Json(body): Json<SendUserRequest>) -> Result<Json<LoginRespon
 pub async fn get_chats(user: AuthenticatedUser) -> Json<Vec<Chat>> {
     Json(db::user_get_chats(user.id).await)
 }
-pub async fn create_chat() {}
-pub async fn get_chat() {}
+
+pub async fn create_chat(user: AuthenticatedUser) {}
+
+pub async fn get_chat(Path(id): Path<i64>) -> Json<Chat> {
+    Json(db::chat_get(id).await)
+}
 
 // !!!
 pub async fn hi() -> &'static str {
