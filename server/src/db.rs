@@ -121,7 +121,7 @@ pub async fn chat_create(chat_name: &str) -> i64 {
 
 pub async fn chat_get(chat_id: i64) -> Chat {
     let pool = get_pool().await;
-    sqlx::query_as::<_, Chat>("SELECT FROM chats WHERE id = ?")
+    sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE id = ?")
         .bind(chat_id)
         .fetch_one(&pool)
         .await
@@ -130,7 +130,7 @@ pub async fn chat_get(chat_id: i64) -> Chat {
 
 pub async fn chat_delete(chat_id: &str) {
     let pool = get_pool().await;
-    sqlx::query("DELETE FROM chats WHERE chat_id = ?")
+    sqlx::query("DELETE * FROM chats WHERE chat_id = ?")
         .bind(chat_id)
         .execute(&pool)
         .await
