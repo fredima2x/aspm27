@@ -23,8 +23,6 @@ async function loadUsers() {
       contactButton.className = "contact";
       contactButton.type = "button";
 
-      
-
       contactButton.innerHTML = `
                 <div class="contact-picture-cont">
                     <img src="imgs/kreise.pdf" class="contact-picture" />
