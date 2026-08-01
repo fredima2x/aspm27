@@ -128,7 +128,7 @@ pub async fn chat_get(chat_id: i64) -> Chat {
         .unwrap()
 }
 
-pub async fn chat_delete(chat_id: &str) {
+pub async fn chat_delete(chat_id: i64) {
     let pool = get_pool().await;
     sqlx::query("DELETE * FROM chats WHERE chat_id = ?")
         .bind(chat_id)

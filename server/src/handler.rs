@@ -1,11 +1,10 @@
-use axum::{Json, extract::Path, http::StatusCode};
-
 use crate::auth;
 use crate::db;
 use crate::models::CreateChatRequest;
 use crate::models::{
     AuthenticatedUser, Chat, CreateUserResponse, LoginResponse, SendUserRequest, User,
 };
+use axum::{Json, extract::Path, http::StatusCode};
 
 // SECURITY FRAUD
 // Only for debug! Must be removed in Release
@@ -20,8 +19,16 @@ pub async fn create_user(Json(body): Json<SendUserRequest>) -> Json<CreateUserRe
 }
 
 // SECURITY FRAUD
-pub async fn delete_user(Path(id): Path<i64>) {
-    db::user_delete(id).await;
+pub async fn delete_user(
+    Path(id): Path<i64>,
+    user: AuthenticatedUser,
+) -> Result<StatusCode, StatusCode> {
+    if user.id == id {
+        db::user_delete(id).await;
+        Ok(StatusCode::OK)
+    } else {
+        Err(StatusCode::FORBIDDEN)
+    }
 }
 
 pub async fn get_user(Path(id): Path<i64>) -> Json<User> {
@@ -56,6 +63,20 @@ pub async fn create_chat(
 
 pub async fn get_chat(Path(id): Path<i64>) -> Json<Chat> {
     Json(db::chat_get(id).await)
+}
+
+pub async fn delete_chat(
+    Path(id): Path<i64>,
+    user: AuthenticatedUser,
+) -> Result<StatusCode, StatusCode> {
+    let user_chats = db::user_get_chats(user.id).await;
+    let is_member = user_chats.iter().any(|chat| chat.id == id);
+    if is_member {
+        db::chat_delete(id).await;
+        Ok(StatusCode::OK)
+    } else {
+        Err(StatusCode::FORBIDDEN)
+    }
 }
 
 // !!!

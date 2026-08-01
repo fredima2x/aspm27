@@ -17,7 +17,10 @@ async fn main() {
     let app = Router::new()
         .route("/", get(handler::hi))
         .route("/chats", get(handler::get_chats).post(handler::create_chat))
-        .route("/chats/{id}", get(handler::get_chat))
+        .route(
+            "/chats/{id}",
+            get(handler::get_chat).delete(handler::delete_chat),
+        )
         .route("/users", get(handler::get_users).post(handler::create_user))
         .route(
             "/users/{id}",
