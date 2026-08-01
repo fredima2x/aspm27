@@ -8,6 +8,16 @@ pub struct User {
     pub password_hash: String,
 }
 
+#[derive(Serialize, Deserialize, sqlx::FromRow)]
+pub struct Chat {
+    pub id: i64,
+    pub chat_name: String,
+}
+
+pub struct AuthenticatedUser {
+    pub id: i64,
+}
+
 // Request Structures
 #[derive(Deserialize)]
 pub struct SendUserRequest {
