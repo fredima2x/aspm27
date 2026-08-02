@@ -39,6 +39,20 @@ pub async fn setup() {
     .execute(&pool)
     .await
     .unwrap();
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            owner INTEGER NOT NULL,
+            chat INTEGER NOT NULL,
+            content TEXT NOT NULL,
+
+            FOREIGN KEY (chat) REFERENCES chats(id) ON DELETE CASCADE,
+            FOREIGN KEY (owner) REFERENCES users(id) ON DELETE CASCADE
+        )",
+    )
+    .execute(&pool)
+    .await
+    .unwrap();
 }
 
 async fn get_pool() -> SqlitePool {

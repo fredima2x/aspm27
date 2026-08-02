@@ -12,28 +12,36 @@ mod extractor;
 mod handler;
 mod models;
 
+// Compily #1
+
 #[tokio::main]
 async fn main() {
     let app = Router::new()
         .route("/", get(handler::hi))
-        .route("/chats", get(handler::get_chats).post(handler::create_chat))
+        .route(
+            "/chats",
+            get(handler::chats::get_chats).post(handler::chats::create_chat),
+        )
         .route(
             "/chats/{id}",
-            get(handler::get_chat).delete(handler::delete_chat),
+            get(handler::chats::get_chat).delete(handler::chats::delete_chat),
         )
-        .route("/chats/{id}/users", get(handler::get_chat_members))
+        .route("/chats/{id}/users", get(handler::chats::get_chat_members))
         .route(
             "/chats/{chat_id}/users/{user_id}",
-            get(handler::is_user_in_chat)
-                .post(handler::add_chat_member)
-                .delete(handler::remove_chat_member),
+            get(handler::chats::is_user_in_chat)
+                .post(handler::chats::add_chat_member)
+                .delete(handler::chats::remove_chat_member),
         )
-        .route("/users", get(handler::get_users).post(handler::create_user))
+        .route(
+            "/users",
+            get(handler::users::get_users).post(handler::users::create_user),
+        )
         .route(
             "/users/{id}",
-            get(handler::get_user).delete(handler::delete_user),
+            get(handler::users::get_user).delete(handler::users::delete_user),
         )
-        .route("/login", post(handler::login))
+        .route("/login", post(handler::users::login))
         // Erlaubt deinem Browser-Frontend Zugriffe
         .layer(CorsLayer::permissive());
 
