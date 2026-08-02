@@ -21,7 +21,7 @@ pub struct Chat {
 //    pub user_id: i64,
 //}
 
-#[derive(FromRow)]
+#[derive(FromRow, Serialize)]
 pub struct Message {
     pub id: i64,
     pub owner_id: i64,

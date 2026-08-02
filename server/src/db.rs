@@ -45,10 +45,9 @@ pub async fn setup() {
             owner_id INTEGER NOT NULL,
             chat_id INTEGER NOT NULL,
             content TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-
-            FOREIGN KEY (chat) REFERENCES chats(id) ON DELETE CASCADE,
-            FOREIGN KEY (owner) REFERENCES users(id) ON DELETE CASCADE
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
         )",
     )
     .execute(&pool)
@@ -214,6 +213,7 @@ pub async fn get_message(message_id: i64) -> Message {
         .unwrap()
 }
 
+#[allow(dead_code)]
 pub async fn delete_message(message_id: i64) {
     let pool = get_pool().await;
     sqlx::query("DELETE FROM message WHERE id = ?")
@@ -223,6 +223,7 @@ pub async fn delete_message(message_id: i64) {
         .unwrap();
 }
 
+#[allow(dead_code)]
 pub async fn chat_get_messages(chat_id: i64, limit: i64, offset: i64) -> Vec<Message> {
     let pool = get_pool().await;
     sqlx::query_as::<_, Message>(
