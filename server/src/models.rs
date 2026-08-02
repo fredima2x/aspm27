@@ -41,6 +41,11 @@ pub struct SendUserRequest {
     pub password: String,
 }
 
+#[derive(Deserialize)]
+pub struct SendMessageRequest {
+    pub content: String,
+}
+
 // Response Structures
 #[derive(Serialize)]
 pub struct CreateUserResponse {

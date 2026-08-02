@@ -147,6 +147,28 @@ pub mod chats {
     }
 }
 
+pub mod message {
+    use crate::{
+        db,
+        models::{AuthenticatedUser, Message, SendMessageRequest, SendUserRequest},
+    };
+    use axum::{Json, extract::Path, http::StatusCode};
+
+    pub async fn save_message(
+        user: AuthenticatedUser,
+        Path(chat_id): Path<i64>,
+        Json(body): Json<SendMessageRequest>,
+    ) -> Result<Json<Message>, StatusCode> {
+        if db::is_user_in_chat(chat_id, user.id).await {
+            Ok(Json(
+                db::get_message(db::save_message(user.id, chat_id, &body.content).await).await,
+            ))
+        } else {
+            Err(StatusCode::FORBIDDEN)
+        }
+    }
+}
+
 // !!!
 pub async fn hi() -> &'static str {
     "Leck Eier!"

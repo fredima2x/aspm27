@@ -34,6 +34,10 @@ async fn main() {
                 .delete(handler::chats::remove_chat_member),
         )
         .route(
+            "/chats/{chat_id}/messages",
+            post(handler::message::save_message),
+        )
+        .route(
             "/users",
             get(handler::users::get_users).post(handler::users::create_user),
         )
