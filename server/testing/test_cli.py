@@ -75,30 +75,30 @@ def get_chat():
 
 def delete_chat():
     id = input("  Chat ID: ")
-    r = requests.delete(f"{BASE_URL}/chats/{id}")
+    r = requests.delete(f"{BASE_URL}/chats/{id}", headers=header())
     print_response(r)
 
 def get_chat_members():
     id = input("  Chat ID: ")
-    r = requests.get(f"{BASE_URL}/chats/{id}/users")
+    r = requests.get(f"{BASE_URL}/chats/{id}/users", headers=header())
     print_response(r)
 
 def is_user_in_chat():
     chat_id = input("  Chat ID: ")
     user_id = input("  user ID: ")
-    r = requests.get(f"{BASE_URL}/chats/{chat_id}/users/{user_id}")
+    r = requests.get(f"{BASE_URL}/chats/{chat_id}/users/{user_id}", headers=header())
     print_response(r)
 
 def add_chat_member():
     chat_id = input("  Chat ID: ")
     user_id = input("  user ID: ")
-    r = requests.post(f"{BASE_URL}/chats/{chat_id}/users/{user_id}")
+    r = requests.post(f"{BASE_URL}/chats/{chat_id}/users/{user_id}", headers=header())
     print_response(r)
 
 def remove_chat_member():
     chat_id = input("  Chat ID: ")
     user_id = input("  user ID: ")
-    r = requests.delete(f"{BASE_URL}/chats/{chat_id}/users/{user_id}")
+    r = requests.delete(f"{BASE_URL}/chats/{chat_id}/users/{user_id}", headers=header())
     print_response(r)
 
 # ─── Menü ────────────────────────────────────────────────────────────────────

@@ -14,6 +14,12 @@ pub struct Chat {
     pub chat_name: String,
 }
 
+//#[derive(sqlx::FromRow)]
+//pub struct ChatMembership {
+//    pub chat_id: i64,
+//    pub user_id: i64,
+//}
+
 pub struct AuthenticatedUser {
     pub id: i64,
 }

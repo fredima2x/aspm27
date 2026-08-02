@@ -129,7 +129,7 @@ pub async fn chat_get(chat_id: i64) -> Chat {
 
 pub async fn chat_delete(chat_id: i64) {
     let pool = get_pool().await;
-    sqlx::query("DELETE * FROM chats WHERE chat_id = ?")
+    sqlx::query("DELETE FROM chats WHERE id = ?")
         .bind(chat_id)
         .execute(&pool)
         .await
@@ -148,7 +148,7 @@ pub async fn chat_add_user(chat_id: i64, user_id: i64) {
 
 pub async fn chat_delete_user(chat_id: i64, user_id: i64) {
     let pool = get_pool().await;
-    sqlx::query("DELETE * FROM chat_members WHERE chat_id = ? AND user_id = ?")
+    sqlx::query("DELETE FROM chat_members WHERE chat_id = ? AND user_id = ?")
         .bind(chat_id)
         .bind(user_id)
         .execute(&pool)
@@ -158,11 +158,15 @@ pub async fn chat_delete_user(chat_id: i64, user_id: i64) {
 
 pub async fn chat_get_members(chat_id: i64) -> Vec<User> {
     let pool = get_pool().await;
-    sqlx::query_as::<_, User>("SELECT * FROM chat_members WHERE chat_id = ?")
-        .bind(chat_id)
-        .fetch_all(&pool)
-        .await
-        .unwrap()
+    sqlx::query_as::<_, User>(
+        "SELECT users.* FROM users
+         INNER JOIN chat_members ON users.id = chat_members.user_id
+         WHERE chat_members.chat_id = ?",
+    )
+    .bind(chat_id)
+    .fetch_all(&pool)
+    .await
+    .unwrap()
 }
 
 pub async fn is_user_in_chat(chat_id: i64, user_id: i64) -> bool {
