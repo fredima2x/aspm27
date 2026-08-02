@@ -73,6 +73,33 @@ def get_chat():
     r = requests.get(f"{BASE_URL}/chats/{id}")
     print_response(r)
 
+def delete_chat():
+    id = input("  Chat ID: ")
+    r = requests.delete(f"{BASE_URL}/chats/{id}")
+    print_response(r)
+
+def get_chat_members():
+    id = input("  Chat ID: ")
+    r = requests.get(f"{BASE_URL}/chats/{id}/users")
+    print_response(r)
+
+def is_user_in_chat():
+    chat_id = input("  Chat ID: ")
+    user_id = input("  user ID: ")
+    r = requests.get(f"{BASE_URL}/chats/{chat_id}/users/{user_id}")
+    print_response(r)
+
+def add_chat_member():
+    chat_id = input("  Chat ID: ")
+    user_id = input("  user ID: ")
+    r = requests.post(f"{BASE_URL}/chats/{chat_id}/users/{user_id}")
+    print_response(r)
+
+def remove_chat_member():
+    chat_id = input("  Chat ID: ")
+    user_id = input("  user ID: ")
+    r = requests.delete(f"{BASE_URL}/chats/{chat_id}/users/{user_id}")
+    print_response(r)
 
 # ─── Menü ────────────────────────────────────────────────────────────────────
 
@@ -85,6 +112,11 @@ MENU = {
     "6": ("Meine Chats",           get_my_chats),
     "7": ("Chat erstellen",        create_chat),
     "8": ("Chat by ID",            get_chat),
+    "9": ("Chat Löschen",          delete_chat),
+    "10": ("Alle Chat Member anzeigen", get_chat_members),
+    "11": ("Chat Member hinzufügen", add_chat_member),
+    "12": ("Chat Member entfernen", remove_chat_member),
+    "13": ("Ist User in Chat?", is_user_in_chat),
     "0": ("Beenden",               None),
 }
 

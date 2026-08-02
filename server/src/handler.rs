@@ -13,9 +13,24 @@ pub async fn get_users() -> Json<Vec<User>> {
     Json(users)
 }
 
-pub async fn create_user(Json(body): Json<SendUserRequest>) -> Json<CreateUserResponse> {
-    let id: i64 = db::user_create(&body.username, &body.password).await;
-    Json(CreateUserResponse { id })
+pub async fn create_user(
+    Json(body): Json<SendUserRequest>,
+) -> Result<Json<CreateUserResponse>, StatusCode> {
+    if body.password.len() < 8 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    if body.password.len() > 64 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    if body.username.len() < 3 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    if body.username.len() > 24 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
+    let id = db::user_create(&body.username, &body.password).await;
+    Ok(Json(CreateUserResponse { id }))
 }
 
 // SECURITY FRAUD
@@ -69,11 +84,56 @@ pub async fn delete_chat(
     Path(id): Path<i64>,
     user: AuthenticatedUser,
 ) -> Result<StatusCode, StatusCode> {
-    let user_chats = db::user_get_chats(user.id).await;
-    let is_member = user_chats.iter().any(|chat| chat.id == id);
-    if is_member {
+    if db::is_user_in_chat(id, user.id).await {
         db::chat_delete(id).await;
         Ok(StatusCode::OK)
+    } else {
+        Err(StatusCode::FORBIDDEN)
+    }
+}
+
+pub async fn get_chat_members(
+    user: AuthenticatedUser,
+    Path(id): Path<i64>,
+) -> Result<Json<Vec<User>>, StatusCode> {
+    if db::is_user_in_chat(id, user.id).await {
+        Ok(Json(db::chat_get_members(id).await))
+    } else {
+        Err(StatusCode::FORBIDDEN)
+    }
+}
+pub async fn add_chat_member(
+    user: AuthenticatedUser,
+    Path((chat_id, user_id)): Path<(i64, i64)>,
+) -> Result<StatusCode, StatusCode> {
+    if db::is_user_in_chat(chat_id, user.id).await {
+        db::chat_add_user(chat_id, user_id).await;
+        Ok(StatusCode::OK)
+    } else {
+        Err(StatusCode::FORBIDDEN)
+    }
+}
+pub async fn is_user_in_chat(
+    user: AuthenticatedUser,
+    Path((chat_id, user_id)): Path<(i64, i64)>,
+) -> Result<Json<bool>, StatusCode> {
+    if db::is_user_in_chat(chat_id, user.id).await {
+        Ok(Json(db::is_user_in_chat(chat_id, user_id).await))
+    } else {
+        Err(StatusCode::FORBIDDEN)
+    }
+}
+pub async fn remove_chat_member(
+    user: AuthenticatedUser,
+    Path((chat_id, user_id)): Path<(i64, i64)>,
+) -> Result<StatusCode, StatusCode> {
+    if db::is_user_in_chat(chat_id, user.id).await {
+        if db::is_user_in_chat(chat_id, user_id).await {
+            db::chat_delete_user(chat_id, user_id).await;
+            Ok(StatusCode::OK)
+        } else {
+            Err(StatusCode::NOT_FOUND)
+        }
     } else {
         Err(StatusCode::FORBIDDEN)
     }

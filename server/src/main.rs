@@ -21,6 +21,13 @@ async fn main() {
             "/chats/{id}",
             get(handler::get_chat).delete(handler::delete_chat),
         )
+        .route("/chats/{id}/users", get(handler::get_chat_members))
+        .route(
+            "/chats/{chat_id}/users/{user_id}",
+            get(handler::is_user_in_chat)
+                .post(handler::add_chat_member)
+                .delete(handler::remove_chat_member),
+        )
         .route("/users", get(handler::get_users).post(handler::create_user))
         .route(
             "/users/{id}",

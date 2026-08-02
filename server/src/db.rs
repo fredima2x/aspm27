@@ -1,5 +1,4 @@
-use axum::routing::get;
-use sqlx::{SqlitePool, pool};
+use sqlx::SqlitePool;
 
 use crate::auth::hash_password;
 use crate::config::SQLITE_DB_ADDRESS;
@@ -164,4 +163,9 @@ pub async fn chat_get_members(chat_id: i64) -> Vec<User> {
         .fetch_all(&pool)
         .await
         .unwrap()
+}
+
+pub async fn is_user_in_chat(chat_id: i64, user_id: i64) -> bool {
+    let user_chats = user_get_chats(user_id).await;
+    user_chats.iter().any(|chat| chat.id == chat_id)
 }
