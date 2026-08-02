@@ -35,7 +35,7 @@ async fn main() {
         )
         .route(
             "/chats/{chat_id}/messages",
-            post(handler::message::save_message),
+            get(handler::message::save_message),
         )
         .route(
             "/users",

@@ -150,7 +150,7 @@ pub mod chats {
 pub mod message {
     use crate::{
         db,
-        models::{AuthenticatedUser, Message, SendMessageRequest, SendUserRequest},
+        models::{AuthenticatedUser, Message, SendMessageRequest},
     };
     use axum::{Json, extract::Path, http::StatusCode};
 

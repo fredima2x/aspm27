@@ -1,6 +1,4 @@
-use std::intrinsics::offset;
-
-use sqlx::{SqlitePool, pool};
+use sqlx::SqlitePool;
 
 use crate::auth::hash_password;
 use crate::config::SQLITE_DB_ADDRESS;
