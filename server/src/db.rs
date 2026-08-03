@@ -4,6 +4,8 @@ use crate::auth::hash_password;
 use crate::config::SQLITE_DB_ADDRESS;
 use crate::models::{Chat, Message, User};
 
+/// = Please Add Error Handling
+
 pub async fn setup() {
     let pool = get_pool().await;
     sqlx::query(
@@ -55,18 +57,19 @@ pub async fn setup() {
     .unwrap();
 }
 
+///
 async fn get_pool() -> SqlitePool {
     SqlitePool::connect(SQLITE_DB_ADDRESS).await.unwrap()
 }
 
-pub async fn user_getall() -> Vec<User> {
+pub async fn user_getall() -> Result<Vec<User>, sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query_as::<_, User>("SELECT * FROM users")
         .fetch_all(&pool)
         .await
-        .expect("Could not fetch users from database!")
 }
 
+///
 pub async fn user_create(username: &str, password: &str) -> i64 {
     let pool = get_pool().await;
     let result = sqlx::query("INSERT INTO users (username, password_hash) VALUES (?, ?)")
@@ -78,6 +81,7 @@ pub async fn user_create(username: &str, password: &str) -> i64 {
     result.last_insert_rowid()
 }
 
+///
 pub async fn user_delete(id: i64) {
     let pool = get_pool().await;
     sqlx::query("DELETE FROM users WHERE id = ?")
@@ -87,6 +91,7 @@ pub async fn user_delete(id: i64) {
         .expect("Failed to delete user!");
 }
 
+///
 pub async fn user_get_by_id(id: i64) -> User {
     let pool = get_pool().await;
     sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = ?")
@@ -96,6 +101,7 @@ pub async fn user_get_by_id(id: i64) -> User {
         .expect("Failed to get user!")
 }
 
+///
 pub async fn user_get_by_name(username: &str) -> User {
     let pool = get_pool().await;
     sqlx::query_as::<_, User>("SELECT * FROM users WHERE username = ?")
@@ -105,6 +111,7 @@ pub async fn user_get_by_name(username: &str) -> User {
         .expect("Failed to get user!")
 }
 
+///
 pub async fn user_get_chats(user_id: i64) -> Vec<Chat> {
     let pool = get_pool().await;
     sqlx::query_as::<_, Chat>(
@@ -122,6 +129,7 @@ pub async fn user_get_chats(user_id: i64) -> Vec<Chat> {
     .unwrap()
 }
 
+///
 pub async fn chat_create(chat_name: &str) -> i64 {
     let pool = get_pool().await;
     let result = sqlx::query("INSERT INTO chats (chat_name) VALUES (?)")
@@ -132,6 +140,7 @@ pub async fn chat_create(chat_name: &str) -> i64 {
     result.last_insert_rowid()
 }
 
+///
 pub async fn chat_get(chat_id: i64) -> Chat {
     let pool = get_pool().await;
     sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE id = ?")
@@ -141,6 +150,7 @@ pub async fn chat_get(chat_id: i64) -> Chat {
         .unwrap()
 }
 
+///
 pub async fn chat_delete(chat_id: i64) {
     let pool = get_pool().await;
     sqlx::query("DELETE FROM chats WHERE id = ?")
@@ -150,6 +160,7 @@ pub async fn chat_delete(chat_id: i64) {
         .unwrap();
 }
 
+///
 pub async fn chat_add_user(chat_id: i64, user_id: i64) {
     let pool = get_pool().await;
     sqlx::query("INSERT INTO chat_members (chat_id, user_id) VALUES (?, ?)")
@@ -160,6 +171,7 @@ pub async fn chat_add_user(chat_id: i64, user_id: i64) {
         .unwrap();
 }
 
+///
 pub async fn chat_delete_user(chat_id: i64, user_id: i64) {
     let pool = get_pool().await;
     sqlx::query("DELETE FROM chat_members WHERE chat_id = ? AND user_id = ?")
@@ -170,6 +182,7 @@ pub async fn chat_delete_user(chat_id: i64, user_id: i64) {
         .unwrap();
 }
 
+///
 pub async fn chat_get_members(chat_id: i64) -> Vec<User> {
     let pool = get_pool().await;
     sqlx::query_as::<_, User>(
@@ -183,6 +196,7 @@ pub async fn chat_get_members(chat_id: i64) -> Vec<User> {
     .unwrap()
 }
 
+///
 pub async fn is_user_in_chat(chat_id: i64, user_id: i64) -> bool {
     let user_chats = user_get_chats(user_id).await;
     user_chats.iter().any(|chat| chat.id == chat_id)
@@ -192,6 +206,7 @@ pub async fn is_user_in_chat(chat_id: i64, user_id: i64) -> bool {
 Messages
 */
 
+///
 pub async fn save_message(owner_id: i64, chat_id: i64, content: &str) -> i64 {
     let pool = get_pool().await;
     let result = sqlx::query("INSERT INTO messages (owner_id, chat_id, content) VALUES (?, ?, ?)")
@@ -204,25 +219,28 @@ pub async fn save_message(owner_id: i64, chat_id: i64, content: &str) -> i64 {
     result.last_insert_rowid()
 }
 
-pub async fn get_message(message_id: i64) -> Message {
+pub async fn get_message(message_id: i64) -> Result<Message, sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query_as::<_, Message>("SELECT * FROM messages WHERE id = ?")
         .bind(message_id)
         .fetch_one(&pool)
         .await
-        .unwrap()
 }
 
 #[allow(dead_code)]
-pub async fn delete_message(message_id: i64) {
+pub async fn delete_message(message_id: i64) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query("DELETE FROM messages WHERE id = ?")
+    let result = sqlx::query("DELETE FROM messages WHERE id = ?")
         .bind(message_id)
         .execute(&pool)
-        .await
-        .unwrap();
+        .await?;
+    if result.rows_affected() == 0 {
+        return Err(sqlx::Error::RowNotFound);
+    }
+    Ok(())
 }
 
+///
 #[allow(dead_code)]
 pub async fn chat_get_messages(chat_id: i64, limit: i64, offset: i64) -> Vec<Message> {
     let pool = get_pool().await;
