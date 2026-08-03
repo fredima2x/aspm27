@@ -1,19 +1,18 @@
 pub mod users {
     use crate::auth;
     use crate::db;
-    use crate::models::{
-        AuthenticatedUser, CreateUserResponse, LoginResponse, SendUserRequest, User,
-    };
+    use crate::models::{AuthenticatedUser, LoginResponse, SendUserRequest, User};
     use axum::{Json, extract::Path, http::StatusCode};
 
-    pub async fn get_users() -> Json<Vec<User>> {
-        let users = db::user_getall().await;
-        Json(users)
+    pub async fn get_users() -> Result<Json<Vec<User>>, StatusCode> {
+        let result = db::user_getall().await;
+        match result {
+            Ok(users) => Ok(Json(users)),
+            Err(e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        }
     }
 
-    pub async fn create_user(
-        Json(body): Json<SendUserRequest>,
-    ) -> Result<Json<CreateUserResponse>, StatusCode> {
+    pub async fn create_user(Json(body): Json<SendUserRequest>) -> Result<Json<User>, StatusCode> {
         if body.password.len() < 8 {
             return Err(StatusCode::BAD_REQUEST);
         }
@@ -26,9 +25,14 @@ pub mod users {
         if body.username.len() > 24 {
             return Err(StatusCode::BAD_REQUEST);
         }
-
-        let id = db::user_create(&body.username, &body.password).await;
-        Ok(Json(CreateUserResponse { id }))
+        let result = db::user_create(&body.username, &body.password).await;
+        match result {
+            Ok(id) => match db::user_get_by_id(id).await {
+                Ok(user) => Ok(Json(user)),
+                Err(e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+            },
+            Err(e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        }
     }
 
     // SECURITY FRAUD
@@ -44,9 +48,12 @@ pub mod users {
         }
     }
 
-    pub async fn get_user(Path(id): Path<i64>) -> Json<User> {
-        let user: User = db::user_get_by_id(id).await;
-        Json(user)
+    pub async fn get_user(Path(id): Path<i64>) -> Result<Json<User>, StatusCode> {
+        let result = db::user_get_by_id(id).await;
+        match result {
+            Ok(user) => Ok(Json(user)),
+            Err(e) => Err(StatusCode::NOT_FOUND),
+        }
     }
 
     pub async fn login(
