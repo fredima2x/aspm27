@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import requests
 import json
 
@@ -103,24 +102,24 @@ def remove_chat_member():
 def send_message():
     chat_id = input("   Chat ID: ")
     content = input("   Message Content: ")
-    r = requests.post(f"/chats/{chat_id}/messages", json={"content": content},headers=header())
+    r = requests.post(f"{BASE_URL}/chats/{chat_id}/messages", json={"content": content},headers=header())
     print_response(r)
 
 def delete_message():
     message_id = input("   Message ID: ")
-    r = requests.delete(f"/messages/{message_id}", headers=header())
+    r = requests.delete(f"{BASE_URL}/messages/{message_id}", headers=header())
     print_response(r)
 
 def get_message():
     message_id = input("   Message ID: ")
-    r = requests.get(f"/messages/{message_id}", headers=header())
+    r = requests.get(f"{BASE_URL}/messages/{message_id}", headers=header())
     print_response(r)
 
 def get_chat_messenges():
     chat_id = input("   Chat ID: ")
     limit = input("   Limit: ")
     offset = input("   Offset: ")
-    r = requests.get(f"/chats/{chat_id}/messages", json={"limit": limit, "offset": offset},headers=header())
+    r = requests.get(f"{BASE_URL}/chats/{chat_id}/messages", json={"limit": limit, "offset": offset},headers=header())
     print_response(r)
 
 # ─── Menü ────────────────────────────────────────────────────────────────────
