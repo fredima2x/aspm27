@@ -69,50 +69,44 @@ pub async fn user_getall() -> Result<Vec<User>, sqlx::Error> {
         .await
 }
 
-///
-pub async fn user_create(username: &str, password: &str) -> i64 {
+pub async fn user_create(username: &str, password: &str) -> Result<i64, sqlx::Error> {
     let pool = get_pool().await;
     let result = sqlx::query("INSERT INTO users (username, password_hash) VALUES (?, ?)")
         .bind(username)
         .bind(hash_password(password))
         .execute(&pool)
-        .await
-        .expect("Failed to create user in database!");
-    result.last_insert_rowid()
+        .await?;
+
+    Ok(result.last_insert_rowid())
 }
 
-///
-pub async fn user_delete(id: i64) {
+pub async fn user_delete(id: i64) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query("DELETE FROM users WHERE id = ?")
         .bind(id)
         .execute(&pool)
-        .await
-        .expect("Failed to delete user!");
+        .await?;
+    Ok(())
 }
 
-///
-pub async fn user_get_by_id(id: i64) -> User {
+pub async fn user_get_by_id(id: i64) -> Result<User, sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = ?")
         .bind(id)
         .fetch_one(&pool)
         .await
-        .expect("Failed to get user!")
 }
 
-///
-pub async fn user_get_by_name(username: &str) -> User {
+pub async fn user_get_by_name(username: &str) -> Result<User, sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query_as::<_, User>("SELECT * FROM users WHERE username = ?")
         .bind(username)
         .fetch_one(&pool)
         .await
-        .expect("Failed to get user!")
 }
 
 ///
-pub async fn user_get_chats(user_id: i64) -> Vec<Chat> {
+pub async fn user_get_chats(user_id: i64) -> Result<Vec<Chat>, sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query_as::<_, Chat>(
         r#"
@@ -126,64 +120,56 @@ pub async fn user_get_chats(user_id: i64) -> Vec<Chat> {
     .bind(user_id)
     .fetch_all(&pool)
     .await
-    .unwrap()
 }
 
-///
-pub async fn chat_create(chat_name: &str) -> i64 {
+pub async fn chat_create(chat_name: &str) -> Result<i64, sqlx::Error> {
     let pool = get_pool().await;
     let result = sqlx::query("INSERT INTO chats (chat_name) VALUES (?)")
         .bind(chat_name)
         .execute(&pool)
-        .await
-        .unwrap();
-    result.last_insert_rowid()
+        .await?;
+    Ok(result.last_insert_rowid())
 }
 
 ///
-pub async fn chat_get(chat_id: i64) -> Chat {
+pub async fn chat_get(chat_id: i64) -> Result<Chat, sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE id = ?")
         .bind(chat_id)
         .fetch_one(&pool)
         .await
-        .unwrap()
 }
 
-///
-pub async fn chat_delete(chat_id: i64) {
+pub async fn chat_delete(chat_id: i64) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query("DELETE FROM chats WHERE id = ?")
         .bind(chat_id)
         .execute(&pool)
-        .await
-        .unwrap();
+        .await?;
+    Ok(())
 }
 
-///
-pub async fn chat_add_user(chat_id: i64, user_id: i64) {
+pub async fn chat_add_user(chat_id: i64, user_id: i64) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query("INSERT INTO chat_members (chat_id, user_id) VALUES (?, ?)")
         .bind(chat_id)
         .bind(user_id)
         .execute(&pool)
-        .await
-        .unwrap();
+        .await?;
+    Ok(())
 }
 
-///
-pub async fn chat_delete_user(chat_id: i64, user_id: i64) {
+pub async fn chat_delete_user(chat_id: i64, user_id: i64) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query("DELETE FROM chat_members WHERE chat_id = ? AND user_id = ?")
         .bind(chat_id)
         .bind(user_id)
         .execute(&pool)
-        .await
-        .unwrap();
+        .await?;
+    Ok(())
 }
 
-///
-pub async fn chat_get_members(chat_id: i64) -> Vec<User> {
+pub async fn chat_get_members(chat_id: i64) -> Result<Vec<User>, sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query_as::<_, User>(
         "SELECT users.* FROM users
@@ -193,30 +179,25 @@ pub async fn chat_get_members(chat_id: i64) -> Vec<User> {
     .bind(chat_id)
     .fetch_all(&pool)
     .await
-    .unwrap()
 }
 
-///
-pub async fn is_user_in_chat(chat_id: i64, user_id: i64) -> bool {
+pub async fn is_user_in_chat(chat_id: i64, user_id: i64) -> Result<bool, sqlx::Error> {
     let user_chats = user_get_chats(user_id).await;
-    user_chats.iter().any(|chat| chat.id == chat_id)
+    match user_chats {
+        Ok(msg) => Ok(msg.iter().any(|chat| chat.id == chat_id)),
+        Err(e) => Err(e),
+    }
 }
 
-/*
-Messages
-*/
-
-///
-pub async fn save_message(owner_id: i64, chat_id: i64, content: &str) -> i64 {
+pub async fn save_message(owner_id: i64, chat_id: i64, content: &str) -> Result<i64, sqlx::Error> {
     let pool = get_pool().await;
     let result = sqlx::query("INSERT INTO messages (owner_id, chat_id, content) VALUES (?, ?, ?)")
         .bind(owner_id)
         .bind(chat_id)
         .bind(content)
         .execute(&pool)
-        .await
-        .unwrap();
-    result.last_insert_rowid()
+        .await?;
+    Ok(result.last_insert_rowid())
 }
 
 pub async fn get_message(message_id: i64) -> Result<Message, sqlx::Error> {
@@ -240,9 +221,12 @@ pub async fn delete_message(message_id: i64) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-///
 #[allow(dead_code)]
-pub async fn chat_get_messages(chat_id: i64, limit: i64, offset: i64) -> Vec<Message> {
+pub async fn chat_get_messages(
+    chat_id: i64,
+    limit: i64,
+    offset: i64,
+) -> Result<Vec<Message>, sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query_as::<_, Message>(
         "SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
@@ -252,5 +236,4 @@ pub async fn chat_get_messages(chat_id: i64, limit: i64, offset: i64) -> Vec<Mes
     .bind(offset)
     .fetch_all(&pool)
     .await
-    .unwrap()
 }
