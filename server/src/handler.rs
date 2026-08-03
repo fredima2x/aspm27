@@ -150,7 +150,7 @@ pub mod chats {
 pub mod message {
     use crate::{
         db,
-        models::{AuthenticatedUser, Message, SendMessageRequest},
+        models::{AuthenticatedUser, GetChatMessagesRequest, Message, SendMessageRequest},
     };
     use axum::{Json, extract::Path, http::StatusCode};
 
@@ -163,6 +163,43 @@ pub mod message {
             Ok(Json(
                 db::get_message(db::save_message(user.id, chat_id, &body.content).await).await,
             ))
+        } else {
+            Err(StatusCode::FORBIDDEN)
+        }
+    }
+
+    pub async fn delete_message(
+        user: AuthenticatedUser,
+        Path(message_id): Path<i64>,
+    ) -> Result<StatusCode, StatusCode> {
+        if db::get_message(message_id).await.owner_id == user.id {
+            db::delete_message(message_id).await;
+            Ok(StatusCode::FORBIDDEN)
+        } else {
+            Err(StatusCode::OK)
+        }
+    }
+
+    pub async fn get_message(
+        user: AuthenticatedUser,
+        Path(message_id): Path<i64>,
+    ) -> Result<Json<Message>, StatusCode> {
+        let message = db::get_message(message_id).await;
+        if db::is_user_in_chat(message.chat_id, user.id).await {
+            Ok(Json(message))
+        } else {
+            Err(StatusCode::FORBIDDEN)
+        }
+    }
+
+    pub async fn get_chat_messages(
+        user: AuthenticatedUser,
+        Path(chat_id): Path<i64>,
+        Json(body): Json<GetChatMessagesRequest>,
+    ) -> Result<Json<Vec<Message>>, StatusCode> {
+        let messages = db::chat_get_messages(chat_id, body.limit, body.offset).await;
+        if db::is_user_in_chat(chat_id, user.id).await {
+            Ok(Json(messages))
         } else {
             Err(StatusCode::FORBIDDEN)
         }

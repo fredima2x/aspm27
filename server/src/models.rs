@@ -46,6 +46,12 @@ pub struct SendMessageRequest {
     pub content: String,
 }
 
+#[derive(Deserialize)]
+pub struct GetChatMessagesRequest {
+    pub limit: i64,
+    pub offset: i64,
+}
+
 // Response Structures
 #[derive(Serialize)]
 pub struct CreateUserResponse {
