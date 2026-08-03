@@ -59,14 +59,19 @@ pub mod users {
     pub async fn login(
         Json(body): Json<SendUserRequest>,
     ) -> Result<Json<LoginResponse>, StatusCode> {
-        let user: User = db::user_get_by_name(&body.username).await;
-        let result: bool = auth::verify_password(&body.password, &user.password_hash);
-        if result {
-            Ok(Json(LoginResponse {
-                token_string: auth::create_token(user.id),
-            }))
-        } else {
-            Err(StatusCode::UNAUTHORIZED)
+        let result = db::user_get_by_name(&body.username).await;
+        match result {
+            Ok(user) => {
+                let result: bool = auth::verify_password(&body.password, &user.password_hash);
+                if result {
+                    Ok(Json(LoginResponse {
+                        token_string: auth::create_token(user.id),
+                    }))
+                } else {
+                    Err(StatusCode::UNAUTHORIZED)
+                }
+            }
+            Err(e) => Err(StatusCode::NOT_FOUND),
         }
     }
 }
@@ -77,32 +82,50 @@ pub mod chats {
     use crate::models::{AuthenticatedUser, Chat, User};
     use axum::{Json, extract::Path, http::StatusCode};
 
-    pub async fn get_chats(user: AuthenticatedUser) -> Json<Vec<Chat>> {
-        Json(db::user_get_chats(user.id).await)
+    pub async fn get_chats(user: AuthenticatedUser) -> Result<Json<Vec<Chat>>, StatusCode> {
+        match db::user_get_chats(user.id).await {
+            Ok(chats) => Ok(Json(chats)),
+            Err(e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        }
     }
 
     pub async fn create_chat(
         user: AuthenticatedUser,
         Json(body): Json<CreateChatRequest>,
-    ) -> Json<Chat> {
-        let chat_id: i64 = db::chat_create(&body.chat_name).await;
-        db::chat_add_user(chat_id, user.id).await;
-        Json(db::chat_get(chat_id).await)
+    ) -> Result<Json<Chat>, StatusCode> {
+        match db::chat_create(&body.chat_name).await {
+            Ok(chat_id) => match db::chat_add_user(chat_id, user.id).await {
+                Ok(T) => match db::chat_get(chat_id).await {
+                    Ok(chat) => Ok(Json(chat)),
+                    Err(e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+                },
+                Err(e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+            },
+            Err(e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        }
     }
 
-    pub async fn get_chat(Path(id): Path<i64>) -> Json<Chat> {
-        Json(db::chat_get(id).await)
+    pub async fn get_chat(Path(id): Path<i64>) -> Result<Json<Chat>, StatusCode> {
+        match db::chat_get(id).await {
+            Ok(chat) => Ok(Json(chat)),
+            Err(e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        }
     }
 
     pub async fn delete_chat(
         Path(id): Path<i64>,
         user: AuthenticatedUser,
     ) -> Result<StatusCode, StatusCode> {
-        if db::is_user_in_chat(id, user.id).await {
-            db::chat_delete(id).await;
-            Ok(StatusCode::OK)
-        } else {
-            Err(StatusCode::FORBIDDEN)
+        match db::is_user_in_chat(id, user.id).await {
+            Ok(bool) => {
+                if bool {
+                    db::chat_delete(id).await;
+                    Ok(StatusCode::OK)
+                } else {
+                    Err(StatusCode::FORBIDDEN)
+                }
+            }
+            Err(e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
         }
     }
 
