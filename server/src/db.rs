@@ -216,7 +216,7 @@ pub async fn get_message(message_id: i64) -> Message {
 #[allow(dead_code)]
 pub async fn delete_message(message_id: i64) {
     let pool = get_pool().await;
-    sqlx::query("DELETE FROM message WHERE id = ?")
+    sqlx::query("DELETE FROM messages WHERE id = ?")
         .bind(message_id)
         .execute(&pool)
         .await
@@ -227,7 +227,7 @@ pub async fn delete_message(message_id: i64) {
 pub async fn chat_get_messages(chat_id: i64, limit: i64, offset: i64) -> Vec<Message> {
     let pool = get_pool().await;
     sqlx::query_as::<_, Message>(
-        "SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC LIMIT ? OFFSET ?",
+        "SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
     )
     .bind(chat_id)
     .bind(limit)

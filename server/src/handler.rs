@@ -174,9 +174,9 @@ pub mod message {
     ) -> Result<StatusCode, StatusCode> {
         if db::get_message(message_id).await.owner_id == user.id {
             db::delete_message(message_id).await;
-            Ok(StatusCode::FORBIDDEN)
+            Ok(StatusCode::OK)
         } else {
-            Err(StatusCode::OK)
+            Err(StatusCode::FORBIDDEN)
         }
     }
 

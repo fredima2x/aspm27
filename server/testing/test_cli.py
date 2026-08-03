@@ -117,8 +117,8 @@ def get_message():
 
 def get_chat_messenges():
     chat_id = input("   Chat ID: ")
-    limit = input("   Limit: ")
-    offset = input("   Offset: ")
+    limit = int(input("   Limit: "))
+    offset = int(input("   Offset: "))
     r = requests.get(f"{BASE_URL}/chats/{chat_id}/messages", json={"limit": limit, "offset": offset},headers=header())
     print_response(r)
 
