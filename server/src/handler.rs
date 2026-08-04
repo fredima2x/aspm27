@@ -66,6 +66,18 @@ pub mod users {
         user: AuthenticatedUser,
         Json(body): Json<UpdateProfileRequest>,
     ) -> Result<StatusCode, StatusCode> {
+        if body.user.username.len() < 3 {
+            return Err(StatusCode::BAD_REQUEST);
+        }
+        if body.user.username.len() > 24 {
+            return Err(StatusCode::BAD_REQUEST);
+        }
+        if body.user.display_name.len() < 2 {
+            return Err(StatusCode::BAD_REQUEST);
+        }
+        if body.user.display_name.len() > 32 {
+            return Err(StatusCode::BAD_REQUEST);
+        }
         db::update_user(User {
             id: user.id,
             username: body.user.username,
