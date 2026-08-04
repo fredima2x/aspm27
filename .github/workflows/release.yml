@@ -44,32 +44,35 @@ jobs:
             target: x86_64-pc-windows-msvc
             artifact_name: server.exe
             asset_name: server-windows-x86_64.exe
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: server
+            asset_name: server-macos-x86_64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: server
+            asset_name: server-macos-arm64
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: ${{ matrix.target }}
           override: true
-
       - name: Cache cargo registry & build
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: "server -> target"
-
       - name: Build release binary
         working-directory: ./server
         run: cargo build --release --target ${{ matrix.target }}
-
       - name: Rename binary
         shell: bash
         run: |
           cp server/target/${{ matrix.target }}/release/${{ matrix.artifact_name }} ./${{ matrix.asset_name }}
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
