@@ -44,6 +44,12 @@ pub struct SendUserRequest {
 }
 
 #[derive(Deserialize)]
+pub struct SimpleSendUserRequest {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Deserialize)]
 pub struct SendMessageRequest {
     pub content: String,
 }
@@ -68,4 +74,14 @@ pub struct CreateChatRequest {
 #[derive(Serialize)]
 pub struct LoginResponse {
     pub token_string: String,
+}
+
+#[derive(Deserialize)]
+pub struct UpdateProfileRequest {
+    pub user: SendUserRequest,
+}
+
+#[derive(Serialize)]
+pub struct GetProfileResponse {
+    pub user: User,
 }

@@ -3,9 +3,10 @@ pub mod users {
     use crate::auth::hash_password;
     use crate::db;
     use crate::error;
-    use crate::models::{
-        AuthenticatedUser, CreateUserResponse, LoginResponse, SendUserRequest, User,
-    };
+    use crate::models::GetProfileResponse;
+    use crate::models::SimpleSendUserRequest;
+    use crate::models::UpdateProfileRequest;
+    use crate::models::{AuthenticatedUser, CreateUserResponse, LoginResponse, User};
     use axum::{Json, extract::Path, http::StatusCode};
 
     pub async fn get_users() -> Result<Json<Vec<User>>, StatusCode> {
@@ -14,7 +15,7 @@ pub mod users {
     }
 
     pub async fn create_user(
-        Json(body): Json<SendUserRequest>,
+        Json(body): Json<SimpleSendUserRequest>,
     ) -> Result<Json<CreateUserResponse>, StatusCode> {
         if body.password.len() < 8 {
             return Err(StatusCode::BAD_REQUEST);
@@ -46,7 +47,7 @@ pub mod users {
     }
 
     pub async fn login(
-        Json(body): Json<SendUserRequest>,
+        Json(body): Json<SimpleSendUserRequest>,
     ) -> Result<Json<LoginResponse>, StatusCode> {
         let user: User = db::user_get_by_name(&body.username)
             .await
@@ -63,17 +64,25 @@ pub mod users {
 
     pub async fn update_profile(
         user: AuthenticatedUser,
-        Json(body): Json<SendUserRequest>,
+        Json(body): Json<UpdateProfileRequest>,
     ) -> Result<StatusCode, StatusCode> {
         db::update_user(User {
             id: user.id,
-            username: body.username,
-            display_name: body.display_name,
-            password_hash: hash_password(&body.password),
+            username: body.user.username,
+            display_name: body.user.display_name,
+            password_hash: hash_password(&body.user.password),
         })
         .await
         .map_err(error::db_err)?;
         Ok(StatusCode::OK)
+    }
+
+    pub async fn get_profile(
+        user: AuthenticatedUser,
+    ) -> Result<Json<GetProfileResponse>, StatusCode> {
+        Ok(Json(GetProfileResponse {
+            user: db::user_get_by_id(user.id).await.map_err(error::db_err)?,
+        }))
     }
 }
 

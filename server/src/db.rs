@@ -85,10 +85,10 @@ pub async fn user_create(username: &str, password: &str) -> Result<i64, sqlx::Er
 
 pub async fn update_user(user: User) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query("UPDATE users SET username = ?, password_hash = ? display_name = ? WHERE id = ?")
+    sqlx::query("UPDATE users SET username = ?, password_hash = ?, display_name = ? WHERE id = ?")
         .bind(&user.username)
         .bind(&user.password_hash)
-        .bind(&user.username)
+        .bind(&user.display_name)
         .bind(&user.id)
         .execute(&pool)
         .await?;

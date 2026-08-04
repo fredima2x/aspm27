@@ -122,6 +122,25 @@ def get_chat_messenges():
     r = requests.get(f"{BASE_URL}/chats/{chat_id}/messages", json={"limit": limit, "offset": offset},headers=header())
     print_response(r)
 
+def update_user_profile():
+    username = input("   Username: ")
+    display_name = input("   Displayname: ")
+    password = input("   Password: ")
+    r = requests.put(
+        f"{BASE_URL}/profile",
+        json={"user": {
+            "username": username,
+            "password": password,
+            "display_name": display_name,
+        }},
+        headers=header(),
+    )
+    print_response(r)
+
+def get_user_profile():
+    r = requests.get(f"{BASE_URL}/profile", headers=header())
+    print_response(r)
+
 # ─── Menü ────────────────────────────────────────────────────────────────────
 
 MENU = {
@@ -142,6 +161,8 @@ MENU = {
     "15": ("Delete Message", delete_message),
     "16": ("Get Message", get_message),
     "17": ("Get Chat Messenges", get_chat_messenges),
+    "18": ("Update User Profile", update_user_profile),
+    "19": ("Get User Profile", get_user_profile),
     "0": ("Beenden", None),
 }
 

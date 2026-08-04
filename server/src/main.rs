@@ -50,6 +50,10 @@ async fn main() {
             "/users/{id}",
             get(handler::users::get_user).delete(handler::users::delete_user),
         )
+        .route(
+            "/profile",
+            get(handler::users::get_profile).put(handler::users::update_profile),
+        )
         .route("/login", post(handler::users::login))
         // Erlaubt deinem Browser-Frontend Zugriffe
         .layer(CorsLayer::permissive());
@@ -59,6 +63,7 @@ async fn main() {
         .unwrap();
 
     println!("Server läuft auf {}", config::SERVER_ADDRESS);
+    tracing_subscriber::fmt::init();
 
     db::setup().await;
 
