@@ -1,12 +1,14 @@
 # aspm
 
-aspm ist ein schlanker, moderner Messenger mit Fokus auf Einfachheit, Geschwindigkeit und Sicherheit.
-Das Projekt befindet sich in aktiver Entwicklung und dient als Grundlage für einen flexiblen, erweiterbaren Chat-Dienst.
+aspm is a slick, modern messenger with focus on simplicity, security and speed.
+The project is in active development and will be the base for a new Chat-Provider.
+
+> This Project is < 1.0 and Currently under Development and not ready for use in Production.
 
 ## Credits:
 
-**Entwicklung:** @fredima2x, @hi_anton
-**Idee & Konzept:** @fredima2x, @hi_anton
-**Design & Beratung:** @hi_anton's Vater
+**Development:** @fredima2x, @hi_anton
+**Idea & Concept:** @fredima2x, @hi_anton
+**Design & Consulting :** @hi_anton's Dad
 
-Dank an: Alle, die Feedback geben, testen oder zum Projekt beitragen ❤️
+Thanks to: Everybody, that gives feedback, tests or contributes in any other way! ❤️
