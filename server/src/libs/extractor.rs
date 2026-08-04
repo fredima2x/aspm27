@@ -1,5 +1,5 @@
-use crate::auth;
-use crate::models::AuthenticatedUser;
+use crate::libs::auth;
+use crate::libs::models::misc::AuthenticatedUser;
 use axum::extract::FromRequestParts;
 use axum::http::{StatusCode, request::Parts};
 
