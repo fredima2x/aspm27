@@ -11,7 +11,7 @@ use crate::libs::handler;
 #[tokio::main]
 async fn main() {
     let app = Router::new()
-        .route("/", get(handler::misc::hi))
+        .route("/", get(handler::hi::hi))
         .route(
             "/chats",
             get(handler::chats::get_chats).post(handler::chats::create_chat),

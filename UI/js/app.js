@@ -1,23 +1,44 @@
+const base_url = "http://127.0.0.1:3000";
+let token = null;
+
+function header() {
+    return {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+  }
+
+async function login(username, password) {
+  const response = await fetch(`${base_url}/login`, {
+    method: "POST",
+    headers: header(),
+    body: JSON.stringify({ username, password }),
+  });
+  return await response.json();
+}
+
+async function get_chats() {
+  const response = await fetch(`${base_url}/chats`, {
+    method: "GET",
+    headers: header(),
+  })
+  return await response.json();
+}
+
 async function loadUsers() {
   try {
-    console.log("Start");
 
-    const response = await fetch("http://127.0.0.1:3000/users");
+    token = (await login("fredima2x", "12341234")).token_string;
 
-    console.log("Status:", response.status);
-
-    const users = await response.json();
-
-    console.log("Users:", users);
+    const chats = await get_chats();
 
     const container = document.querySelector(".contacts");
-
     if (!container) {
       console.error("Contacts container not found");
       return;
     }
 
-    users.forEach((user) => {
+    chats.forEach((chat) => {
       const contactButton = document.createElement("button");
 
       contactButton.className = "contact";
@@ -29,11 +50,11 @@ async function loadUsers() {
                 </div>
                 <div class="contact-info">
                     <p class="contact-heading">
-                        ${user.username}
+                        ${chat.chat_name}
                     </p>
 
                     <p class="contact-id">
-                        ID: ${user.id}
+                        ID: ${chat.id}
                     </p>
                 </div>
             `;
