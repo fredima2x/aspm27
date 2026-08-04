@@ -6,6 +6,7 @@ use sqlx::prelude::FromRow;
 pub struct User {
     pub id: i64,
     pub username: String,
+    pub display_name: String,
     pub password_hash: String,
 }
 
@@ -39,6 +40,7 @@ pub struct AuthenticatedUser {
 pub struct SendUserRequest {
     pub username: String,
     pub password: String,
+    pub display_name: String,
 }
 
 #[derive(Deserialize)]

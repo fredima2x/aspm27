@@ -1,5 +1,6 @@
 pub mod users {
     use crate::auth;
+    use crate::auth::hash_password;
     use crate::db;
     use crate::error;
     use crate::models::{
@@ -34,16 +35,9 @@ pub mod users {
         Ok(Json(CreateUserResponse { id }))
     }
 
-    pub async fn delete_user(
-        Path(id): Path<i64>,
-        user: AuthenticatedUser,
-    ) -> Result<StatusCode, StatusCode> {
-        if user.id == id {
-            db::user_delete(id).await.map_err(error::db_err)?;
-            Ok(StatusCode::OK)
-        } else {
-            Err(StatusCode::FORBIDDEN)
-        }
+    pub async fn delete_user(user: AuthenticatedUser) -> Result<StatusCode, StatusCode> {
+        db::user_delete(user.id).await.map_err(error::db_err)?;
+        Ok(StatusCode::OK)
     }
 
     pub async fn get_user(Path(id): Path<i64>) -> Result<Json<User>, StatusCode> {
@@ -65,6 +59,21 @@ pub mod users {
         } else {
             Err(StatusCode::UNAUTHORIZED)
         }
+    }
+
+    pub async fn update_profile(
+        user: AuthenticatedUser,
+        Json(body): Json<SendUserRequest>,
+    ) -> Result<StatusCode, StatusCode> {
+        db::update_user(User {
+            id: user.id,
+            username: body.username,
+            display_name: body.display_name,
+            password_hash: hash_password(&body.password),
+        })
+        .await
+        .map_err(error::db_err)?;
+        Ok(StatusCode::OK)
     }
 }
 

@@ -13,8 +13,6 @@ mod extractor;
 mod handler;
 mod models;
 
-// Compily #1
-
 #[tokio::main]
 async fn main() {
     let app = Router::new()
@@ -44,7 +42,9 @@ async fn main() {
         )
         .route(
             "/users",
-            get(handler::users::get_users).post(handler::users::create_user),
+            get(handler::users::get_users)
+                .post(handler::users::create_user)
+                .put(handler::users::update_profile),
         )
         .route(
             "/users/{id}",

@@ -12,6 +12,7 @@ pub async fn setup() {
         "CREATE TABLE IF NOT EXISTS users (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
             username      TEXT NOT NULL UNIQUE,
+            display_name  TEXT NOT NULL,
             password_hash TEXT NOT NULL
         )",
     )
@@ -71,13 +72,27 @@ pub async fn user_getall() -> Result<Vec<User>, sqlx::Error> {
 
 pub async fn user_create(username: &str, password: &str) -> Result<i64, sqlx::Error> {
     let pool = get_pool().await;
-    let result = sqlx::query("INSERT INTO users (username, password_hash) VALUES (?, ?)")
-        .bind(username)
-        .bind(hash_password(password))
-        .execute(&pool)
-        .await?;
+    let result =
+        sqlx::query("INSERT INTO users (username, display_name, password_hash) VALUES (?, ?, ?)")
+            .bind(username)
+            .bind(username)
+            .bind(hash_password(password))
+            .execute(&pool)
+            .await?;
 
     Ok(result.last_insert_rowid())
+}
+
+pub async fn update_user(user: User) -> Result<(), sqlx::Error> {
+    let pool = get_pool().await;
+    sqlx::query("UPDATE users SET username = ?, password_hash = ? display_name = ? WHERE id = ?")
+        .bind(&user.username)
+        .bind(&user.password_hash)
+        .bind(&user.username)
+        .bind(&user.id)
+        .execute(&pool)
+        .await?;
+    Ok(())
 }
 
 pub async fn user_delete(id: i64) -> Result<(), sqlx::Error> {
