@@ -5,18 +5,13 @@ use axum::{
 
 use tower_http::cors::CorsLayer;
 
-mod auth;
-mod config;
-mod db;
-mod error;
-mod extractor;
-mod handler;
-mod models;
+mod libs;
+use crate::libs::handler;
 
 #[tokio::main]
 async fn main() {
     let app = Router::new()
-        .route("/", get(handler::hi))
+        .route("/", get(handler::misc::hi))
         .route(
             "/chats",
             get(handler::chats::get_chats).post(handler::chats::create_chat),
@@ -42,9 +37,7 @@ async fn main() {
         )
         .route(
             "/users",
-            get(handler::users::get_users)
-                .post(handler::users::create_user)
-                .put(handler::users::update_profile),
+            get(handler::users::get_users).post(handler::users::create_user),
         )
         .route(
             "/users/{id}",
@@ -52,20 +45,18 @@ async fn main() {
         )
         .route(
             "/profile",
-            get(handler::users::get_profile).put(handler::users::update_profile),
+            get(handler::profile::get_profile).put(handler::profile::update_profile),
         )
-        .route("/login", post(handler::users::login))
+        .route("/login", post(handler::profile::login))
         // Erlaubt deinem Browser-Frontend Zugriffe
         .layer(CorsLayer::permissive());
 
-    let listener = tokio::net::TcpListener::bind(config::SERVER_ADDRESS)
+    let listener = tokio::net::TcpListener::bind(libs::config::SERVER_ADDRESS)
         .await
         .unwrap();
 
-    println!("Server läuft auf {}", config::SERVER_ADDRESS);
+    println!("Server läuft auf {}", libs::config::SERVER_ADDRESS);
     tracing_subscriber::fmt::init();
-
-    db::setup().await;
-
+    libs::db::setup::setup().await;
     axum::serve(listener, app).await.unwrap();
 }

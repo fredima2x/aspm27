@@ -5,7 +5,7 @@ use argon2::{
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::config::TOKEN_SECRET;
+use crate::libs::config::TOKEN_SECRET;
 
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
