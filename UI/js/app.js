@@ -2,28 +2,41 @@ const base_url = "http://127.0.0.1:3000";
 let token = null;
 
 function header() {
-    return {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json",
-    };
-  }
+  return {
+    "Authorization": `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+}
 
 async function login(username, password) {
+
+  try {
   const response = await fetch(`${base_url}/login`, {
     method: "POST",
     headers: header(),
     body: JSON.stringify({ username, password }),
   });
   return await response.json();
+
+  } catch(error) {
+    console.error("Fetch error:", error);
+  }
 }
 
 async function get_chats() {
+
+  try {
   const response = await fetch(`${base_url}/chats`, {
     method: "GET",
     headers: header(),
-  })
+  });
   return await response.json();
+
+  } catch(error) {
+    console.error("Fetch error:", error);
+  }
 }
+
 
 async function loadUsers() {
   try {
@@ -74,7 +87,7 @@ async function loadUsers() {
     container.appendChild(addContactButton);
 
   } catch (error) {
-    console.error("Fetch Fehler:", error);
+    console.error("Fetch error:", error);
   }
 }
 
@@ -130,9 +143,7 @@ messageInput.addEventListener("keydown", (event) => {
   }
 });
 
-const actionsButton = document.querySelector(".actions-button");
-
-function deleteMessage() {
+function deleteLastMessage() {
   if (messages.length === 0) {
     return;
   }
@@ -140,10 +151,6 @@ function deleteMessage() {
   messages.pop();
   saveMessages();
   renderMessages();
-}
-
-if (actionsButton) {
-  actionsButton.addEventListener("click", deleteMessage);
 }
 
 renderMessages();
