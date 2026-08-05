@@ -1,39 +1,45 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="styles.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri App</title>
-    <script type="module" src="/main.js" defer></script>
-  </head>
 
-  <body>
-    <main class="container">
-      <h1>Welcome to Tauri</h1>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>aspm</title>
+  <link rel="stylesheet" href="styles/chat-window.css">
+  <link rel="stylesheet" href="styles/contacts-window.css">
+  <link rel="stylesheet" href="styles/general.css">
+</head>
 
-      <div class="row">
-        <a href="https://tauri.app" target="_blank">
-          <img src="/assets/tauri.svg" class="logo tauri" alt="Tauri logo" />
-        </a>
-        <a
-          href="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
-          target="_blank"
-        >
-          <img
-            src="/assets/javascript.svg"
-            class="logo vanilla"
-            alt="JavaScript logo"
-          />
-        </a>
+<body>
+  <div class="contacts-window">
+    <div class="top-contact-bar">
+      <input type="search" class="contact-search-bar" placeholder="Search Contacts">
+    </div>
+    <div class="contacts">
+    </div>
+  </div>
+  </div>
+  <div class="chat-window">
+    <div class="opened-contact">
+      <div class="opened-contact-picture-cont">
+        <img src="imgs/kreise.pdf" class="opened-contact-picture">
       </div>
-      <p>Click on the Tauri logo to learn more about the framework</p>
+      <div class="contact-info">
+        <p class="opened-contact-heading">Contact 1</p>
+        <p class="opened-contact-number"> Number: 1234567890</p>
+        <p class="opened-contact-name"> Name: Max Mustermann</p>
+      </div>
+    </div>
+    <div class="chat-area">
+    </div>
+    <div class="message-bar">
+      <input type="text" class="message-text-bar" placeholder="Message">
+      <button class="send-button">Send</button>
+      <button class="actions-button" onclick="deleteLastMessage();">Delete Message</button>
+    </div>
 
-      <form class="row" id="greet-form">
-        <input id="greet-input" placeholder="Enter a name..." />
-        <button type="submit">Greet</button>
-      </form>
-      <p id="greet-msg"></p>
-    </main>
-  </body>
+  </div>
+  <script src="scripts/app.js"></script>
+</body>
+
 </html>
