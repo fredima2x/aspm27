@@ -1,4 +1,4 @@
-const base_url = "http://127.0.0.1:3000";
+const baseURL = "http://127.0.0.1:3000";
 let token = null;
 
 function header() {
@@ -8,15 +8,30 @@ function header() {
   };
 }
 
+async function register(username, password) {
+  
+  try {
+    const response = await fetch(`${baseURL}/users`, {
+      method: 'POST',
+      headers: header(),
+      body: JSON.stringify({ username, password })
+    });
+    return await response.json();
+
+  } catch(error) {
+    console.error("Fetch error:", error);
+  }
+}
+
 async function login(username, password) {
 
   try {
-  const response = await fetch(`${base_url}/login`, {
-    method: "POST",
-    headers: header(),
-    body: JSON.stringify({ username, password }),
-  });
-  return await response.json();
+    const response = await fetch(`${baseURL}/login`, {
+      method: "POST",
+      headers: header(),
+      body: JSON.stringify({ username, password }),
+    });
+    return await response.json();
 
   } catch(error) {
     console.error("Fetch error:", error);
@@ -26,11 +41,10 @@ async function login(username, password) {
 async function get_chats() {
 
   try {
-  const response = await fetch(`${base_url}/chats`, {
-    method: "GET",
-    headers: header(),
-  });
-  return await response.json();
+    const response = await fetch(`${base_url}/chats`, {
+      headers: header(),
+    });
+    return await response.json();
 
   } catch(error) {
     console.error("Fetch error:", error);
@@ -38,7 +52,19 @@ async function get_chats() {
 }
 
 
-async function loadUsers() {
+async function getUser(id) {
+  try {
+    response = await fetch(`${BASE_URL}/users/${id}`, {
+      headers: header()
+    });
+    return await response.json();
+
+  } catch(error) {
+    console.error("Fetch error:", error);
+  }
+}
+
+async function loadChats() {
   try {
 
     token = (await login("fredima2x", "12341234")).token_string;
@@ -154,4 +180,4 @@ function deleteLastMessage() {
 }
 
 renderMessages();
-loadUsers();
+loadChats();
