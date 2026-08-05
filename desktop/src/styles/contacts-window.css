@@ -64,6 +64,11 @@
     border-radius: 25px;
 }
 
+.no-chats-placeholder {
+    color: rgb(200, 200, 200);
+    font-size: 14px;
+}
+
 .add-contact-button-cont {
     display: flex;
     align-items: center;
