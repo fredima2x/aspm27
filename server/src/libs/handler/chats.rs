@@ -1,7 +1,7 @@
 use crate::libs::{
     db, error,
     models::{
-        api::requests::CreateChatRequest,
+        api::requests::{CreateChatRequest, UpdateChatRequest},
         db_objects::{Chat, User},
         misc::AuthenticatedUser,
     },
@@ -119,6 +119,28 @@ pub async fn remove_chat_member(
         } else {
             Err(StatusCode::NOT_FOUND)
         }
+    } else {
+        Err(StatusCode::FORBIDDEN)
+    }
+}
+
+pub async fn update_chat(
+    user: AuthenticatedUser,
+    Path(id): Path<i64>,
+    Json(body): Json<UpdateChatRequest>,
+) -> Result<StatusCode, StatusCode> {
+    if db::chats::is_user_in_chat(id, user.id)
+        .await
+        .map_err(error::db_err)?
+    {
+        db::chats::update_chat(Chat {
+            id,
+            chat_name: body.chat_name,
+            chat_desc: body.chat_desc,
+        })
+        .await
+        .map_err(error::db_err)?;
+        Ok(StatusCode::OK)
     } else {
         Err(StatusCode::FORBIDDEN)
     }

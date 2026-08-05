@@ -12,6 +12,7 @@ pub struct User {
 pub struct Chat {
     pub id: i64,
     pub chat_name: String,
+    pub chat_desc: String,
 }
 
 #[derive(Serialize, sqlx::FromRow)]

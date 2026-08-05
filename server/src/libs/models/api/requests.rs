@@ -33,3 +33,9 @@ pub struct SimpleSendUserRequest {
 pub struct UpdateProfileRequest {
     pub user: SendUserRequest,
 }
+
+#[derive(Deserialize)]
+pub struct UpdateChatRequest {
+    pub chat_name: String,
+    pub chat_desc: String,
+}

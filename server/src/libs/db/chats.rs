@@ -1,5 +1,8 @@
+use sqlx::pool;
+
 use crate::libs::{
     db::utility::get_pool,
+    error::db_err,
     models::db_objects::{Chat, User},
 };
 
@@ -84,4 +87,15 @@ pub async fn is_user_in_chat(chat_id: i64, user_id: i64) -> Result<bool, sqlx::E
         Ok(msg) => Ok(msg.iter().any(|chat| chat.id == chat_id)),
         Err(e) => Err(e),
     }
+}
+
+pub async fn update_chat(chat: Chat) -> Result<(), sqlx::Error> {
+    let pool = get_pool().await;
+    sqlx::query("UPDATE chats SET chat_name = ?, chat_desc = ? WHERE id = ?")
+        .bind(chat.chat_name)
+        .bind(chat.chat_desc)
+        .bind(chat.id)
+        .execute(&pool)
+        .await?;
+    Ok(())
 }
