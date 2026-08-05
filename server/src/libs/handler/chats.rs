@@ -20,6 +20,14 @@ pub async fn create_chat(
     user: AuthenticatedUser,
     Json(body): Json<CreateChatRequest>,
 ) -> Result<Json<Chat>, StatusCode> {
+    // Checks
+    if body.chat_name.len() > 24 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    if body.chat_name.len() < 3 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
     let chat_id: i64 = db::chats::chat_create(&body.chat_name)
         .await
         .map_err(error::db_err)?;
@@ -129,6 +137,17 @@ pub async fn update_chat(
     Path(id): Path<i64>,
     Json(body): Json<UpdateChatRequest>,
 ) -> Result<StatusCode, StatusCode> {
+    // Checks
+    if body.chat_name.len() > 24 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    if body.chat_name.len() < 3 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    if body.chat_desc.len() > 255 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
     if db::chats::is_user_in_chat(id, user.id)
         .await
         .map_err(error::db_err)?

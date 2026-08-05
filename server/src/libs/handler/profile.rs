@@ -32,6 +32,7 @@ pub async fn update_profile(
     user: AuthenticatedUser,
     Json(body): Json<UpdateProfileRequest>,
 ) -> Result<StatusCode, StatusCode> {
+    // Checks
     if body.user.username.len() < 3 {
         return Err(StatusCode::BAD_REQUEST);
     }
@@ -44,6 +45,13 @@ pub async fn update_profile(
     if body.user.display_name.len() > 32 {
         return Err(StatusCode::BAD_REQUEST);
     }
+    if body.user.password.len() > 8 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    if body.user.password.len() < 64 {
+        return Err(StatusCode::BAD_GATEWAY);
+    }
+
     db::user::update_user(User {
         id: user.id,
         username: body.user.username,

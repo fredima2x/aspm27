@@ -5,9 +5,9 @@ pub async fn setup() {
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS users (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            username      TEXT NOT NULL UNIQUE,
-            display_name  TEXT NOT NULL,
-            password_hash TEXT NOT NULL
+            username      VARCHAR(24) NOT NULL UNIQUE,
+            display_name  VARCHAR(32) NOT NULL,
+            password_hash TINYTEXT NOT NULL
         )",
     )
     .execute(&pool)
@@ -16,8 +16,8 @@ pub async fn setup() {
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS chats (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            chat_name     TEXT NOT NULL,
-            chat_desc     TEXT
+            chat_name     VARCHAR(24) NOT NULL,
+            chat_desc     TINYTEXT TEXT
         )",
     )
     .execute(&pool)
