@@ -6,10 +6,12 @@ use axum::{
 use tower_http::cors::CorsLayer;
 
 mod libs;
-use crate::libs::handler;
+use crate::libs::{config::SERVER_ADDRESS, handler};
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt::init();
+    tracing::debug!("Creating APP Router...");
     let app = Router::new()
         .route("/", get(handler::hi::hi))
         .route(
@@ -53,12 +55,12 @@ async fn main() {
         // Erlaubt deinem Browser-Frontend Zugriffe
         .layer(CorsLayer::permissive());
 
+    tracing::info!("Binding to Server Address [{}]...", SERVER_ADDRESS);
     let listener = tokio::net::TcpListener::bind(libs::config::SERVER_ADDRESS)
         .await
         .unwrap();
 
-    println!("Server läuft auf {}", libs::config::SERVER_ADDRESS);
-    tracing_subscriber::fmt::init();
+    tracing::info!("Server running...");
     libs::db::setup::setup().await;
     axum::serve(listener, app).await.unwrap();
 }
