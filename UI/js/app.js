@@ -54,7 +54,7 @@ async function loadUsers() {
                     </p>
 
                     <p class="contact-id">
-                        ID: ${chat.id}
+                        ${chat.chat_desc}
                     </p>
                 </div>
             `;

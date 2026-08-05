@@ -1,8 +1,5 @@
-use sqlx::pool;
-
 use crate::libs::{
     db::utility::get_pool,
-    error::db_err,
     models::db_objects::{Chat, User},
 };
 

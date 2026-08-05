@@ -137,6 +137,17 @@ def update_user_profile():
     )
     print_response(r)
 
+def update_chat():
+    chat_id = input("   Chat ID: ")
+    chat_name = input("   Chat Name: ")
+    chat_desc = input("   Chat Description: ")
+    r = requests.put(
+        f"{BASE_URL}/chats/{chat_id}",
+        json={"chat_name": chat_name, "chat_desc": chat_desc},
+        headers=header(),
+    )
+    print_response(r)
+
 def get_user_profile():
     r = requests.get(f"{BASE_URL}/profile", headers=header())
     print_response(r)
@@ -163,6 +174,7 @@ MENU = {
     "17": ("Get Chat Messenges", get_chat_messenges),
     "18": ("Update User Profile", update_user_profile),
     "19": ("Get User Profile", get_user_profile),
+    "20": ("Update Chat", update_chat),
     "0": ("Beenden", None),
 }
 
