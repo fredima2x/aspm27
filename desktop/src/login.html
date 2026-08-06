@@ -11,26 +11,26 @@
 
 <body>
   <div class="login-page">
-    <h2 class="heading">Welcome Back!</h3> 
-    <p class="sign-in-text">Sign in:</p>
+    <h2 class="heading">Welcome Back!</h3>
+      <p class="sign-in-text">Sign in:</p>
 
-    <input type="text" placeholder="Username or id" class="username-input">
-    <input type="text" placeholder="Password" class="password-input">
-    <button class="sign-in-button" onclick="">Sign in</button>
+      <input type="text" placeholder="Username or id" class="username-input">
+      <input type="text" placeholder="Password" class="password-input">
+      <button class="sign-in-button" onclick="">Sign in</button>
 
-    <p class="sign-up-text">Dont have an account yet?</p>
-    <a href="register.html" class="sign-up-link">Sign up</a>
+      <p class="sign-up-text">Dont have an account yet?</p>
+      <a href="register.html" class="sign-up-link">Sign up</a>
   </div>
-  <script> 
+  <script>
     const passwordInput = document.querySelector('.password-input');
 
     document.querySelector(".sign-in-button").addEventListener("click", () => {
       document.startViewTransition(() => {
-      window.location.href = "index.html";
+        window.location.href = "index.html";
       });
 
       if (length(passwordInput.value) < 8) {
-      alert('Password must be at least 8 characters long');
+        alert('Password must be at least 8 characters long');
       } else if (length(passwordInput.value) > 64) {
         alert("Password can't be longer than 64 charaters");
       }
