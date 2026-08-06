@@ -22,6 +22,7 @@ pub async fn login(
     if result {
         Ok(Json(LoginResponse {
             token_string: auth::create_token(user.id),
+            session_id: -1,
         }))
     } else {
         Err(StatusCode::UNAUTHORIZED)

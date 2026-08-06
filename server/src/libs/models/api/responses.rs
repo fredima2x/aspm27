@@ -14,5 +14,5 @@ pub struct GetProfileResponse {
 #[derive(Serialize)]
 pub struct LoginResponse {
     pub token_string: String,
-    pub session_
+    pub session_id: i64,
 }
