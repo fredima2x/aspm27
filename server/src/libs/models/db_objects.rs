@@ -57,6 +57,13 @@ pub struct BasicMessage {
     pub content: String,
 }
 
+#[derive(sqlx::FromRow)]
+pub struct Session {
+    pub id: i64,
+    pub owner_id: i64,
+    pub last_update: String,
+}
+
 impl From<DirectUser> for BasicUser {
     fn from(user: DirectUser) -> Self {
         BasicUser {

@@ -4,6 +4,17 @@ pub async fn setup() {
     let pool = get_pool().await;
 
     sqlx::query(
+        "CREATE TABLE IF NOT EXISTS sessions (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            owner_id      INTEGER NOT NULL,
+            last_update   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )",
+    )
+    .execute(&pool)
+    .await
+    .unwrap();
+
+    sqlx::query(
         "CREATE TABLE IF NOT EXISTS users (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
             username      VARCHAR(24) NOT NULL UNIQUE,
