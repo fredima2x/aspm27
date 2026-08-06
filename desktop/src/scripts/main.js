@@ -30,6 +30,22 @@ function header() {
   };
 }
 
+async function get_profile() {
+  try {
+    const response = await fetch(`${baseURL}/profile`, {
+      method: "GET",
+      headers: header(),
+    });
+    if (!response.ok) {
+      console.error(await response.text());
+      return null;
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Fetch error:", error);
+  }
+}
+
 async function get_chat_messages(chat_id, limit, offset) {
   try {
     const response = await fetch(`${baseURL}/chats/${chat_id}/messages`, {
@@ -91,7 +107,7 @@ async function login(username, password) {
 async function get_chats() {
   try {
     const response = await fetch(`${baseURL}/chats`, {
-      headers: header(token),
+      headers: header(auth_token),
     });
 
     if (!response.ok) {
