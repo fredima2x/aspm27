@@ -1,5 +1,6 @@
 use crate::libs::{
-    auth, db, error,
+    auth::{self, create_token},
+    db, error,
     models::{
         api::{
             requests::{SimpleSendUserRequest, UpdateProfileRequest},
@@ -18,11 +19,18 @@ pub async fn login(
     let user = db::user::user_get_by_name(&body.username)
         .await
         .map_err(error::db_err)?;
+
     let result: bool = auth::verify_password(&body.password, &user.password_hash);
+
     if result {
+        let session_id = db::session::create_session(user.id)
+            .await
+            .map_err(error::db_err)?;
+
+        let token_string = auth::create_token(user.id, session_id);
+
         Ok(Json(LoginResponse {
-            token_string: auth::create_token(user.id),
-            session_id: -1,
+            token_string: token_string,
         }))
     } else {
         Err(StatusCode::UNAUTHORIZED)
