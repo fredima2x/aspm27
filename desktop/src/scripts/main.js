@@ -1,3 +1,6 @@
+////Libs
+
+
 //// Configuration
 const baseURL = "http://127.0.0.1:3000";
 const messageInput = document.querySelector(".message-text-bar");
@@ -7,8 +10,8 @@ const chatArea = document.querySelector(".chat-area");
 const storageKey = "messages";
 
 //// Runtime Globals
-let auth_token = null;
 let displayed_messages = null;
+let auth_token = null;
 
 // Depreciated
 // let messages = JSON.parse(localStorage.getItem(storageKey) || "[]");
@@ -19,6 +22,7 @@ let displayed_messages = null;
 
 //// API Communcation Functions
 // API Header Helper
+
 function header() {
   return {
     "Authorization": `Bearer ${auth_token}`,
@@ -87,7 +91,7 @@ async function login(username, password) {
 async function get_chats() {
   try {
     const response = await fetch(`${baseURL}/chats`, {
-      headers: header(),
+      headers: header(token),
     });
 
     if (!response.ok) {
@@ -121,6 +125,7 @@ async function getUser(id) {
 
 //// UI functions
 async function updateChats() {
+  try {
   const chats = await get_chats();
 
   if (!Array.isArray(chats)) {
@@ -166,6 +171,10 @@ async function updateChats() {
             `;
 
     container.appendChild(addContactButton);
+
+  } catch (error) {
+    console.error(`Fetch error: ${error}`);
+  }
 }
 
 async function updateMessages() {
