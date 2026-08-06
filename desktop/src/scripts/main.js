@@ -1,54 +1,16 @@
-const baseURL = "http://127.0.0.1:3000";
 let token = null;
+const baseURL = "http://127.0.0.1:3000";
 
-function header() {
-  return {
-    "Authorization": `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
-}
+import { header } from './headers.js';
+import { register } from './register.js';
+import { login } from './login.js';
 
-async function register(username, password) {
-  
-  try {
-    const response = await fetch(`${baseURL}/users`, {
-      method: 'POST',
-      headers: header(),
-      body: JSON.stringify({ username, password })
-    });
-    return await response.json();
-
-  } catch(error) {
-    console.error("Fetch error:", error);
-  }
-}
-
-async function login(username, password) {
-
-  try {
-    const response = await fetch(`${baseURL}/login`, {
-      method: "POST",
-      headers: header(),
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      console.error("Login failed:", data);
-      return null;
-    }
-    return data;
-
-  } catch(error) {
-    console.error("Fetch error:", error);
-    return null;
-  }
-}
 
 async function get_chats() {
 
   try {
     const response = await fetch(`${baseURL}/chats`, {
-      headers: header(),
+      headers: header(token),
     });
     return await response.json();
 
@@ -62,7 +24,7 @@ async function getUser(id) {
   
   try {
     response = await fetch(`${baseURL}/users/${id}`, {
-      headers: header()
+      headers: header(token)
     });
     return await response.json();
 
@@ -75,6 +37,7 @@ async function loadChats() {
   try {
 
     const loginResponse = await login("fredima2x", "12341234");
+    
     if (!loginResponse || !loginResponse.token_string) {
       console.error("Login response invalid", loginResponse);
       return;
@@ -85,11 +48,6 @@ async function loadChats() {
     const chats = await get_chats();
 
     const container = document.querySelector(".contacts");
-
-    if (!container) {
-      console.error("Contacts container not found");
-      return;
-    }
 
     chats.forEach((chat) => {
       const contactButton = document.createElement("button");
@@ -127,7 +85,7 @@ async function loadChats() {
     container.appendChild(addContactButton);
 
   } catch (error) {
-    console.error("Fetch error:", error);
+    console.error(`Fetch error: ${error}`);
   }
 }
 
