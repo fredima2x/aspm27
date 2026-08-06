@@ -13,6 +13,10 @@ a {
   color: rgb(90, 90, 90);
 }
 
+p {
+  font-size: 12px;
+}
+
 input {
   display: block;
   width: 100%;

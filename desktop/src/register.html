@@ -4,11 +4,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Register</title>
+  <link rel="stylesheet" href="styles/register/general.css">
+  <link rel="stylesheet" href="styles/register/register-page.css">
 </head>
 
 <body>
+  <div class="register-page">
+    <h2 class="heading">Hello there!</h2>
+    <p class="sign-up-text">Sign up:</p>
 
+    <p class="username-desc-text">Enter a username between 3 and 24 characters long:</p>
+    <input type="text" placeholder="Username" class="username-input">
+
+    <p class="password-desc-text">Enter a strong password between 8 and 64 characters long:</p>
+    <input type="text" placeholder="Password" class="password-input">
+
+    <button class="sign-up-button" onclick="">Sign up</button>
+
+    <p class="sign-in-text">Already have an account?
+      <a href="login.html" class="sign-in-link">Sign in</a>
+    </p>
+  </div>
+  <script>
+    const passwordInput = document.querySelector('.password-input');
+
+    document.querySelector(".sign-up-button").addEventListener("click", () => {
+      document.startViewTransition(() => {
+        window.location.href = "chat.html";
+      });
+
+      if (length(passwordInput.value) < 8) {
+        alert('Password must be at least 8 characters long');
+      } else if (length(passwordInput.value) > 64) {
+        alert("Password can't be longer than 64 charaters");
+      }
+    });
+
+  </script>
 </body>
 
 </html>
