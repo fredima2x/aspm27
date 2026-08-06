@@ -11,7 +11,7 @@
 
 <body>
   <div class="login-page">
-    <h2 class="heading">Welcome Back!</h3> 
+    <h2 class="heading">Welcome Back!</h3>
     <p class="sign-in-text">Sign in:</p>
 
     <input type="text" placeholder="Username or id" class="username-input">
@@ -21,12 +21,12 @@
     <p class="sign-up-text">Dont have an account yet?</p>
     <a href="register.html" class="sign-up-link">Sign up</a>
   </div>
-  <script> 
+  <script>
     const passwordInput = document.querySelector('.password-input');
 
     document.querySelector(".sign-in-button").addEventListener("click", () => {
       document.startViewTransition(() => {
-      window.location.href = "index.html";
+      window.location.href = "/chat.html";
       });
 
       if (length(passwordInput.value) < 8) {
