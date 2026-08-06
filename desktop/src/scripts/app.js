@@ -1,22 +1,44 @@
+//// Configuration
 const baseURL = "http://127.0.0.1:3000";
-let token = null;
+const messageInput = document.querySelector(".message-text-bar");
+const sendButton = document.querySelector(".send-button");
+const chatArea = document.querySelector(".chat-area");
+const storageKey = "messages";
 
+//// Runtime Globals
+let auth_token = null;
+let displayed_messages = null;
+
+// Depreciated
+// let messages = JSON.parse(localStorage.getItem(storageKey) || "[]");
+// function saveMessages() {
+//   localStorage.setItem(storageKey, JSON.stringify(messages));
+// }
+
+
+//// API Communcation Functions
+// API Header Helper
 function header() {
   return {
-    "Authorization": `Bearer ${token}`,
+    "Authorization": `Bearer ${auth_token}`,
     "Content-Type": "application/json",
   };
 }
 
 async function register(username, password) {
-  
+
   try {
     const response = await fetch(`${baseURL}/users`, {
       method: 'POST',
       headers: header(),
       body: JSON.stringify({ username, password })
     });
+    if (!response.ok) {
+      console.error(await response.text());
+      return null;
+    }
     return await response.json();
+
 
   } catch(error) {
     console.error("Fetch error:", error);
@@ -45,51 +67,52 @@ async function login(username, password) {
 }
 
 async function get_chats() {
-
   try {
     const response = await fetch(`${baseURL}/chats`, {
       headers: header(),
     });
-    return await response.json();
 
-  } catch(error) {
+    if (!response.ok) {
+      console.error(await response.text());
+      return [];
+    }
+
+    return await response.json();
+  } catch (error) {
     console.error("Fetch error:", error);
+    return [];
   }
 }
 
 
 async function getUser(id) {
-  
   try {
-    response = await fetch(`${baseURL}/users/${id}`, {
-      headers: header()
+    const response = await fetch(`${baseURL}/users/${id}`, {
+      headers: header(),
     });
+    if (!response.ok) {
+      console.error(await response.text());
+      return null;
+    }
     return await response.json();
-
-  } catch(error) {
+  } catch (error) {
     console.error("Fetch error:", error);
+    return null;
   }
 }
 
-async function loadChats() {
-  try {
+//// UI functions
+async function updateChats() {
+  const chats = await get_chats();
 
-    const loginResponse = await login("fredima2x", "12341234");
-    if (!loginResponse || !loginResponse.token_string) {
-      console.error("Login response invalid", loginResponse);
-      return;
-    }
+  if (!Array.isArray(chats)) {
+    console.error("Chats is not an array:", chats);
+    return;
+  }
+  const container = document.querySelector(".contacts");
+  if (!container) return;
 
-    token = loginResponse.token_string;
-
-    const chats = await get_chats();
-
-    const container = document.querySelector(".contacts");
-
-    if (!container) {
-      console.error("Contacts container not found");
-      return;
-    }
+  container.innerHTML = "";
 
     chats.forEach((chat) => {
       const contactButton = document.createElement("button");
@@ -125,23 +148,9 @@ async function loadChats() {
             `;
 
     container.appendChild(addContactButton);
-
-  } catch (error) {
-    console.error("Fetch error:", error);
-  }
 }
 
-const messageInput = document.querySelector(".message-text-bar");
-const sendButton = document.querySelector(".send-button");
-const chatArea = document.querySelector(".chat-area");
-const storageKey = "messages";
-let messages = JSON.parse(localStorage.getItem(storageKey) || "[]");
-
-function saveMessages() {
-  localStorage.setItem(storageKey, JSON.stringify(messages));
-}
-
-function renderMessages() {
+function updateMessages() {
   chatArea.innerHTML = "";
 
   messages.forEach((entry) => {
@@ -161,37 +170,51 @@ function renderMessages() {
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 
-function displayMessage() {
-  const text = messageInput.value.trim();
 
+function displayMessage() {
   if (!text) {
     return;
   }
-
   messages.push({ message: text });
   saveMessages();
   renderMessages();
   messageInput.value = "";
 }
 
-sendButton.addEventListener("click", displayMessage);
-
-messageInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    event.preventDefault();
-    displayMessage();
-  }
-});
-
 function deleteLastMessage() {
   if (messages.length === 0) {
     return;
   }
-
   messages.pop();
   saveMessages();
   renderMessages();
 }
 
-renderMessages();
-loadChats();
+
+
+
+
+
+async function setup() {
+
+  // Depreciated: Initial Login Attempt
+  const loginResponse = (await login("fredima2x", "12341234"));
+  if (!loginResponse || !loginResponse.token_string) {
+    console.error("Login response invalid", loginResponse);
+    return;
+  }
+  auth_token = loginResponse.token_string;
+
+  sendButton.addEventListener("click", displayMessage);
+  messageInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      displayMessage();
+    }
+  });
+
+  // Setting Updates
+  setInterval(updateChats, 5000);
+}
+
+setup();
