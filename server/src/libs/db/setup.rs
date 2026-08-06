@@ -66,13 +66,13 @@ pub async fn setup() {
             chat_id INTEGER NOT NULL,
             content TEXT NOT NULL,
 
-            FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
-            FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
-
             soft_delete   BOOLEAN NOT NULL DEFAULT FALSE,
             deleted_at    TIMESTAMP NULL DEFAULT NULL,
             created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
         )",
     )
     .execute(&pool)
