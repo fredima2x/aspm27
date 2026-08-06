@@ -2,15 +2,20 @@ use axum::{
     Router,
     routing::{get, post},
 };
-
 use tower_http::cors::CorsLayer;
+use tracing_subscriber::EnvFilter;
 
 mod libs;
 use crate::libs::{config::SERVER_ADDRESS, handler};
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
+        )
+        .init();
+
     tracing::debug!("Creating APP Router...");
     let app = Router::new()
         .route("/", get(handler::hi::hi))

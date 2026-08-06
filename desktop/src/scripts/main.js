@@ -161,7 +161,7 @@ async function updateChats() {
 
       contactButton.innerHTML = `
                 <div class="contact-picture-cont">
-                    <img src="imgs/kreise.pdf" class="contact-picture" />
+                    <img src="https://picsum.photos/300/200" class="contact-picture" />
                 </div>
                 <div class="contact-info">
                     <p class="contact-heading">
