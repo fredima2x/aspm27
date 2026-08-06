@@ -31,17 +31,23 @@ async function login(username, password) {
       headers: header(),
       body: JSON.stringify({ username, password }),
     });
-    return await response.json();
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Login failed:", data);
+      return null;
+    }
+    return data;
 
   } catch(error) {
     console.error("Fetch error:", error);
+    return null;
   }
 }
 
 async function get_chats() {
 
   try {
-    const response = await fetch(`${base_url}/chats`, {
+    const response = await fetch(`${baseURL}/chats`, {
       headers: header(),
     });
     return await response.json();
@@ -53,8 +59,9 @@ async function get_chats() {
 
 
 async function getUser(id) {
+  
   try {
-    response = await fetch(`${BASE_URL}/users/${id}`, {
+    response = await fetch(`${baseURL}/users/${id}`, {
       headers: header()
     });
     return await response.json();
@@ -67,11 +74,18 @@ async function getUser(id) {
 async function loadChats() {
   try {
 
-    token = (await login("fredima2x", "12341234")).token_string;
+    const loginResponse = await login("fredima2x", "12341234");
+    if (!loginResponse || !loginResponse.token_string) {
+      console.error("Login response invalid", loginResponse);
+      return;
+    }
+
+    token = loginResponse.token_string;
 
     const chats = await get_chats();
 
     const container = document.querySelector(".contacts");
+
     if (!container) {
       console.error("Contacts container not found");
       return;
