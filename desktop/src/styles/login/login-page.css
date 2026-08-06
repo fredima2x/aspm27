@@ -23,12 +23,3 @@
 .sign-in-button:active {
   opacity: 0.6;
 }
-
-.sign-up-text {
-  color: rgb(90, 90, 90);
-  font-size: 12px;
-}
-
-.sign-up-link {
-  font-size: 12px;
-}
