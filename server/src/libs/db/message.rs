@@ -1,4 +1,4 @@
-use crate::libs::{db::utility::get_pool, models::db_objects::Message};
+use crate::libs::{db::utility::get_pool, models::db_objects::DirectMessage};
 
 pub async fn save_message(owner_id: i64, chat_id: i64, content: &str) -> Result<i64, sqlx::Error> {
     let pool = get_pool().await;
@@ -11,9 +11,9 @@ pub async fn save_message(owner_id: i64, chat_id: i64, content: &str) -> Result<
     Ok(result.last_insert_rowid())
 }
 
-pub async fn get_message(message_id: i64) -> Result<Message, sqlx::Error> {
+pub async fn get_message(message_id: i64) -> Result<DirectMessage, sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query_as::<_, Message>("SELECT * FROM messages WHERE id = ?")
+    sqlx::query_as::<_, DirectMessage>("SELECT * FROM messages WHERE id = ?")
         .bind(message_id)
         .fetch_one(&pool)
         .await
@@ -37,9 +37,9 @@ pub async fn chat_get_messages(
     chat_id: i64,
     limit: i64,
     offset: i64,
-) -> Result<Vec<Message>, sqlx::Error> {
+) -> Result<Vec<DirectMessage>, sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query_as::<_, Message>(
+    sqlx::query_as::<_, DirectMessage>(
         "SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
     )
     .bind(chat_id)

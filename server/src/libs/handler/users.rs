@@ -2,7 +2,7 @@ use crate::libs::{
     db, error,
     models::{
         api::{requests::SimpleSendUserRequest, responses::CreateUserResponse},
-        db_objects::User,
+        db_objects::BasicUser,
         misc::AuthenticatedUser,
     },
 };
@@ -10,8 +10,13 @@ use axum::Json;
 use axum::extract::Path;
 use axum::http::StatusCode;
 
-pub async fn get_users() -> Result<Json<Vec<User>>, StatusCode> {
-    let users = db::user::user_getall().await.map_err(error::db_err)?;
+pub async fn get_users() -> Result<Json<Vec<BasicUser>>, StatusCode> {
+    let users = db::user::user_getall()
+        .await
+        .map_err(error::db_err)?
+        .into_iter()
+        .map(|c| c.into())
+        .collect();
     Ok(Json(users))
 }
 
@@ -44,7 +49,10 @@ pub async fn delete_user(user: AuthenticatedUser) -> Result<StatusCode, StatusCo
     Ok(StatusCode::OK)
 }
 
-pub async fn get_user(Path(id): Path<i64>) -> Result<Json<User>, StatusCode> {
-    let user: User = db::user::user_get_by_id(id).await.map_err(error::db_err)?;
+pub async fn get_user(Path(id): Path<i64>) -> Result<Json<BasicUser>, StatusCode> {
+    let user: BasicUser = db::user::user_get_by_id(id)
+        .await
+        .map_err(error::db_err)?
+        .into();
     Ok(Json(user))
 }

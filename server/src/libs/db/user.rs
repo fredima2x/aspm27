@@ -1,8 +1,12 @@
-use crate::libs::{auth::hash_password, db::utility::get_pool, models::db_objects::User};
+use crate::libs::{
+    auth::hash_password,
+    db::utility::get_pool,
+    models::db_objects::{BasicUser, DirectUser},
+};
 
-pub async fn user_getall() -> Result<Vec<User>, sqlx::Error> {
+pub async fn user_getall() -> Result<Vec<DirectUser>, sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query_as::<_, User>("SELECT * FROM users")
+    sqlx::query_as::<_, DirectUser>("SELECT * FROM users")
         .fetch_all(&pool)
         .await
 }
@@ -20,11 +24,11 @@ pub async fn user_create(username: &str, password: &str) -> Result<i64, sqlx::Er
     Ok(result.last_insert_rowid())
 }
 
-pub async fn update_user(user: User) -> Result<(), sqlx::Error> {
+pub async fn update_user(user: BasicUser, password_hash: String) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query("UPDATE users SET username = ?, password_hash = ?, display_name = ? WHERE id = ?")
         .bind(&user.username)
-        .bind(&user.password_hash)
+        .bind(&password_hash)
         .bind(&user.display_name)
         .bind(&user.id)
         .execute(&pool)
@@ -41,17 +45,17 @@ pub async fn user_delete(id: i64) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-pub async fn user_get_by_id(id: i64) -> Result<User, sqlx::Error> {
+pub async fn user_get_by_id(id: i64) -> Result<DirectUser, sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = ?")
+    sqlx::query_as::<_, DirectUser>("SELECT * FROM users WHERE id = ?")
         .bind(id)
         .fetch_one(&pool)
         .await
 }
 
-pub async fn user_get_by_name(username: &str) -> Result<User, sqlx::Error> {
+pub async fn user_get_by_name(username: &str) -> Result<DirectUser, sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query_as::<_, User>("SELECT * FROM users WHERE username = ?")
+    sqlx::query_as::<_, DirectUser>("SELECT * FROM users WHERE username = ?")
         .bind(username)
         .fetch_one(&pool)
         .await

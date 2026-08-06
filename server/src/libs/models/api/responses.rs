@@ -1,4 +1,4 @@
-use crate::libs::models::db_objects::User;
+use crate::libs::models::db_objects::BasicUser;
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -8,7 +8,7 @@ pub struct CreateUserResponse {
 
 #[derive(Serialize)]
 pub struct GetProfileResponse {
-    pub user: User,
+    pub user: BasicUser,
 }
 
 #[derive(Serialize)]

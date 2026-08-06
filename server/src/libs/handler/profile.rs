@@ -5,7 +5,7 @@ use crate::libs::{
             requests::{SimpleSendUserRequest, UpdateProfileRequest},
             responses::{GetProfileResponse, LoginResponse},
         },
-        db_objects::User,
+        db_objects::BasicUser,
         misc::AuthenticatedUser,
     },
 };
@@ -15,7 +15,7 @@ use axum::http::StatusCode;
 pub async fn login(
     Json(body): Json<SimpleSendUserRequest>,
 ) -> Result<Json<LoginResponse>, StatusCode> {
-    let user: User = db::user::user_get_by_name(&body.username)
+    let user = db::user::user_get_by_name(&body.username)
         .await
         .map_err(error::db_err)?;
     let result: bool = auth::verify_password(&body.password, &user.password_hash);
@@ -52,12 +52,14 @@ pub async fn update_profile(
         return Err(StatusCode::BAD_GATEWAY);
     }
 
-    db::user::update_user(User {
-        id: user.id,
-        username: body.user.username,
-        display_name: body.user.display_name,
-        password_hash: auth::hash_password(&body.user.password),
-    })
+    db::user::update_user(
+        BasicUser {
+            id: user.id,
+            username: body.user.username,
+            display_name: body.user.display_name,
+        },
+        auth::hash_password(&body.user.password),
+    )
     .await
     .map_err(error::db_err)?;
     Ok(StatusCode::OK)
@@ -67,6 +69,7 @@ pub async fn get_profile(user: AuthenticatedUser) -> Result<Json<GetProfileRespo
     Ok(Json(GetProfileResponse {
         user: db::user::user_get_by_id(user.id)
             .await
-            .map_err(error::db_err)?,
+            .map_err(error::db_err)?
+            .into(),
     }))
 }

@@ -1,11 +1,11 @@
 use crate::libs::{
     db::utility::get_pool,
-    models::db_objects::{Chat, User},
+    models::db_objects::{BasicChat, DirectChat, DirectUser},
 };
 
-pub async fn user_get_chats(user_id: i64) -> Result<Vec<Chat>, sqlx::Error> {
+pub async fn user_get_chats(user_id: i64) -> Result<Vec<DirectChat>, sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query_as::<_, Chat>(
+    sqlx::query_as::<_, DirectChat>(
         r#"
         SELECT c.*
         FROM chats c
@@ -29,9 +29,9 @@ pub async fn chat_create(chat_name: &str) -> Result<i64, sqlx::Error> {
 }
 
 ///
-pub async fn chat_get(chat_id: i64) -> Result<Chat, sqlx::Error> {
+pub async fn chat_get(chat_id: i64) -> Result<DirectChat, sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE id = ?")
+    sqlx::query_as::<_, DirectChat>("SELECT * FROM chats WHERE id = ?")
         .bind(chat_id)
         .fetch_one(&pool)
         .await
@@ -66,9 +66,9 @@ pub async fn chat_delete_user(chat_id: i64, user_id: i64) -> Result<(), sqlx::Er
     Ok(())
 }
 
-pub async fn chat_get_members(chat_id: i64) -> Result<Vec<User>, sqlx::Error> {
+pub async fn chat_get_members(chat_id: i64) -> Result<Vec<DirectUser>, sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query_as::<_, User>(
+    sqlx::query_as::<_, DirectUser>(
         "SELECT users.* FROM users
          INNER JOIN chat_members ON users.id = chat_members.user_id
          WHERE chat_members.chat_id = ?",
@@ -86,7 +86,7 @@ pub async fn is_user_in_chat(chat_id: i64, user_id: i64) -> Result<bool, sqlx::E
     }
 }
 
-pub async fn update_chat(chat: Chat) -> Result<(), sqlx::Error> {
+pub async fn update_chat(chat: BasicChat) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query("UPDATE chats SET chat_name = ?, chat_desc = ? WHERE id = ?")
         .bind(chat.chat_name)

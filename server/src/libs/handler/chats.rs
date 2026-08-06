@@ -2,24 +2,27 @@ use crate::libs::{
     db, error,
     models::{
         api::requests::{CreateChatRequest, UpdateChatRequest},
-        db_objects::{Chat, User},
+        db_objects::{BasicChat, BasicUser},
         misc::AuthenticatedUser,
     },
 };
 use axum::{Json, extract::Path, http::StatusCode};
 
-pub async fn get_chats(user: AuthenticatedUser) -> Result<Json<Vec<Chat>>, StatusCode> {
+pub async fn get_chats(user: AuthenticatedUser) -> Result<Json<Vec<BasicChat>>, StatusCode> {
     Ok(Json(
         db::chats::user_get_chats(user.id)
             .await
-            .map_err(error::db_err)?,
+            .map_err(error::db_err)?
+            .into_iter()
+            .map(|c| c.into())
+            .collect(),
     ))
 }
 
 pub async fn create_chat(
     user: AuthenticatedUser,
     Json(body): Json<CreateChatRequest>,
-) -> Result<Json<Chat>, StatusCode> {
+) -> Result<Json<BasicChat>, StatusCode> {
     // Checks
     if body.chat_name.len() > 24 {
         return Err(StatusCode::BAD_REQUEST);
@@ -35,12 +38,17 @@ pub async fn create_chat(
         .await
         .map_err(error::db_err)?;
     Ok(Json(
-        db::chats::chat_get(chat_id).await.map_err(error::db_err)?,
+        db::chats::chat_get(chat_id)
+            .await
+            .map_err(error::db_err)?
+            .into(),
     ))
 }
 
-pub async fn get_chat(Path(id): Path<i64>) -> Result<Json<Chat>, StatusCode> {
-    Ok(Json(db::chats::chat_get(id).await.map_err(error::db_err)?))
+pub async fn get_chat(Path(id): Path<i64>) -> Result<Json<BasicChat>, StatusCode> {
+    Ok(Json(
+        db::chats::chat_get(id).await.map_err(error::db_err)?.into(),
+    ))
 }
 
 pub async fn delete_chat(
@@ -61,7 +69,7 @@ pub async fn delete_chat(
 pub async fn get_chat_members(
     user: AuthenticatedUser,
     Path(id): Path<i64>,
-) -> Result<Json<Vec<User>>, StatusCode> {
+) -> Result<Json<Vec<BasicUser>>, StatusCode> {
     if db::chats::is_user_in_chat(id, user.id)
         .await
         .map_err(error::db_err)?
@@ -69,7 +77,10 @@ pub async fn get_chat_members(
         Ok(Json(
             db::chats::chat_get_members(id)
                 .await
-                .map_err(error::db_err)?,
+                .map_err(error::db_err)?
+                .into_iter()
+                .map(|c| c.into())
+                .collect(),
         ))
     } else {
         Err(StatusCode::FORBIDDEN)
@@ -152,7 +163,7 @@ pub async fn update_chat(
         .await
         .map_err(error::db_err)?
     {
-        db::chats::update_chat(Chat {
+        db::chats::update_chat(BasicChat {
             id,
             chat_name: body.chat_name,
             chat_desc: body.chat_desc,
