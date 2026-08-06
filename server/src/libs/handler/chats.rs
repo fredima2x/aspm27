@@ -59,7 +59,9 @@ pub async fn delete_chat(
         .await
         .map_err(error::db_err)?
     {
-        db::chats::chat_delete(id).await.map_err(error::db_err)?;
+        db::chats::chat_soft_delete(id)
+            .await
+            .map_err(error::db_err)?;
         Ok(StatusCode::OK)
     } else {
         Err(StatusCode::FORBIDDEN)

@@ -31,21 +31,38 @@ pub async fn chat_create(chat_name: &str) -> Result<i64, sqlx::Error> {
 ///
 pub async fn chat_get(chat_id: i64) -> Result<DirectChat, sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query_as::<_, DirectChat>("SELECT * FROM chats WHERE id = ?")
+    sqlx::query_as::<_, DirectChat>("SELECT * FROM chats WHERE id = ? AND soft_delete = FALSE")
         .bind(chat_id)
         .fetch_one(&pool)
         .await
 }
 
+#[allow(dead_code)]
 pub async fn chat_delete(chat_id: i64) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query("DELETE FROM chats WHERE id = ?")
+    let result = sqlx::query("DELETE FROM chats WHERE id = ?")
         .bind(chat_id)
         .execute(&pool)
         .await?;
+    if result.rows_affected() == 0 {
+        return Err(sqlx::Error::RowNotFound);
+    }
     Ok(())
 }
 
+pub async fn chat_soft_delete(chat_id: i64) -> Result<(), sqlx::Error> {
+    let pool = get_pool().await;
+    let result = sqlx::query("UPDATE chats SET soft_delete = TRUE, deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND soft_delete = FALSE")
+        .bind(chat_id)
+        .execute(&pool)
+        .await?;
+    if result.rows_affected() == 0 {
+        return Err(sqlx::Error::RowNotFound);
+    }
+    Ok(())
+}
+
+#[allow(dead_code)]
 pub async fn chat_add_user(chat_id: i64, user_id: i64) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query("INSERT INTO chat_members (chat_id, user_id) VALUES (?, ?)")
@@ -88,11 +105,13 @@ pub async fn is_user_in_chat(chat_id: i64, user_id: i64) -> Result<bool, sqlx::E
 
 pub async fn update_chat(chat: BasicChat) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query("UPDATE chats SET chat_name = ?, chat_desc = ? WHERE id = ?")
-        .bind(chat.chat_name)
-        .bind(chat.chat_desc)
-        .bind(chat.id)
-        .execute(&pool)
-        .await?;
+    sqlx::query(
+        "UPDATE chats SET chat_name = ?, chat_desc = ? WHERE id = ? AND soft_delete = FALSE",
+    )
+    .bind(chat.chat_name)
+    .bind(chat.chat_desc)
+    .bind(chat.id)
+    .execute(&pool)
+    .await?;
     Ok(())
 }

@@ -42,7 +42,7 @@ pub async fn delete_message(
         .owner_id
         == user.id
     {
-        db::message::delete_message(message_id)
+        db::message::message_soft_delete(message_id)
             .await
             .map_err(error::db_err)?;
         Ok(StatusCode::OK)

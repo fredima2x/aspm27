@@ -36,12 +36,30 @@ pub async fn update_user(user: BasicUser, password_hash: String) -> Result<(), s
     Ok(())
 }
 
+#[allow(dead_code)]
 pub async fn user_delete(id: i64) -> Result<(), sqlx::Error> {
     let pool = get_pool().await;
-    sqlx::query("DELETE FROM users WHERE id = ?")
+    let result = sqlx::query("DELETE FROM users WHERE id = ?")
         .bind(id)
         .execute(&pool)
         .await?;
+    if result.rows_affected() == 0 {
+        return Err(sqlx::Error::RowNotFound);
+    }
+    Ok(())
+}
+
+pub async fn user_soft_delete(id: i64) -> Result<(), sqlx::Error> {
+    let pool = get_pool().await;
+    let result = sqlx::query(
+        "UPDATE users SET soft_delete = TRUE, deleted_at = CURRENT_TIMESTAMP WHERE id = ?",
+    )
+    .bind(id)
+    .execute(&pool)
+    .await?;
+    if result.rows_affected() == 0 {
+        return Err(sqlx::Error::RowNotFound);
+    }
     Ok(())
 }
 

@@ -2,7 +2,7 @@ use crate::libs::{
     db, error,
     models::{
         api::{requests::SimpleSendUserRequest, responses::CreateUserResponse},
-        db_objects::BasicUser,
+        db_objects::{BasicUser, DirectUser},
         misc::AuthenticatedUser,
     },
 };
@@ -10,13 +10,9 @@ use axum::Json;
 use axum::extract::Path;
 use axum::http::StatusCode;
 
-pub async fn get_users() -> Result<Json<Vec<BasicUser>>, StatusCode> {
-    let users = db::user::user_getall()
-        .await
-        .map_err(error::db_err)?
-        .into_iter()
-        .map(|c| c.into())
-        .collect();
+// DEBUG ONLY REMOVE IN PRODUCTION (1.0)
+pub async fn get_users() -> Result<Json<Vec<DirectUser>>, StatusCode> {
+    let users = db::user::user_getall().await.map_err(error::db_err)?;
     Ok(Json(users))
 }
 
@@ -43,7 +39,7 @@ pub async fn create_user(
 }
 
 pub async fn delete_user(user: AuthenticatedUser) -> Result<StatusCode, StatusCode> {
-    db::user::user_delete(user.id)
+    db::user::user_soft_delete(user.id)
         .await
         .map_err(error::db_err)?;
     Ok(StatusCode::OK)
