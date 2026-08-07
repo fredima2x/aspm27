@@ -1,6 +1,6 @@
 import { register } from "./register_function.js";
 import { login } from "./login_function.js";
-import { bannedPasswords } from './config.js';
+import { applyValidationMessage, getValidationErrors } from './validation.js';
 
 const passwordInput = document.querySelector('.password-input');
 const usernameInput = document.querySelector(".username-input");
@@ -9,21 +9,16 @@ async function sign_up() {
 
   const password = passwordInput.value;
   const username = usernameInput.value;
+
   const passwordDescription = document.querySelector('.password-desc-text');
+  const usernameDescription = document.querySelector('.username-desc-text');
+  const validationErrors = getValidationErrors(password, username);
 
-  if (password.length < 8) {
+  applyValidationMessage(passwordDescription, validationErrors.password);
+  applyValidationMessage(usernameDescription, validationErrors.username);
 
-    passwordDescription.innerText = 'Password must be at least 8 characters long!';
-    passwordDescription.classList.add('password-warn-text');
+  if (validationErrors.password || validationErrors.username) {
     return;
-  } else if (password.length > 64) {
-
-    passwordDescription.innerText = "Password can't be longer than 64 characters!";
-    passwordDescription.classList.add('password-warn-text');
-    return;
-  } else if (bannedPasswords.includes(password)) {
-    passwordDescription.innerText = "Don't even try...";
-    passwordDescription.classList.add('password-warn-text');
   }
 
   let register_data = await register(username, password);
