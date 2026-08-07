@@ -6,8 +6,9 @@ const messageInput = document.querySelector(".message-text-bar");
 const sendMessageButton = document.querySelector(".send-button");
 const deleteMessageButton = document.querySelector(".delete-button")
 
-const yourProfileNumber = document.querySelector(".profile-number");
-const yourProfileName = document.querySelector(".profile-name");
+const yourProfileDisplayName = document.querySelector(".your-profile-heading")
+const yourProfileName = document.querySelector(".your-profile-number");
+const yourProfileID = document.querySelector(".your-profile-name");
 
 const chatArea = document.querySelector(".chat-area");
 const storageKey = "messages";
@@ -193,8 +194,9 @@ async function update_profile() {
   console.log("profile:", profile);
   if (!profile) {return}
 
-  yourProfileName.textContent = profile.user.display_name;
-  yourProfileNumber.textContent = profile.user.username;
+  yourProfileDisplayName.textContent = profile.user.display_name;
+  yourProfileName.textContent = `@${profile.user.username}`;
+  yourProfileID.textContent = `#${profile.user.id}`;
 }
 
 
