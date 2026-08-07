@@ -5,8 +5,14 @@ import { baseURL } from "./config.js";
 const messageInput = document.querySelector(".message-text-bar");
 const sendMessageButton = document.querySelector(".send-button");
 const deleteMessageButton = document.querySelector(".delete-button")
+
+const yourProfileNumber = document.querySelector(".profile-number");
+const yourProfileName = document.querySelector(".profile-name");
+
 const chatArea = document.querySelector(".chat-area");
 const storageKey = "messages";
+
+
 
 //// Runtime Globals
 let displayed_messages = null;
@@ -71,47 +77,6 @@ async function get_chat_messages(chat_id, limit, offset) {
   }
 }
 
-async function register(username, password) {
-
-  try {
-    const response = await fetch(`${baseURL}/users`, {
-      method: 'POST',
-      headers: header(),
-      body: JSON.stringify({ username, password })
-    });
-    if (!response.ok) {
-      console.error(await response.text());
-      return null;
-    }
-    return await response.json();
-
-
-  } catch(error) {
-    console.error("Fetch error:", error);
-  }
-}
-
-async function login(username, password) {
-
-  try {
-    const response = await fetch(`${baseURL}/login`, {
-      method: "POST",
-      headers: header(),
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      console.error("Login failed:", data);
-      return null;
-    }
-    return data;
-
-  } catch(error) {
-    console.error("Fetch error:", error);
-    return null;
-  }
-}
-
 async function get_chats() {
   try {
     const response = await fetch(`${baseURL}/chats`, {
@@ -150,16 +115,16 @@ async function getUser(id) {
 //// UI functions
 async function updateChats() {
   try {
-  const chats = await get_chats();
+    const chats = await get_chats();
 
-  if (!Array.isArray(chats)) {
-    console.error("Chats is not an array:", chats);
-    return;
-  }
-  const container = document.querySelector(".contacts");
-  if (!container) return;
+    if (!Array.isArray(chats)) {
+      console.error("Chats is not an array:", chats);
+      return;
+    }
+    const container = document.querySelector(".contacts");
+    if (!container) return;
 
-  container.innerHTML = "";
+    container.innerHTML = "";
 
     chats.forEach((chat) => {
       const contactButton = document.createElement("button");
@@ -223,6 +188,16 @@ async function updateMessages() {
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 
+async function update_profile() {
+  const profile = await get_profile();
+  console.log("profile:", profile);
+  if (!profile) {return}
+
+  yourProfileName.textContent = profile.user.display_name;
+  yourProfileNumber.textContent = profile.user.username;
+}
+
+
 // Handler
 async function handler_sendButton() {
   // TODO API-Call
@@ -238,24 +213,20 @@ async function update_ui() {
   await Promise.all([
     updateChats(),
     updateMessages(),
+    update_profile(),
   ]);
 }
 
 async function setup() {
 
-  // Depreciated: Initial Login Attempt
-  const loginResponse = (await login("fredima2x", "12341234"));
-  if (!loginResponse || !loginResponse.token_string) {
-    console.error("Login response invalid", loginResponse);
-    return;
-  }
-  auth_token = loginResponse.token_string;
-
   sendMessageButton.addEventListener("click", handler_sendButton);
   deleteMessageButton.addEventListener("click", handler_deleteButton);
 
+  // Initial load, so the UI isn't empty for the first 5 seconds
+  await update_ui().catch(console.error);
+
   // Setting Updates
-  setInterval(() => { updateChats().catch(console.error); }, 5000);
+  setInterval(() => { update_ui().catch(console.error); }, 5000);
 }
 
 setup();
