@@ -49,6 +49,8 @@
 .your-profile {
     background-color: rgb(0, 219, 124);
     color: rgb(46, 46, 46);
+    align-items: center;
+    gap: 10px;
 }
 
 .your-profile-heading,
@@ -62,12 +64,30 @@
     color: rgb(46, 46, 46);
 }
 
+.settings-cont {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
 .settings-button {
     background-color: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.5s ease;
+}
+
+.settings-button:hover .settings-picture {
+    transform: rotate(90deg);
 }
 
 .settings-picture {
     width: 50px;
+    transition: transform 0.5s ease;
 }
 
 .contact-number,
