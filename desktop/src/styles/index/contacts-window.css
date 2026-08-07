@@ -46,6 +46,11 @@
     font: inherit;
 }
 
+.contact.selected {
+    background-color: rgb(0, 219, 124);
+    color: rgb(46, 46, 46);
+}
+
 .your-profile {
     background-color: rgb(0, 219, 124);
     color: rgb(46, 46, 46);

@@ -17,6 +17,7 @@ const storageKey = "messages";
 
 //// Runtime Globals
 let displayed_messages = null;
+let selected_chat = null;
 
 let auth_token = null;
 console.log("Trying to load Auth Token...");
@@ -63,8 +64,8 @@ async function get_profile() {
 
 async function get_chat_messages(chat_id, limit, offset) {
   try {
-    const response = await fetch(`${baseURL}/chats/${chat_id}/messages`, {
-      method: "GET",
+    const response = await fetch(`${baseURL}/chats/${chat_id}/get_messages`, {
+      method: "POST",
       body: JSON.stringify({ limit, offset }),
       headers: header(),
     })
@@ -115,56 +116,74 @@ async function getUser(id) {
 
 //// UI functions
 async function updateChats() {
-  try {
-    const chats = await get_chats();
+    try {
+        const chats = await get_chats();
 
-    if (!Array.isArray(chats)) {
-      console.error("Chats is not an array:", chats);
-      return;
-    }
-    const container = document.querySelector(".contacts");
-    if (!container) return;
+        if (!Array.isArray(chats)) {
+            console.error("Chats is not an array:", chats);
+            return;
+        }
 
-    container.innerHTML = "";
+        const container = document.querySelector(".contacts");
+        if (!container) return;
 
-    chats.forEach((chat) => {
-      const contactButton = document.createElement("button");
+        container.innerHTML = "";
 
-      contactButton.className = "contact";
-      contactButton.type = "button";
+        for (const chat of chats) {
+            const contactButton = document.createElement("button");
 
-      contactButton.innerHTML = `
+            contactButton.className = "contact";
+            contactButton.type = "button";
+            contactButton.dataset.chatId = chat.id;
+
+            // Markiere ausgewählten Chat
+            if (chat.id === selected_chat) {
+                contactButton.classList.add("selected");
+            }
+
+            contactButton.innerHTML = `
                 <div class="contact-picture-cont">
-                    <img src="https://picsum.photos/300/200" class="contact-picture" />
+                    <img src="https://picsum.photos/300/200" class="contact-picture">
                 </div>
+
                 <div class="contact-info">
-                    <p class="contact-heading">
-                        ${chat.chat_name}
-                    </p>
-
-                    <p class="contact-id">
-                        ${chat.chat_desc}
-                    </p>
+                    <p class="contact-heading">${chat.chat_name}</p>
+                    <p class="contact-id">${chat.chat_desc}</p>
                 </div>
             `;
 
-      container.appendChild(contactButton);
-    });
+            contactButton.addEventListener("click", async () => {
+                // Bereits ausgewählt -> nichts tun
+                if (selected_chat === chat.id) return;
 
-    const addContactButton = document.createElement("div");
+                selected_chat = chat.id;
 
-    addContactButton.className = "add-contact-button-cont";
-    addContactButton.type = "div";
+                displayed_messages = await get_chat_messages(
+                    chat.id,
+                    100,
+                    0
+                );
 
-    addContactButton.innerHTML = `
-                <button class="add-contact-button">+</button>
-            `;
+                updateChats();      // selected neu zeichnen
+                updateMessages();   // Nachrichten anzeigen
+            });
 
-    container.appendChild(addContactButton);
+            container.appendChild(contactButton);
+        }
 
-  } catch (error) {
-    console.error(`Fetch error: ${error}`);
-  }
+        // "+"-Button
+        const addContactContainer = document.createElement("div");
+        addContactContainer.className = "add-contact-button-cont";
+
+        addContactContainer.innerHTML = `
+            <button class="add-contact-button">+</button>
+        `;
+
+        container.appendChild(addContactContainer);
+
+    } catch (error) {
+        console.error("Fetch error:", error);
+    }
 }
 
 async function updateMessages() {
