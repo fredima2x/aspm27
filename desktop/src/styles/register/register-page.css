@@ -5,6 +5,7 @@
   box-shadow: 0px 0px 15px rgb(15, 15, 15);
   width: min(100%, 360px);
   box-sizing: border-box;
+  margin-top: 40px;
 }
 
 .heading {
