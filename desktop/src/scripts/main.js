@@ -1,8 +1,7 @@
 ////Libs
-
-
+import { baseURL } from "./config.js";
 //// Configuration
-const baseURL = "http://127.0.0.1:3000";
+
 const messageInput = document.querySelector(".message-text-bar");
 const sendMessageButton = document.querySelector(".send-button");
 const deleteMessageButton = document.querySelector(".delete-button")
@@ -11,7 +10,16 @@ const storageKey = "messages";
 
 //// Runtime Globals
 let displayed_messages = null;
+
 let auth_token = null;
+console.log("Trying to load Auth Token...");
+if (localStorage.getItem("auth_token") !== null) {
+  auth_token = localStorage.getItem("auth_token");
+  console.log("Token loaded:", auth_token);
+} else {
+  console.error("No auth token available!");
+  window.location.href = "/login.html";
+}
 
 // Depreciated
 // let messages = JSON.parse(localStorage.getItem(storageKey) || "[]");

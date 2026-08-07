@@ -1,33 +1,36 @@
-let token = null;
-const baseURL = "http://127.0.0.1:3000";
+import { login } from "./login_function.js";
 
-export async function login(username, password) {
+const passwordInput = document.querySelector('.password-input');
+const usernameInput = document.querySelector(".username-input");
 
-  try {
-    const headersObj = token ? header(token) : { "Content-Type": "application/json" };
-    const response = await fetch(`${baseURL}/login`, {
-      method: "POST",
-      headers: headersObj,
-      body: JSON.stringify({ username, password })
-    });
+document.querySelector(".sign-in-button").addEventListener("click", sign_in);
 
-    const contentType = response.headers.get("content-type") || "";
-    let data;
-    if (contentType.includes("application/json")) {
-      data = await response.json();
-    } else {
-      data = await response.text();
-    }
+async function sign_in() {
+  console.log("Sign In was Attempted");
 
-    if (!response.ok) {
-      console.error("Login failed:", data);
-      return null;
-    }
-    
-    return data;
 
-  } catch(error) {
-    console.error(`Fetch error: ${error}`);
-    return null;
+  if (passwordInput.value.length < 8) {
+    alert('Password must be at least 8 characters long');
+    return;
   }
+  if (passwordInput.value.length > 64) {
+    alert("Password can't be longer than 64 charaters");
+    return;
+  }
+
+  console.log("Logging in!", usernameInput.value, passwordInput.value);
+  const login_data = await login(usernameInput.value, passwordInput.value);
+
+  if (!login_data) {
+    console.log("Invalid Loggin Data");
+    return;
+  }
+
+  localStorage.setItem("auth_token", login_data.token_string);
+
+
+
+  document.startViewTransition(() => {
+    window.location.href = "/chat.html";
+  });
 }
