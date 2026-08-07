@@ -59,7 +59,15 @@
 }
 
 .your-profile-heading {
-color: rgb(46, 46, 46);
+    color: rgb(46, 46, 46);
+}
+
+.settings-button {
+    background-color: transparent;
+}
+
+.settings-picture {
+    width: 50px;
 }
 
 .contact-number,
