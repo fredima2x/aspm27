@@ -55,7 +55,7 @@ pub async fn chat_get_messages(
 ) -> Result<Vec<DirectMessage>, sqlx::Error> {
     let pool = get_pool().await;
     sqlx::query_as::<_, DirectMessage>(
-        "SELECT * FROM messages WHERE chat_id = ? AND soft_delete = FALSE ORDER BY created_at DESC LIMIT ? OFFSET ?",
+        "SELECT * FROM messages WHERE chat_id = ? AND soft_delete = FALSE ORDER BY created_at ASC LIMIT ? OFFSET ?",
     )
     .bind(chat_id)
     .bind(limit)

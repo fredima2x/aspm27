@@ -10,6 +10,12 @@ const yourProfileDisplayName = document.querySelector(".your-profile-heading")
 const yourProfileName = document.querySelector(".your-profile-number");
 const yourProfileID = document.querySelector(".your-profile-name");
 
+const openedContact = document.querySelector(".opened-contact");
+const openedContactDisplayName = document.querySelector(".opened-contact-heading");
+const openedContactName = document.querySelector(".opened-contact-number");
+const openedContactID = document.querySelector(".opened-contact-name");
+
+
 const chatArea = document.querySelector(".chat-area");
 const storageKey = "messages";
 
@@ -18,6 +24,7 @@ const storageKey = "messages";
 //// Runtime Globals
 let displayed_messages = null;
 let selected_chat = null;
+let profile = null;
 
 let auth_token = null;
 console.log("Trying to load Auth Token...");
@@ -44,6 +51,23 @@ function header() {
     "Authorization": `Bearer ${auth_token}`,
     "Content-Type": "application/json",
   };
+}
+
+async function send_message(chat_id, content) {
+  try {
+    const response = await fetch(`${baseURL}/chats/${chat_id}/messages`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+      headers: header(),
+    });
+    if (!response.ok) {
+      console.error(await response.text());
+      return null;
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Fetch error:", error);
+  }
 }
 
 async function get_profile() {
@@ -143,7 +167,7 @@ async function updateChats() {
 
             contactButton.innerHTML = `
                 <div class="contact-picture-cont">
-                    <img src="https://picsum.photos/300/200" class="contact-picture">
+                    <!--img src="https://picsum.photos/300/200" class="contact-picture">-->
                 </div>
 
                 <div class="contact-info">
@@ -154,22 +178,28 @@ async function updateChats() {
 
             contactButton.addEventListener("click", async () => {
                 // Bereits ausgewählt -> nichts tun
-                if (selected_chat === chat.id) return;
+              if (selected_chat === chat.id) return;
 
-                selected_chat = chat.id;
+              selected_chat = chat.id;
 
-                displayed_messages = await get_chat_messages(
-                    chat.id,
-                    100,
-                    0
-                );
+              openedContactDisplayName.textContent = chat.chat_name;
+              openedContactName.textContent = chat.chat_desc;
+              openedContactID.textContent = `#${chat.id}`;
 
-                updateChats();      // selected neu zeichnen
-                updateMessages();   // Nachrichten anzeigen
+              await updateChats();
+              await updateMessages();
             });
 
             container.appendChild(contactButton);
         }
+
+
+        if (selected_chat === null) {
+          openedContact.style.display = "none";
+        } else {
+          openedContact.style.display = "block";
+        }
+
 
         // "+"-Button
         const addContactContainer = document.createElement("div");
@@ -186,22 +216,52 @@ async function updateChats() {
     }
 }
 
+async function load_messages() {
+  if (selected_chat === null) {return}
+  displayed_messages = await get_chat_messages(
+    selected_chat,
+    100,
+    0
+  );
+}
+
 async function updateMessages() {
+  await load_messages();
+
   chatArea.innerHTML = "";
 
   if (!displayed_messages) {return}
 
-  displayed_messages.forEach((entry) => {
+
+
+  displayed_messages.forEach(async (entry) => {
+
+    function get_display_name(owner) {
+      if (owner.id === profile.user.id) {
+        return "You";
+      }
+      return owner.display_name;
+    }
+
+    function get_class(owner) {
+      if (owner.id === profile.user.id) {
+        return "message-me";
+      }
+      return "message-them";
+    }
+
+    const owner = await getUser(entry.owner_id);
+    if (!owner) { return }
     const messageWrapper = document.createElement("div");
-    messageWrapper.className = "message-me";
+    messageWrapper.className = get_class(owner);
     messageWrapper.innerHTML = `
-      <p class="sender">You</p>
+      <p class="sender">${get_display_name(owner)}</p>
       <div class="message-cont">
         <p class="message"></p>
       </div>
     `;
 
-    messageWrapper.querySelector(".message").textContent = entry.message;
+    messageWrapper.querySelector(".message").textContent = entry.content;
     chatArea.appendChild(messageWrapper);
   });
 
@@ -209,7 +269,7 @@ async function updateMessages() {
 }
 
 async function update_profile() {
-  const profile = await get_profile();
+  profile = await get_profile();
   console.log("profile:", profile);
   if (!profile) {return}
 
@@ -221,7 +281,10 @@ async function update_profile() {
 
 // Handler
 async function handler_sendButton() {
-  // TODO API-Call
+  const content = messageInput.value;
+  if (!content) { return }
+  messageInput.value = "";
+  await send_message(selected_chat, content);
   await update_ui();
 }
 async function handler_deleteButton() {
@@ -241,6 +304,11 @@ async function update_ui() {
 async function setup() {
 
   sendMessageButton.addEventListener("click", handler_sendButton);
+  messageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      handler_sendButton();
+    }
+  });
   deleteMessageButton.addEventListener("click", handler_deleteButton);
 
   // Initial load, so the UI isn't empty for the first 5 seconds
