@@ -8,3 +8,6 @@ target/
 .DS_Store
 venv/
 gen/
+
+# fredima2x
+desktopv2/

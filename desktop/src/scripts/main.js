@@ -223,6 +223,7 @@ async function load_messages() {
     100,
     0
   );
+  console.log("Loaded messages", displayed_messages);
 }
 
 async function updateMessages() {
@@ -230,28 +231,38 @@ async function updateMessages() {
 
   chatArea.innerHTML = "";
 
-  if (!displayed_messages) {return}
+  if (displayed_messages === null) {
+    console.debug("Displayed Messages null return");
+    return;
+  }
 
+  // Alle benötigten User einmalig und parallel laden
+  const uniqueOwnerIds = [...new Set(displayed_messages.map(m => m.owner_id))];
+  const userEntries = await Promise.all(
+    uniqueOwnerIds.map(async (id) => [id, await getUser(id)])
+  );
+  const users = Object.fromEntries(userEntries); // { ownerId: userObj }
 
-
-  displayed_messages.forEach(async (entry) => {
+  displayed_messages.forEach((entry) => {
+    console.debug("Printing Message", entry);
 
     function get_display_name(owner) {
-      if (owner.id === profile.user.id) {
-        return "You";
-      }
+      if (owner.id === profile.user.id) return "You";
       return owner.display_name;
     }
 
     function get_class(owner) {
-      if (owner.id === profile.user.id) {
-        return "message-me";
-      }
+      if (owner.id === profile.user.id) return "message-me";
       return "message-them";
     }
 
-    const owner = await getUser(entry.owner_id);
-    if (!owner) { return }
+    const owner = users[entry.owner_id];
+
+    if (owner === null || owner === undefined) {
+      console.error("Owner is null/undefined, skipping message", entry);
+      return;
+    }
+
     const messageWrapper = document.createElement("div");
     messageWrapper.className = get_class(owner);
     messageWrapper.innerHTML = `
@@ -315,7 +326,7 @@ async function setup() {
   await update_ui().catch(console.error);
 
   // Setting Updates
-  setInterval(() => { update_ui().catch(console.error); }, 5000);
+  setInterval(() => { update_ui().catch(console.error); }, 60000);
 }
 
 setup();
