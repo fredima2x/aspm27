@@ -30,3 +30,8 @@ async function get_chats() {
 
 token = (await login("fredima2x", "12341234")).token_string;
 console.log(chats)
+
+
+() => {
+
+}

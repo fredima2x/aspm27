@@ -1,11 +1,11 @@
-import { login } from "./login_function.js";
+import { login } from "./loginFunction.js";
 
 const passwordInput = document.querySelector('.password-input');
 const usernameInput = document.querySelector(".username-input");
 
-document.querySelector(".sign-in-button").addEventListener("click", sign_in);
+document.querySelector(".js-sign-in-button").addEventListener("click", signIn);
 
-async function sign_in() {
+async function signIn() {
   console.log("Sign In was Attempted");
 
 
@@ -22,7 +22,7 @@ async function sign_in() {
   const login_data = await login(usernameInput.value, passwordInput.value);
 
   if (!login_data) {
-    console.log("Invalid Loggin Data");
+    console.log("Invalid Login Data");
     return;
   }
 

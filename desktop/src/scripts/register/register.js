@@ -1,6 +1,6 @@
-import { register } from "./register_function.js";
-import { login } from "./login_function.js";
-import { applyValidationMessage, getValidationErrors } from './validation.js';
+import { register } from "../registerFunction.js";
+import { login } from "../login/loginFunction.js";
+import { applyValidationMessage, getValidationErrors } from '../validation.js';
 
 const passwordInput = document.querySelector('.password-input');
 const usernameInput = document.querySelector(".username-input");

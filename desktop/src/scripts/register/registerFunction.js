@@ -1,4 +1,4 @@
-import { baseURL } from "./config.js";
+import { baseURL } from "../config.js";
 
 export async function register(username, password) {
   try {
