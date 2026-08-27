@@ -1,4 +1,4 @@
-import { register } from "../registerFunction.js";
+import { register } from "./registerFunction.js";
 import { login } from "../login/loginFunction.js";
 import { applyValidationMessage, getValidationErrors } from '../validation.js';
 

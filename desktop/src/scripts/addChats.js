@@ -18,7 +18,7 @@ async function createNewChat(chatName) {
   const HTML = `
     <div class="contact">
       <div class="contact-picture-cont">
-        <!--img src="assets/James_E._Webb,_official_NASA_photo,_1966.jpg" class="your-profile-picture">-->
+        
       </div>
       <div class="contact-info">
         <p class="your-profile-heading">${chat.chatName}</p>
