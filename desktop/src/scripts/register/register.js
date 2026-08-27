@@ -1,11 +1,11 @@
-import { register } from "./register_function.js";
-import { login } from "./login_function.js";
-import { applyValidationMessage, getValidationErrors } from './validation.js';
+import { register } from "../registerFunction.js";
+import { login } from "../login/loginFunction.js";
+import { applyValidationMessage, getValidationErrors } from '../validation.js';
 
 const passwordInput = document.querySelector('.password-input');
 const usernameInput = document.querySelector(".username-input");
 
-async function sign_up() {
+async function signUp() {
 
   const password = passwordInput.value;
   const username = usernameInput.value;
@@ -42,4 +42,4 @@ async function sign_up() {
   });
 }
 
-document.querySelector(".sign-up-button").addEventListener("click", sign_up)
+document.querySelector(".sign-up-button").addEventListener("click", signUp);
