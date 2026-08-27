@@ -46,7 +46,7 @@ if (localStorage.getItem("auth_token") !== null) {
 //// API Communcation Functions
 // API Header Helper
 
-function header() {
+export function header() {
   return {
     "Authorization": `Bearer ${auth_token}`,
     "Content-Type": "application/json",
