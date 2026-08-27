@@ -5,7 +5,7 @@ import { applyValidationMessage, getValidationErrors } from './validation.js';
 const passwordInput = document.querySelector('.password-input');
 const usernameInput = document.querySelector(".username-input");
 
-async function sign_up() {
+async function signUp() {
 
   const password = passwordInput.value;
   const username = usernameInput.value;
@@ -42,4 +42,4 @@ async function sign_up() {
   });
 }
 
-document.querySelector(".sign-up-button").addEventListener("click", sign_up)
+document.querySelector(".sign-up-button").addEventListener("click", signUp);
