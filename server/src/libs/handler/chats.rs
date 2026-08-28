@@ -1,5 +1,5 @@
 use crate::libs::{
-    db, error,
+    check, db, error,
     models::{
         api::requests::{CreateChatRequest, UpdateChatRequest},
         db_objects::{BasicChat, BasicUser},
@@ -28,12 +28,9 @@ pub async fn create_chat(
 ) -> Result<Json<BasicChat>, StatusCode> {
     tracing::info!("Got create_chats Request.");
     // Checks
-    if body.chat_name.len() > 24 {
-        tracing::debug!("Returned BAD_REQUEST because chat_name was longer than 24 chars.");
-        return Err(StatusCode::BAD_REQUEST);
-    }
-    if body.chat_name.len() < 3 {
-        tracing::debug!("Returned BAD_REQUEST because chat_name was shorter than 3 chars.");
+    let chat_name_valid = check::check_chat_name(&body.chat_name).await;
+    if !chat_name_valid {
+        tracing::info!("Returned BAD_REQUEST because chat_name is invalid.");
         return Err(StatusCode::BAD_REQUEST);
     }
 
@@ -43,7 +40,7 @@ pub async fn create_chat(
     db::chats::chat_add_user(chat_id, user.id)
         .await
         .map_err(error::db_err)?;
-    tracing::debug!("Succesfully Created Chat");
+    tracing::info!("Succesfully Created Chat");
     Ok(Json(
         db::chats::chat_get(chat_id)
             .await
@@ -52,6 +49,7 @@ pub async fn create_chat(
     ))
 }
 
+#[instrument]
 pub async fn get_chat(Path(id): Path<i64>) -> Result<Json<BasicChat>, StatusCode> {
     tracing::info!("Got get_chat Request.");
     Ok(Json(
@@ -59,6 +57,7 @@ pub async fn get_chat(Path(id): Path<i64>) -> Result<Json<BasicChat>, StatusCode
     ))
 }
 
+#[instrument]
 pub async fn delete_chat(
     Path(id): Path<i64>,
     user: AuthenticatedUser,
@@ -77,6 +76,7 @@ pub async fn delete_chat(
     }
 }
 
+#[instrument]
 pub async fn get_chat_members(
     user: AuthenticatedUser,
     Path(id): Path<i64>,
@@ -95,9 +95,12 @@ pub async fn get_chat_members(
                 .collect(),
         ))
     } else {
+        tracing::info!("Returned FORBIDDEN because User isn't in chat.");
         Err(StatusCode::FORBIDDEN)
     }
 }
+
+#[tracing::instrument]
 pub async fn add_chat_member(
     user: AuthenticatedUser,
     Path((chat_id, user_id)): Path<(i64, i64)>,
@@ -115,6 +118,8 @@ pub async fn add_chat_member(
         Err(StatusCode::FORBIDDEN)
     }
 }
+
+#[tracing::instrument]
 pub async fn is_user_in_chat(
     user: AuthenticatedUser,
     Path((chat_id, user_id)): Path<(i64, i64)>,
@@ -130,9 +135,12 @@ pub async fn is_user_in_chat(
                 .map_err(error::db_err)?,
         ))
     } else {
+        tracing::info!("Returned FORBIDDEN because User isn't in chat.");
         Err(StatusCode::FORBIDDEN)
     }
 }
+
+#[tracing::instrument]
 pub async fn remove_chat_member(
     user: AuthenticatedUser,
     Path((chat_id, user_id)): Path<(i64, i64)>,
@@ -151,13 +159,16 @@ pub async fn remove_chat_member(
                 .map_err(error::db_err)?;
             Ok(StatusCode::OK)
         } else {
+            tracing::info!("Returned NOT_FOUND because User {} isn't in chat.", user_id);
             Err(StatusCode::NOT_FOUND)
         }
     } else {
+        tracing::info!("Returned FORBIDDEN because User {} isn't in chat.", user_id);
         Err(StatusCode::FORBIDDEN)
     }
 }
 
+#[tracing::instrument]
 pub async fn update_chat(
     user: AuthenticatedUser,
     Path(id): Path<i64>,
@@ -165,13 +176,12 @@ pub async fn update_chat(
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Got update_chat Request.");
     // Checks
-    if body.chat_name.len() > 24 {
-        return Err(StatusCode::BAD_REQUEST);
-    }
-    if body.chat_name.len() < 3 {
-        return Err(StatusCode::BAD_REQUEST);
-    }
-    if body.chat_desc.len() > 255 {
+    let (chat_name_valid, chat_desc_valid) = tokio::join!(
+        check::check_chat_name(&body.chat_name),
+        check::check_chat_desc(&body.chat_desc),
+    );
+    if !chat_name_valid || !chat_desc_valid {
+        tracing::info!("Returned BAD_REQUEST because chat_name or chat_desc is invalid.");
         return Err(StatusCode::BAD_REQUEST);
     }
 
@@ -188,6 +198,7 @@ pub async fn update_chat(
         .map_err(error::db_err)?;
         Ok(StatusCode::OK)
     } else {
+        tracing::info!("Returned FORBIDDEN because User {} isn't in chat.", user.id);
         Err(StatusCode::FORBIDDEN)
     }
 }

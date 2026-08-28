@@ -48,10 +48,7 @@ async fn main() {
             "/messages/{message_id}",
             get(handler::message::get_message).delete(handler::message::delete_message),
         )
-        .route(
-            "/users",
-            get(handler::users::get_users).post(handler::users::create_user),
-        )
+        .route("/users", post(handler::users::create_user))
         .route(
             "/users/{id}",
             get(handler::users::get_user).delete(handler::users::delete_user),
