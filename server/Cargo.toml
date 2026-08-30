@@ -9,6 +9,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.150"
 tokio = { version = "1.52.3", features = ["full"] }
 sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio", "macros"] }
+libsqlite3-sys = { version = "0.30", features = ["bundled"] }
 argon2 = "0.5"
 rand_core = { version = "0.6", features = ["std"] }
 jsonwebtoken = "9"

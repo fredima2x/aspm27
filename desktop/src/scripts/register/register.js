@@ -5,7 +5,12 @@ import { applyValidationMessage, getValidationErrors } from '../validation.js';
 const passwordInput = document.querySelector('.password-input');
 const usernameInput = document.querySelector(".username-input");
 
+document.querySelector(".sign-up-button").addEventListener("click", signUp);
+
+
 async function signUp() {
+
+  console.log("Sign Up was attempted")
 
   const password = passwordInput.value;
   const username = usernameInput.value;
@@ -41,5 +46,3 @@ async function signUp() {
     window.location.href = "chat.html";
   });
 }
-
-document.querySelector(".sign-up-button").addEventListener("click", signUp);
