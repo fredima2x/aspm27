@@ -74,10 +74,6 @@ jobs:
             artifact_name: server.exe
             asset_name: server-windows-x86_64.exe
           - os: macos-latest
-            target: x86_64-apple-darwin
-            artifact_name: server
-            asset_name: server-macos-x86_64
-          - os: macos-latest
             target: aarch64-apple-darwin
             artifact_name: server
             asset_name: server-macos-arm64
