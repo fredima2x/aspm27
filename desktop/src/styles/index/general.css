@@ -1,3 +1,7 @@
+:root {
+    --base-green: rgb(0, 219, 124);
+}
+
 html,
 body {
     height: 100vh;
