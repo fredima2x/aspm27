@@ -60,8 +60,12 @@ async function sign_up_handler() {
   const username = usernameInput.value;
   const password = passwordInput.value;
 
+  console.log("Registering...");
   let res = await register(username, password);
-  if (!res.ok) { return }
+  if (!res.ok) {
+    console.log("Returned because of invalid data", res)
+    return;
+  }
   res = await login(username, password);
   save_token(res.auth_token);
 
