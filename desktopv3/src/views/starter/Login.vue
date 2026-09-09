@@ -1,6 +1,23 @@
 <script setup>
+import { login } from '../../api/requests/login';
+import { save_token } from '../../stores/token';
+import { ref } from 'vue';
+
 import { useRouter } from 'vue-router';
 const router = useRouter();
+
+const usernameInput = ref('');
+const passwordInput = ref('');
+
+async function handle_login() {
+  const res = await login(
+    usernameInput.value,
+    passwordInput.value,
+  );
+  console.log("Saved Auth_token", res);
+  save_token(res.auth_token);
+}
+
 </script>
 
 <template>
@@ -9,9 +26,9 @@ const router = useRouter();
             <h2 class="heading">Welcome Back!</h2>
             <p class="sign-in-text">Sign in:</p>
 
-            <input type="text" placeholder="Username or id" class="username-input">
-            <input type="text" placeholder="Password" class="password-input">
-            <button class="sign-in-button js-sign-in-button">Sign in</button>
+            <input type="text" placeholder="Username or id" class="username-input" v-model="usernameInput">
+            <input type="text" placeholder="Password" class="password-input" v-model="passwordInput">
+            <button class="sign-in-button" @click="handle_login">Sign in</button>
 
             <p class="sign-up-text">
                 Dont have an account yet?

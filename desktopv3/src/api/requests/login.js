@@ -1,7 +1,7 @@
 import { apiFetch } from "../client"
 
-export function login(username, password) {
-  return apiFetch('/auth/login', {
+export async function login(username, password) {
+  return apiFetch('/login', {
     method: 'POST',
     body: JSON.stringify({ username, password })
   })
