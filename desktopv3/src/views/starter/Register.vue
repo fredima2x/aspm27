@@ -157,4 +157,3 @@ async function sign_up_handler() {
   cursor: pointer;
 }
 </style>
-```
