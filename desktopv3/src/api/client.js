@@ -1,13 +1,11 @@
-// api/client.js
-const BASE_URL = 'http://localhost:3000' // deine Axum-Server-Adresse
+import { BASE_SERVER_URL } from "../config/config"
+import { get_token } from "../stores/token"
+
 
 export async function apiFetch(endpoint, options = {}) {
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
+  const res = await fetch(`${BASE_SERVER_URL}${endpoint}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers
-    }
+    headers: get_header()
   })
 
   if (!res.ok) {
@@ -16,4 +14,18 @@ export async function apiFetch(endpoint, options = {}) {
   }
 
   return res.json()
+}
+
+function get_header() {
+  const token = get_token();
+  if (!token) {
+    return {
+      'Content-Type': 'application/json',
+    }
+  } else {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    }
+  }
 }
