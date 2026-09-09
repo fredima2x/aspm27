@@ -35,10 +35,10 @@ function startDragging() {
 header {
     background-color: black;
     display: flex;
-    align-items: center;
-    padding: 10px;
+    align-items:  bottom;
+    padding: 5px;
     margin: 0;
-    height: 15px;
+    height: 20px;
 }
 
 .app-controls {
@@ -69,6 +69,11 @@ body,
     padding: 0;
     width: 100%;
     height: 100%;
+
+    background-color: black;
+    display: flex;
+    gap: 10px;
+    box-sizing: border-box;
 }
 
 #app {

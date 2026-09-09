@@ -1,3 +1,8 @@
+:root {
+    --base-green: rgb(0, 219, 124);
+}
+
+
 .chat-window {
     background-color: rgb(15, 15, 15);
     flex: 1;
