@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "desktopv3",
-  "version": "0.1.0",
-  "identifier": "de.fredima.desktopv3",
+  "productName": "aspm27",
+  "version": "0.3.0",
+  "identifier": "de.fredima.aspm27",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,10 +12,10 @@
   "app": {
     "windows": [
       {
-        "title": "desktopv3",
+        "title": "aspm27",
         "decorations": false,
-        "width": 800,
-        "height": 600
+        "width": 600,
+        "height": 700
       }
     ],
     "security": {
