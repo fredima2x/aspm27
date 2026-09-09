@@ -12,7 +12,7 @@
 }
 
 .opened-contact {
-    background-color: rgb(0, 219, 124);
+    background-color: var(--base-green);
     border-radius: 10px;
     padding: 10px;
     display: inline-flex;
@@ -89,7 +89,7 @@
 }
 
 .message-me .message-cont {
-    background-color: rgb(0, 219, 124);
+    background-color: var(--base-green);
 }
 
 .message {
@@ -112,7 +112,7 @@
 .delete-button {
     margin-left: 10px;
     padding: 10px;
-    background-color: rgb(0, 219, 124);
+    background-color: var(--base-green);
 }
 
 .delete-button {

@@ -47,12 +47,12 @@
 }
 
 .contact.selected {
-    background-color: rgb(0, 219, 124);
+    background-color: var(--base-green);
     color: rgb(46, 46, 46);
 }
 
 .your-profile {
-    background-color: rgb(0, 219, 124);
+    background-color: var(--base-green);
     color: rgb(46, 46, 46);
     align-items: center;
     gap: 10px;
