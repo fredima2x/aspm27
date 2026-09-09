@@ -62,10 +62,6 @@ async function sign_up_handler() {
 
   console.log("Registering...");
   let res = await register(username, password);
-  if (!res.ok) {
-    console.log("Returned because of invalid data", res)
-    return;
-  }
   res = await login(username, password);
   save_token(res.auth_token);
 
@@ -90,7 +86,7 @@ async function sign_up_handler() {
                 <p v-if="passwordWarning" class="password-warn-text">{{ passwordWarning }}</p>
             </Transition>
 
-            <button class="sign-up-button">Sign up</button>
+            <button class="sign-up-button" @click="sign_up_handler">Sign up</button>
 
             <p class="sign-in-text">Already have an account?
                 <a @click="router.push('/login')" class="sign-in-link">Sign in</a>
