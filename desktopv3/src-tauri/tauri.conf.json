@@ -13,6 +13,7 @@
     "windows": [
       {
         "title": "desktopv3",
+        "decorations": false,
         "width": 800,
         "height": 600
       }

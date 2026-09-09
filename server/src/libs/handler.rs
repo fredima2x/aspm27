@@ -1,3 +1,4 @@
+pub mod avatars;
 pub mod chats;
 pub mod hi;
 pub mod message;

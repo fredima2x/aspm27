@@ -21,6 +21,9 @@ pub async fn setup() {
             display_name  VARCHAR(32) NOT NULL,
             password_hash TINYTEXT NOT NULL,
 
+            avatar_key    TEXT,
+            avatar_v      INT NOT NULL DEFAULT 0,
+
             soft_delete   BOOLEAN NOT NULL DEFAULT FALSE,
             deleted_at    TIMESTAMP NULL DEFAULT NULL,
             created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
