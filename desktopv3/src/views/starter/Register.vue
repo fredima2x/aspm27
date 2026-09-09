@@ -1,11 +1,17 @@
-```vue
 <script setup>
+import { login, login } from '../../api/requests/login';
+import { register } from '../../api/requests/register';
+import { save_token } from '../../stores/token';
+
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 const router = useRouter();
 
 const usernameWarning = ref('');
 const passwordWarning = ref('');
+
+const usernameInput = ref('');
+const passwordInput = ref('');
 
 function check_password(password) {
   if (password.length < 8) { return -1 }
@@ -50,6 +56,18 @@ function password_update(event) {
   }
 }
 
+async function sign_up_handler() {
+  const username = usernameInput.value;
+  const password = passwordInput.value;
+
+  let res = await register(username, password);
+  if (!res.ok) { return }
+  res = await login(username, password);
+  save_token(res.auth_token);
+
+  router.push("/chat");
+}
+
 </script>
 
 <template>
@@ -58,14 +76,12 @@ function password_update(event) {
             <h2 class="heading">Hello there!</h2>
             <p class="sign-up-text">Sign up:</p>
 
-            <input type="text" placeholder="Username" class="username-input" @input="username_update">
-
+            <input type="text" placeholder="Username" class="username-input" @input="username_update" v-model="usernameInput">
             <Transition name="warning">
                 <p v-if="usernameWarning" class="password-warn-text">{{ usernameWarning }}</p>
             </Transition>
 
-            <input type="password" placeholder="Password" class="password-input" @input="password_update">
-
+            <input type="password" placeholder="Password" class="password-input" @input="password_update" v-model="passwordInput">
             <Transition name="warning">
                 <p v-if="passwordWarning" class="password-warn-text">{{ passwordWarning }}</p>
             </Transition>
