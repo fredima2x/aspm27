@@ -1,21 +1,11 @@
+```vue
 <script setup>
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 const router = useRouter();
 
-const showUsernameShort = ref(false);
-const showPasswordShort = ref(false);
-const showUsernameLong = ref(false);
-const showPasswordLong = ref(false);
-
-function reset_password_warn_messages() {
-  showPasswordLong.value = false;
-  showPasswordShort.value = false;
-}
-function reset_username_warn_messages() {
-  showUsernameLong.value = false;
-  showUsernameShort.value = false;
-}
+const usernameWarning = ref('');
+const passwordWarning = ref('');
 
 function check_password(password) {
   if (password.length < 8) { return -1 }
@@ -25,25 +15,39 @@ function check_password(password) {
 function check_username(username) {
   if (username.length < 3) { return -1 }
   if (username.length > 24) { return 1 }
-  return 0;
+  return 0
 }
 
 function username_update(event) {
   const username = event.target.value;
-  if (!username) { reset_username_warn_messages(); return }
+  if (!username) { usernameWarning.value = ''; return }
   const username_status = check_username(username);
-  reset_username_warn_messages();
-  if (username_status === -1) { showUsernameShort.value = true }
-  if (username_status === 1) { showUsernameLong.value = true }
+
+  if (username_status === -1) {
+    usernameWarning.value = 'Username is too short!';
+  }
+  if (username_status === 1) {
+    usernameWarning.value = 'Username is too long!';
+  }
+  if (username_status === 0) {
+    usernameWarning.value = '';
+  }
 }
 
 function password_update(event) {
   const password = event.target.value;
-  if (!password) { reset_password_warn_messages(); return }
+  if (!password) { passwordWarning.value = ''; return }
   const password_status = check_password(password);
-  reset_password_warn_messages();
-  if (password_status === -1) { showPasswordShort.value = true }
-  if (password_status === 1) { showPasswordLong.value = true }
+
+  if (password_status === -1) {
+    passwordWarning.value = 'Password is too short!';
+  }
+  if (password_status === 1) {
+    passwordWarning.value = 'Password is too long!';
+  }
+  if (password_status === 0) {
+    passwordWarning.value = '';
+  }
 }
 
 </script>
@@ -57,19 +61,13 @@ function password_update(event) {
             <input type="text" placeholder="Username" class="username-input" @input="username_update">
 
             <Transition name="warning">
-                <p v-if="showUsernameShort" class="password-warn-text">Username is too short!</p>
-            </Transition>
-            <Transition name="warning">
-                <p v-if="showUsernameLong" class="password-warn-text">Username is too long!</p>
+                <p v-if="usernameWarning" class="password-warn-text">{{ usernameWarning }}</p>
             </Transition>
 
-            <input type="text" placeholder="Password" class="password-input" @input="password_update">
+            <input type="password" placeholder="Password" class="password-input" @input="password_update">
 
             <Transition name="warning">
-                <p v-if="showPasswordShort" class="password-warn-text">Password is too short!</p>
-            </Transition>
-            <Transition name="warning">
-                <p v-if="showPasswordLong" class="password-warn-text">Password is too long!</p>
+                <p v-if="passwordWarning" class="password-warn-text">{{ passwordWarning }}</p>
             </Transition>
 
             <button class="sign-up-button">Sign up</button>
@@ -110,6 +108,23 @@ function password_update(event) {
   color: red;
 }
 
+.warning-enter-active,
+.warning-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.warning-enter-from,
+.warning-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+.warning-enter-to,
+.warning-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .sign-up-button:hover {
   opacity: 0.8;
 }
@@ -126,3 +141,4 @@ function password_update(event) {
   cursor: pointer;
 }
 </style>
+```
