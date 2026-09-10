@@ -1,5 +1,5 @@
 <script setup>
-import { getCurrentWindow } from '@tauri-apps/api/window';
+const isTauri = !!window.__TAURI_INTERNALS__;
 
 import { ref } from 'vue';
 import fullscreenIcon from "../assets/fullscreen-icon.svg";
@@ -14,10 +14,12 @@ if (isTauri) {
 const reactiveIsTauri = ref(isTauri);
 
 function toggleFullscreen() {
+    if (!isTauri) {return}
     currentWindow.setFullscreen(!currentWindow.isFullscreen());
 }
 
 function quit() {
+    if (!isTauri) {return}
     currentWindow.close();
 }
 
