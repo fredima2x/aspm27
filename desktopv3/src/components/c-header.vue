@@ -1,17 +1,19 @@
-<script>
+<script setup>
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
-import fullscreenIcon from '/src/assets/fullscreen-icon.svg';
-import quitIcon from '/src/assets/quit-icon.svg';
+import fullscreenIcon from '../assets/fullscreen-icon.svg';
+import quitIcon from '../assets/quit-icon.svg';
 
 const currentWindow = getCurrentWindow();
 
 function toggleFullscreen() {
     currentWindow.setFullscreen(!currentWindow.isFullscreen());
 }
+
 function quit() {
     currentWindow.close();
 }
+
 function startDragging() {
     currentWindow.startDragging();
 }
@@ -28,21 +30,25 @@ function startDragging() {
 
 <style scoped>
 header {
-    background-color: black;
-    display: flex;
-    align-items:  bottom;
+    background-color: var(--theme-gray);
+    display: fixed;
     padding: 5px;
     margin: 0;
+    right: 0;
+    left: 0;
+    top: 0;
     height: 20px;
+    border-bottom: solid 2px var(--theme-primary);
 }
 
 .app-controls {
-    margin-left: auto;
+   display: flex;
+   align-items: center;
+   justify-content: flex-start;
 }
 
 header .icon {
     width: 16px;
-    height: 16px;
     filter: brightness(0) invert(1);
 }
 
