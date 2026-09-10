@@ -1,6 +1,6 @@
 <script setup>
-import { sidebar } from '../../components/sidebar.vue';
-import { contentPanel } from '../../components/contentPanel.vue'
+import sidebar from '../../components/sidebar.vue';
+import contentPanel from '../../components/contentPanel.vue';
 </script>
 
 <template>
@@ -11,8 +11,6 @@ import { contentPanel } from '../../components/contentPanel.vue'
 </template>
 
 <style scoped>
-@import '/src/assets/styles/general.css';
-
 * {
   box-sizing: border-box;
 }

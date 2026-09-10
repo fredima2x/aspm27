@@ -17,6 +17,8 @@
 </template>
 
 <style scoped>
+@import '/src/assets/styles/general.css';
+
 .content-panel {
 	display: flex;
 	flex: 2;

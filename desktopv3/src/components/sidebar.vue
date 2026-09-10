@@ -16,6 +16,8 @@
 </template>
 
 <style scoped>
+@import '/src/assets/styles/general.css';
+
 .sidebar {
 	display: flex;
 	flex-direction: column;
