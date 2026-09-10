@@ -1,13 +1,13 @@
 <script setup>
-import sidebar from '../../components/sidebar.vue';
-import contentPanel from '../../components/contentPanel.vue';
+import sidebar from "../../components/sidebar.vue";
+import contentPanel from "../../components/contentPanel.vue";
 </script>
 
 <template>
-	<div class="app-background">
-		<sidebar/>
-		<contentPanel/>
-	</div>
+  <div class="app-background">
+    <sidebar />
+    <contentPanel />
+  </div>
 </template>
 
 <style scoped>
@@ -16,10 +16,10 @@ import contentPanel from '../../components/contentPanel.vue';
 }
 
 .app-background {
-	display: flex;
-	width: 100vw;
-	height: 100%;
-	margin: 0;
-	padding: 0;
+  display: flex;
+  width: 100vw;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 </style>
