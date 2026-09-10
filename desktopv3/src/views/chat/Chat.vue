@@ -1,17 +1,16 @@
-```html
 <template>
     <div class="app-background">
         <div class="sidebar">
-            <div class="profile-panel">
+            <div class="profile-panel widget">
 
             </div>
-            <div class="chat-panel">
+            <div class="chat-panel widget">
                 <input type="search" placeholder="Search Chats...">
                 <div class="chat-list"></div>
             </div>
         </div>
         <div class="content-panel">
-            <div class="message-panel">
+            <div class="message-panel widget">
                 <div class="message-list"></div>
                 <div class="message-input">
                     <input type="text" placeholder="Enter Message...">
@@ -25,80 +24,83 @@
 <style scoped>
 @import '/src/assets/styles/general.css';
 
+* {
+    box-sizing: border-box;
+}
+
 .app-background {
+    display: flex;
+    width: 100vw;
+    height: 100%;
     margin: 0;
     padding: 0;
-    display: flex;
-    gap: 0;
-    height: 100%;
-    width: 100vw;
-    flex-direction: row;
 }
 
 .sidebar {
     display: flex;
     flex-direction: column;
     flex: 1;
+    min-width: 0;
     height: 100%;
-}
-
-.chat-panel, .message-panel, .profile-panel {
-    display: flex;
-    flex-direction: column;
-    background-color: rgb(30,30,30);
-    height: calc(100% - 40px);
-    border-radius: 10px;
-    margin: 10px;
-    padding: 10px;
-}
-.chat-panel {
-    flex: 2;
-    margin-right: 0;
 }
 
 .content-panel {
-    flex: 2;
     display: flex;
-    flex-direction: column;
-    width: 100%;
+    flex: 2;
+    min-width: 0;
     height: 100%;
 }
 
-.message-list, .chat-list {
-    height: 100%;
+/* Common widget styling */
+.widget {
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+    padding: 10px;
+    background-color: rgb(30, 30, 30);
+    border-radius: 10px;
+}
+
+/* Sidebar */
+.profile-panel {
+    flex: 0 0 100px;
+    margin-right: 0;
+    margin-bottom: 0;
+}
+
+.chat-panel {
+    flex: 1;
+    margin-right: 0;
+}
+
+/* Messages */
+.message-panel {
+    flex: 1;
+}
+
+.message-list,
+.chat-list {
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
     background-color: var(--theme-gray);
     border: 4px solid var(--theme-primary);
     border-radius: 10px;
 }
 
-.message-list {
-    flex: 1;
-}
-.chat-list {
-    flex: 2;
-}
-
 .message-input {
     display: flex;
-    flex-direction: row;
     gap: 10px;
     padding-top: 10px;
 }
 
 .message-input input {
-    margin: 0;
     flex: 1;
+    margin: 0;
 }
 
 .send-button {
-    margin: 0;
     width: 80px;
-}
-
-.profile-panel {
-    flex: 1;
-    margin-right: 0;
-    margin-bottom: 0;
+    margin: 0;
 }
 </style>
