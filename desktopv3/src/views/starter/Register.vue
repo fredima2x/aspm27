@@ -66,7 +66,6 @@ async function sign_up_handler() {
   const data = await register(username, password);
   if (data.ok) {
     const res = await data.json();
-    res = await login(username, password);
     save_token(res.auth_token);
     router.push("/chat");
   } else {
