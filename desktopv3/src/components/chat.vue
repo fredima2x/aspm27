@@ -20,7 +20,7 @@ defineProps({
     border-radius: 5px;
     background-color: var(--theme-light-gray);
 }
-.chat.selected {
+.chat .selected {
     background-color: var(--theme-primary);
 }
 .chat-name, .chat-desc {
