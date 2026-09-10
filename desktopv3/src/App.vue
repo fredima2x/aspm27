@@ -1,5 +1,5 @@
 <script setup>
-import cHeader from './components/c-header.vue';
+import CHeader from './components/c-header.vue';
 </script>
 
 <template>
