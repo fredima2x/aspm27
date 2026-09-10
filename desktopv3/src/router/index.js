@@ -5,6 +5,7 @@ const routes = [
   { path: '/login', name: 'Login', component: () => import('/src/views/starter/Login.vue') },
   { path: '/register', name: 'Register', component: () => import('/src/views/starter/Register.vue') },
   { path: '/chat', name: 'App', component: () => import('/src/views/chat/Chat.vue') },
+  { path: '/settings', name: 'Settings', component: () => import('/src/views/settings/Settings.vue') },
 ]
 
 const router = createRouter({
