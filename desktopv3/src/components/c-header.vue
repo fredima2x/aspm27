@@ -1,26 +1,37 @@
 <script setup>
-import { getCurrentWindow } from '@tauri-apps/api/window';
+const isTauri = !!window.__TAURI_INTERNALS__;
 
+import { ref } from 'vue';
 import fullscreenIcon from '../assets/fullscreen-icon.svg';
 import quitIcon from '../assets/quit-icon.svg';
 
-const currentWindow = getCurrentWindow();
+let currentWindow;
+if (isTauri) {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    currentWindow = getCurrentWindow();
+}
+
+const reactiveIsTauri = ref(isTauri);
 
 function toggleFullscreen() {
+    if (!isTauri) {return}
     currentWindow.setFullscreen(!currentWindow.isFullscreen());
 }
 
 function quit() {
+    if (!isTauri) {return}
     currentWindow.close();
 }
 
 function startDragging() {
+    if (!isTauri) {return}
     currentWindow.startDragging();
 }
+
 </script>
 
 <template>
-    <header @mousedown="startDragging">
+    <header @mousedown="startDragging" v-if="reactiveIsTauri">
         <div class="app-controls">
             <button @click="toggleFullscreen" @mousedown.stop class="app-control-fullscreen"><img :src="fullscreenIcon" class="icon" alt="Fullscreen"></button>
             <button @click="quit" @mousedown.stop class="app-control-quit"><img :src="quitIcon" class="icon" alt="Quit"></button>
