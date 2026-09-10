@@ -29,7 +29,7 @@ async function handle_login() {
             <p class="sign-in-text">Sign in:</p>
 
             <input type="text" placeholder="Username or id" class="username-input" v-model="usernameInput">
-            <input type="text" placeholder="Password" class="password-input" v-model="passwordInput">
+            <input type="password" placeholder="Password" class="password-input" v-model="passwordInput">
             <button class="sign-in-button" @click="handle_login">Sign in</button>
 
             <p class="sign-up-text">
@@ -41,7 +41,7 @@ async function handle_login() {
 </template>
 
 <style scoped>
-@import '/src/assets/styles/starters/general.css';
+@import '/src/assets/styles/general.css';
 @import '/src/assets/styles/utils/animations.css';
 
 .login-page {

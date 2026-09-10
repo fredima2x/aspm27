@@ -96,7 +96,7 @@ async function sign_up_handler() {
 </template>
 
 <style scoped>
-@import '/src/assets/styles/starters/general.css';
+@import '/src/assets/styles/general.css';
 @import '/src/assets/styles/utils/animations.css';
 
 

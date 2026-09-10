@@ -1,90 +1,90 @@
 <template>
     <div class="background">
-        <div class="contacts-window">
-            <div class="your-profile">
-                <div class="contact-picture-cont">
-                     <img src="https://picsum.photos/300/300" class="opened-contact-picture">
-                </div>
-                <div class="contact-info">
-                    <p class="your-profile-heading"></p>
-                    <p class="your-profile-number"></p>
-                    <p class="your-profile-name"></p>
-                </div>
-            </div>
-            <div class="top-contact-bar">
-                <input type="search" class="contact-search-bar" placeholder="Search Chats...">
-            </div>
-            <div class="contacts">
-                <p class="no-chats-placeholder">No chats found</p>
-                <div class="add-contact-button-cont">
-                    <button class="add-contact-button">+</button>
-                </div>
+        <div class="left-sidebar">
+            <div class="chat-window">
+                <input type="search" placeholder="Search Chats...">
+                <div class="chat-container"></div>
             </div>
         </div>
-    </div>
-    <div class="chat-window">
-        <div class="opened-contact">
-            <div class="opened-contact-picture-cont">
-                <img src="https://picsum.photos/300/300" class="opened-contact-picture">
+        <div class="main-window">
+            <div class="message-window">
+                <div class="message-container"></div>
+                <div class="message-input-bar">
+                    <input type="text" placeholder="Enter Message...">
+                    <button class="send-button">Send</button>
+                </div>
             </div>
-            <div class="contact-info">
-                <p class="opened-contact-heading"></p>
-                <p class="opened-contact-number"></p>
-                <p class="opened-contact-name"></p>
-            </div>
-        </div>
-
-        <div class="chat-area"></div>
-        <div class="message-bar">
-            <input type="text" class="message-text-bar" placeholder="Message">
-            <button class="send-button">Send</button>
-            <button class="delete-button"> - </button>
         </div>
     </div>
 </template>
 
 <style scoped>
-@import '/src/assets/styles/chat_window/chat-window.css';
-@import '/src/assets/styles/chat_window/contacts-window.css';
+@import '/src/assets/styles/general.css';
+:root {
+    --theme: rgb(0, 219, 124);
+}
 
-body {
-    background-color: black;
-    padding: 10px;
+.background {
+    margin: 0;
+    padding: 0;
     display: flex;
-    gap: 10px;
-    box-sizing: border-box;
+    gap: 0;
+    height: 100%;
+    width: 100vw;
+    flex-direction: row;
 }
-
-p {
-    font-family: Arial;
-}
-
-button {
-    transition: opacity 0.1s;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-}
-
-button:hover {
-    opacity: 0.8;
-}
-
-button:active {
-    opacity: 0.6;
-}
-
-input {
-    border-radius: 20px;
-    border: none;
-    flex: 1;
+.left-sidebar, .main-window {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(30,30,30);
+    height: calc(100% - 40px);
+    border-radius: 10px;
+    margin: 10px;
     padding: 10px;
-    background-color: rgb(27, 27, 27);
-    color: rgb(200, 200, 200);
-    font-size: 14px;
+}
+.left-sidebar {
+    flex: 1;
+    margin-right: 0;
+}
+.main-window {
+    flex: 2;
 }
 
-input:focus {
-    outline: none;
+.chat-window, .message-window {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.message-container, .chat-container {
+    height: 100%;
+    overflow-y: auto;
+    background-color: black;
+    border: 4px solid rgb(0, 219, 124);
+    border-radius: 10px;
+}
+.message-container {
+    flex: 1;
+}
+.chat-container {
+    flex: 2;
+}
+
+.message-input-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    padding-top: 10px;
+}
+
+.message-input-bar input {
+    margin: 0;
+    flex: 1;
+}
+
+.send-button {
+    margin: 0;
+    width: 80px;
 }
 </style>
