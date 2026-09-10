@@ -8,12 +8,8 @@ export async function apiFetch(endpoint, options = {}) {
     headers: get_header()
   })
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: 'Unbekannter Fehler' }))
-    throw new Error(error.message || `HTTP ${res.status}`)
-  }
 
-  return res.json()
+  return res
 }
 
 function get_header() {

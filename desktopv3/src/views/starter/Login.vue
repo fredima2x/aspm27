@@ -8,13 +8,33 @@ const router = useRouter();
 
 const usernameInput = ref("");
 const passwordInput = ref("");
+const warning = ref('');
 
 async function handle_login() {
-  const res = await login(usernameInput.value, passwordInput.value);
-  console.log("Saved Auth_token", res);
-  save_token(res.token_string);
+  const data = await login(usernameInput.value, passwordInput.value);
+  if (data.ok) {
+    const res = await data.json()
+    console.log("Saved Auth_token", res);
+    save_token(res.token_string);
+    router.push("/chat");
+  } else {
+    if (data.status === 400) {
+      warning.value = 'Invalid Username or Password!';
+    } else if (data.status === 404) {
+      warning.value = 'User does not exist!';
+    } else if (data.status === 401) {
+      warning.value = 'Wrong Password!';
+    } else if (data.status === 500) {
+      warning.value = 'Internal Server Error, Please try again later.';
+    } else {
+      warning.value = 'An unknown Error occured. View console for more Information!'
+      console.error("Invalid Server Response", data);
+    }
+  }
+}
 
-  router.push("/chat");
+function handleInput() {
+  warning.value = '';
 }
 </script>
 
@@ -30,6 +50,7 @@ async function handle_login() {
         class="username-input"
         v-model="usernameInput"
         @keydown.enter="handle_login"
+        @input="handleInput"
       />
       <input
         type="password"
@@ -37,7 +58,12 @@ async function handle_login() {
         class="password-input"
         v-model="passwordInput"
         @keydown.enter="handle_login"
+        @input="handleInput"
       />
+      <Transition name="warning">
+        <p v-show="warning" class="password-warn-text">{{ warning }}</p>
+      </Transition>
+
       <button class="sign-in-button" @click="handle_login">Sign in</button>
 
       <p class="sign-up-text">
@@ -82,5 +108,26 @@ async function handle_login() {
 
 .sign-up-link {
   cursor: pointer;
+}
+
+.warning-enter-active,
+.warning-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.warning-enter-from,
+.warning-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+.warning-enter-to,
+.warning-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.password-warn-text {
+  color: var(--theme-red);
 }
 </style>

@@ -9,6 +9,7 @@ const router = useRouter();
 
 const usernameWarning = ref('');
 const passwordWarning = ref('');
+const warning = ref('');
 
 const usernameInput = ref('');
 const passwordInput = ref('');
@@ -25,6 +26,7 @@ function check_username(username) {
 }
 
 function username_update(event) {
+  warning.value = '';
   const username = event.target.value;
   if (!username) { usernameWarning.value = ''; return }
   const username_status = check_username(username);
@@ -41,6 +43,7 @@ function username_update(event) {
 }
 
 function password_update(event) {
+  warning.value = '';
   const password = event.target.value;
   if (!password) { passwordWarning.value = ''; return }
   const password_status = check_password(password);
@@ -60,12 +63,24 @@ async function sign_up_handler() {
   const username = usernameInput.value;
   const password = passwordInput.value;
 
-  console.log("Registering...");
-  let res = await register(username, password);
-  res = await login(username, password);
-  save_token(res.auth_token);
-
-  router.push("/chat");
+  const data = await register(username, password);
+  if (data.ok) {
+    const res = await data.json();
+    res = await login(username, password);
+    save_token(res.auth_token);
+    router.push("/chat");
+  } else {
+    if (data.status === 400) {
+      warning.value = 'Invalid Username or Password!';
+    } else if (data.status === 409) {
+      warning.value = 'User already Exists!';
+    } else if (data.status === 500) {
+      warning.value = 'Internal Server Error, Please try again later.';
+    } else {
+      warning.value = 'An unknown Error occured. View console for more Information!'
+      console.error("Invalid Server Response", data);
+    }
+  }
 }
 
 </script>
@@ -84,6 +99,9 @@ async function sign_up_handler() {
             <input type="password" placeholder="Password" class="password-input" @input="password_update" @keydown.enter="sign_up_handler" v-model="passwordInput">
             <Transition name="warning">
                 <p v-show="passwordWarning" class="password-warn-text">{{ passwordWarning }}</p>
+            </Transition>
+            <Transition name="warning">
+                <p v-show="warning" class="password-warn-text">{{ warning }}</p>
             </Transition>
 
             <button class="sign-up-button" @click="sign_up_handler">Sign up</button>
