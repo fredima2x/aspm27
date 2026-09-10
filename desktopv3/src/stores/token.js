@@ -11,7 +11,9 @@ export function save_token(token) {
 
 export function get_token() {
   try {
-    return localStorage.getItem(TOKEN_STORAGE_KEY);
+    const auth_token = localStorage.getItem(TOKEN_STORAGE_KEY);
+    console.debug("Getting auth_token from LS", auth_token);
+    return auth_token;
   } catch {
     return false;
   }

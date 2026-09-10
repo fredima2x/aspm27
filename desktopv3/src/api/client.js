@@ -19,10 +19,12 @@ export async function apiFetch(endpoint, options = {}) {
 function get_header() {
   const token = get_token();
   if (!token) {
+    console.warn("Header was Created with no Token!");
     return {
       'Content-Type': 'application/json',
     }
   } else {
+    console.debug("Header was Created with a Token!", token);
     return {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,

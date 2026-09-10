@@ -78,12 +78,12 @@ async function sign_up_handler() {
 
             <input type="text" placeholder="Username" class="username-input" @input="username_update" @keydown.enter="sign_up_handler" v-model="usernameInput">
             <Transition name="warning">
-                <p v-if="usernameWarning" class="password-warn-text">{{ usernameWarning }}</p>
+                <p v-show="usernameWarning" class="password-warn-text">{{ usernameWarning }}</p>
             </Transition>
 
             <input type="password" placeholder="Password" class="password-input" @input="password_update" @keydown.enter="sign_up_handler" v-model="passwordInput">
             <Transition name="warning">
-                <p v-if="passwordWarning" class="password-warn-text">{{ passwordWarning }}</p>
+                <p v-show="passwordWarning" class="password-warn-text">{{ passwordWarning }}</p>
             </Transition>
 
             <button class="sign-up-button" @click="sign_up_handler">Sign up</button>

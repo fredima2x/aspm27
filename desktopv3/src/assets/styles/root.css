@@ -6,6 +6,8 @@
     --theme-light-gray: rgb(70, 70, 70);
     --theme-white: rgb(255, 255, 255);
     --theme-black: rgb(0, 0, 0);
+    --theme-red: rgb(255, 0, 0);
+
     /* Misc */
     --theme-round-edges: 10px;
 }

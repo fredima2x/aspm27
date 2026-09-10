@@ -15,7 +15,7 @@ async function handle_login() {
     passwordInput.value,
   );
   console.log("Saved Auth_token", res);
-  save_token(res.auth_token);
+  save_token(res.token_string);
 
   router.push("/chat")
 }
