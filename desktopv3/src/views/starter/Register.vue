@@ -71,17 +71,17 @@ async function sign_up_handler() {
 </script>
 
 <template>
-    <div class="background">
+    <div class="app-background">
         <div class="register-page">
             <h2 class="heading">Hello there!</h2>
             <p class="sign-up-text">Sign up:</p>
 
-            <input type="text" placeholder="Username" class="username-input" @input="username_update" v-model="usernameInput">
+            <input type="text" placeholder="Username" class="username-input" @input="username_update" @keydown.enter="sign_up_handler" v-model="usernameInput">
             <Transition name="warning">
                 <p v-if="usernameWarning" class="password-warn-text">{{ usernameWarning }}</p>
             </Transition>
 
-            <input type="password" placeholder="Password" class="password-input" @input="password_update" v-model="passwordInput">
+            <input type="password" placeholder="Password" class="password-input" @input="password_update" @keydown.enter="sign_up_handler" v-model="passwordInput">
             <Transition name="warning">
                 <p v-if="passwordWarning" class="password-warn-text">{{ passwordWarning }}</p>
             </Transition>
@@ -112,7 +112,7 @@ async function sign_up_handler() {
 }
 
 .heading {
-  color: white;
+  color: var(--theme-white);
   margin-top: 8px;
 }
 
@@ -121,7 +121,7 @@ async function sign_up_handler() {
 }
 
 .password-warn-text {
-  color: red;
+  color: var(--theme-red);
 }
 
 .warning-enter-active,
@@ -150,7 +150,7 @@ async function sign_up_handler() {
 }
 
 .sign-in-text {
-  color: rgb(90, 90, 90);
+  color: var(--theme-light-gray);
 }
 
 .sign-in-link {

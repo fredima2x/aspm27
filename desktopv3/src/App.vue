@@ -62,6 +62,8 @@ header button {
 
 
 <style>
+@import '/src/assets/styles/root.css';
+
 html,
 body,
 #app {

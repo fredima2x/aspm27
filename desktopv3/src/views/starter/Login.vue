@@ -23,13 +23,13 @@ async function handle_login() {
 </script>
 
 <template>
-    <div class="background">
+    <div class="app-background">
         <div class="login-page">
             <h2 class="heading">Welcome Back!</h2>
             <p class="sign-in-text">Sign in:</p>
 
-            <input type="text" placeholder="Username or id" class="username-input" v-model="usernameInput">
-            <input type="password" placeholder="Password" class="password-input" v-model="passwordInput">
+            <input type="text" placeholder="Username or id" class="username-input" v-model="usernameInput" @keydown.enter="handle_login">
+            <input type="password" placeholder="Password" class="password-input" v-model="passwordInput" @keydown.enter="handle_login">
             <button class="sign-in-button" @click="handle_login">Sign in</button>
 
             <p class="sign-up-text">
@@ -45,10 +45,10 @@ async function handle_login() {
 @import '/src/assets/styles/utils/animations.css';
 
 .login-page {
-  background-color: rgb(15, 15, 15);
-  border-radius: 10px;
+  background-color: var(--theme-gray);
+  border-radius: var(--theme-round-edges);
   padding: 20px;
-  box-shadow: 0px 0px 15px rgb(15, 15, 15);
+  box-shadow: 0px 0px 15px var(--theme-gray);
   width: min(100%, 360px);
   box-sizing: border-box;
   margin: 0;
@@ -56,7 +56,7 @@ async function handle_login() {
 }
 
 .heading {
-  color: white;
+  color: var(--theme-white);
   margin-top: 8px;
 }
 
