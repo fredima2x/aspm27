@@ -22,19 +22,20 @@ onMounted(() => {
   loadingStatus.value = false;
 });
 
-function check_password(password) {
+async function check_password(password) {
   if (password.length < 8) { return -1 }
   if (password.length > 64) { return 1 }
   return 0
 }
-function check_username(username) {
+
+async function check_username(username) {
   if (username.length < 3) { return -1 }
   if (username.length > 24) { return 1 }
-  const data = get_user(username);
+  const data = await get_user(username);
   if (data.ok) {
     return 2;
   } else {
-    if (data.status = 404) {
+    if (data.status == 404) {
       return 0;
     } else {
       return 2;
@@ -42,11 +43,12 @@ function check_username(username) {
   }
 }
 
-function username_update(event) {
+async function username_update(event) {
   warning.value = '';
   const username = event.target.value;
   if (!username) { usernameWarning.value = ''; return }
-  const username_status = check_username(username);
+  const username_status = await check_username(username);
+  console.debug(username_status);
 
   if (username_status === -1) {
     usernameWarning.value = 'Username is too short!';
@@ -59,11 +61,11 @@ function username_update(event) {
   }
 }
 
-function password_update(event) {
+async function password_update(event) {
   warning.value = '';
   const password = event.target.value;
   if (!password) { passwordWarning.value = ''; return }
-  const password_status = check_password(password);
+  const password_status = await check_password(password);
 
   if (password_status === -1) {
     passwordWarning.value = 'Password is too short!';
@@ -86,7 +88,7 @@ async function sign_up_handler() {
     warning.value = 'Username and Password cannot be empty!';
   }
 
-  if (check_password(password) != 0 || check_username(username) != 0) {
+  if (await check_password(password) != 0 || await check_username(username) != 0) {
     loadingStatus.value = false;
     return;
   }
@@ -224,3 +226,4 @@ async function sign_up_handler() {
   }
 }
 </style>
+

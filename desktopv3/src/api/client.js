@@ -3,13 +3,19 @@ import { get_token } from "../stores/token"
 
 
 export async function apiFetch(endpoint, options = {}) {
-  const res = await fetch(`${BASE_SERVER_URL}${endpoint}`, {
-    ...options,
-    headers: get_header()
-  })
+  let res;
 
+  try {
+    res = await fetch(`${BASE_SERVER_URL}${endpoint}`, {
+      ...options,
+      headers: get_header()
+    });
+  } catch (error) {
+    console.error("Network error:", error);
+    return null;
+  }
 
-  return res
+  return res;
 }
 
 function get_header() {
