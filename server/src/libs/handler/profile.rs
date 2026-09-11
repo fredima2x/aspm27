@@ -5,31 +5,34 @@ use crate::libs::{
             requests::{SimpleSendUserRequest, UpdateProfileRequest},
             responses::{GetProfileResponse, LoginResponse},
         },
+        app_state::AppState,
         db_objects::BasicUser,
         misc::AuthenticatedUser,
     },
 };
-use axum::Json;
 use axum::http::StatusCode;
+use axum::{Json, extract::State};
 
-#[tracing::instrument]
+#[axum::debug_handler]
 pub async fn login(
+    State(state): State<AppState>,
     Json(body): Json<SimpleSendUserRequest>,
 ) -> Result<Json<LoginResponse>, StatusCode> {
     tracing::info!("Got login request for username: {}", body.username);
 
-    let user = db::user::user_get_by_name(&body.username)
+    let user = db::user::user_get_by_name(&body.username, state.db.clone())
         .await
         .map_err(error::db_err)?;
 
     let result: bool = auth::verify_password(&body.password, &user.password_hash);
 
     if result {
-        let session_id = db::session::create_session(user.id)
+        let session_id = db::session::create_session(user.id, state.db.clone())
             .await
             .map_err(error::db_err)?;
 
-        let token_string = auth::create_token(user.id, session_id);
+        let token_string =
+            auth::create_token(user.id, session_id, &state.config.jwt_signing_secret);
         tracing::info!("Login successful for user: {}", body.username);
         Ok(Json(LoginResponse {
             token_string: token_string,
@@ -43,6 +46,7 @@ pub async fn login(
 #[tracing::instrument]
 pub async fn update_profile(
     user: AuthenticatedUser,
+    State(state): State<AppState>,
     Json(body): Json<UpdateProfileRequest>,
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Updating profile for user: {}", user.id);
@@ -66,6 +70,7 @@ pub async fn update_profile(
             display_name: body.user.display_name,
         },
         auth::hash_password(&body.user.password),
+        state.db.clone(),
     )
     .await
     .map_err(error::db_err)?;
@@ -74,10 +79,13 @@ pub async fn update_profile(
 }
 
 #[tracing::instrument]
-pub async fn get_profile(user: AuthenticatedUser) -> Result<Json<GetProfileResponse>, StatusCode> {
+pub async fn get_profile(
+    user: AuthenticatedUser,
+    State(state): State<AppState>,
+) -> Result<Json<GetProfileResponse>, StatusCode> {
     tracing::info!("Getting profile for user: {}", user.id);
     Ok(Json(GetProfileResponse {
-        user: db::user::user_get_by_id(user.id)
+        user: db::user::user_get_by_id(user.id, state.db.clone())
             .await
             .map_err(error::db_err)?
             .into(),

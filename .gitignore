@@ -9,6 +9,8 @@ target/
 venv/
 gen/
 
+config.json
+
 # fredima2x
 
 # Logs

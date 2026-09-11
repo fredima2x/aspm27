@@ -5,7 +5,7 @@ use argon2::{
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::libs::config::TOKEN_SECRET;
+use crate::libs::models::app_state::AppState;
 
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
@@ -30,7 +30,7 @@ pub fn verify_password(password: &str, password_hash: &str) -> bool {
         .is_ok()
 }
 
-pub fn create_token(user_id: i64, session_id: i64) -> String {
+pub fn create_token(user_id: i64, session_id: i64, secret: &str) -> String {
     let exp_time = chrono::Utc::now()
         .checked_add_signed(chrono::Duration::hours(24))
         .unwrap()
@@ -43,15 +43,18 @@ pub fn create_token(user_id: i64, session_id: i64) -> String {
     jsonwebtoken::encode(
         &Header::default(),
         &claims,
-        &EncodingKey::from_secret(TOKEN_SECRET.as_bytes()),
+        &EncodingKey::from_secret(secret.as_bytes()),
     )
     .unwrap()
 }
 
-pub fn verify_token(token_string: &str) -> Result<Claims, jsonwebtoken::errors::Error> {
+pub fn verify_token(
+    token_string: &str,
+    secret: &str,
+) -> Result<Claims, jsonwebtoken::errors::Error> {
     let token_data = jsonwebtoken::decode::<Claims>(
         token_string,
-        &DecodingKey::from_secret(TOKEN_SECRET.as_bytes()),
+        &DecodingKey::from_secret(secret.as_bytes()),
         &Validation::default(),
     )?;
     Ok(token_data.claims)

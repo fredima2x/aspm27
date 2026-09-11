@@ -1,8 +1,6 @@
-use crate::libs::db::utility::get_pool;
+use sqlx::SqlitePool;
 
-pub async fn setup() {
-    let pool = get_pool().await;
-
+pub async fn setup(pool: SqlitePool) {
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS sessions (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,

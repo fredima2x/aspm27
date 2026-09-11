@@ -6,7 +6,7 @@ use tower_http::cors::CorsLayer;
 use tracing_subscriber::EnvFilter;
 
 mod libs;
-use crate::libs::{config::SERVER_ADDRESS, handler};
+use crate::libs::{config::load_config, handler, models::app_state::AppState};
 
 #[tokio::main]
 async fn main() {
@@ -15,6 +15,20 @@ async fn main() {
             EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
         )
         .init();
+
+    tracing::info!("Loading Config...");
+    let config = load_config();
+    if config.jwt_signing_secret == "DEFAULT" || config.jwt_signing_secret == "" {
+        tracing::error!("Default or Invalid JWT-Secret! PLEASE CHANGE");
+        return;
+    }
+
+    tracing::info!("Connecting to Database...");
+    let db = sqlx::SqlitePool::connect(&config.database_url)
+        .await
+        .expect("Could not connect to database!");
+
+    let state = AppState { config, db };
 
     tracing::debug!("Creating APP Router...");
     let app = Router::new()
@@ -60,14 +74,18 @@ async fn main() {
         )
         .route("/login", post(handler::profile::login))
         // Erlaubt deinem Browser-Frontend Zugriffe
-        .layer(CorsLayer::permissive());
+        .layer(CorsLayer::permissive())
+        .with_state(state.clone());
 
-    tracing::info!("Binding to Server Address [{}]...", SERVER_ADDRESS);
-    let listener = tokio::net::TcpListener::bind(libs::config::SERVER_ADDRESS)
+    tracing::info!(
+        "Binding to Server Address [{}]...",
+        state.config.host_address
+    );
+    let listener = tokio::net::TcpListener::bind(state.config.host_address)
         .await
         .unwrap();
 
     tracing::info!("Server running...");
-    libs::db::setup::setup().await;
+    libs::db::setup::setup(state.db.clone()).await;
     axum::serve(listener, app).await.unwrap();
 }

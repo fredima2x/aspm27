@@ -1,0 +1,5 @@
+{
+  "jwt_signing_secret": "DEFAULT PLEASE CHANGE",
+  "host_address": "127.0.0.1:3000",
+  "database_url": "sqlite:data.db"
+}

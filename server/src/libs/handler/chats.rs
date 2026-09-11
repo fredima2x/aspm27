@@ -2,17 +2,25 @@ use crate::libs::{
     check, db, error,
     models::{
         api::requests::{CreateChatRequest, UpdateChatRequest},
+        app_state::AppState,
         db_objects::{BasicChat, BasicUser},
         misc::AuthenticatedUser,
     },
 };
-use axum::{Json, extract::Path, http::StatusCode};
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
 use tracing::instrument;
 
-pub async fn get_chats(user: AuthenticatedUser) -> Result<Json<Vec<BasicChat>>, StatusCode> {
+pub async fn get_chats(
+    user: AuthenticatedUser,
+    State(state): State<AppState>,
+) -> Result<Json<Vec<BasicChat>>, StatusCode> {
     tracing::info!("Got get_chats Request.");
     Ok(Json(
-        db::chats::user_get_chats(user.id)
+        db::chats::user_get_chats(user.id, state.db)
             .await
             .map_err(error::db_err)?
             .into_iter()
@@ -24,6 +32,7 @@ pub async fn get_chats(user: AuthenticatedUser) -> Result<Json<Vec<BasicChat>>, 
 #[instrument]
 pub async fn create_chat(
     user: AuthenticatedUser,
+    State(state): State<AppState>,
     Json(body): Json<CreateChatRequest>,
 ) -> Result<Json<BasicChat>, StatusCode> {
     tracing::info!("Got create_chats Request.");
@@ -34,15 +43,15 @@ pub async fn create_chat(
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    let chat_id: i64 = db::chats::chat_create(&body.chat_name)
+    let chat_id: i64 = db::chats::chat_create(&body.chat_name, state.db.clone())
         .await
         .map_err(error::db_err)?;
-    db::chats::chat_add_user(chat_id, user.id)
+    db::chats::chat_add_user(chat_id, user.id, state.db.clone())
         .await
         .map_err(error::db_err)?;
     tracing::info!("Succesfully Created Chat");
     Ok(Json(
-        db::chats::chat_get(chat_id)
+        db::chats::chat_get(chat_id, state.db.clone())
             .await
             .map_err(error::db_err)?
             .into(),
@@ -50,24 +59,31 @@ pub async fn create_chat(
 }
 
 #[instrument]
-pub async fn get_chat(Path(id): Path<i64>) -> Result<Json<BasicChat>, StatusCode> {
+pub async fn get_chat(
+    Path(id): Path<i64>,
+    State(state): State<AppState>,
+) -> Result<Json<BasicChat>, StatusCode> {
     tracing::info!("Got get_chat Request.");
     Ok(Json(
-        db::chats::chat_get(id).await.map_err(error::db_err)?.into(),
+        db::chats::chat_get(id, state.db)
+            .await
+            .map_err(error::db_err)?
+            .into(),
     ))
 }
 
 #[instrument]
 pub async fn delete_chat(
-    Path(id): Path<i64>,
     user: AuthenticatedUser,
+    Path(id): Path<i64>,
+    State(state): State<AppState>,
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Got delete_chats Request.");
-    if db::chats::is_user_in_chat(id, user.id)
+    if db::chats::is_user_in_chat(id, user.id, state.db.clone())
         .await
         .map_err(error::db_err)?
     {
-        db::chats::chat_soft_delete(id)
+        db::chats::chat_soft_delete(id, state.db.clone())
             .await
             .map_err(error::db_err)?;
         Ok(StatusCode::OK)
@@ -80,14 +96,15 @@ pub async fn delete_chat(
 pub async fn get_chat_members(
     user: AuthenticatedUser,
     Path(id): Path<i64>,
+    State(state): State<AppState>,
 ) -> Result<Json<Vec<BasicUser>>, StatusCode> {
     tracing::info!("Got get_chat_members Request.");
-    if db::chats::is_user_in_chat(id, user.id)
+    if db::chats::is_user_in_chat(id, user.id, state.db.clone())
         .await
         .map_err(error::db_err)?
     {
         Ok(Json(
-            db::chats::chat_get_members(id)
+            db::chats::chat_get_members(id, state.db.clone())
                 .await
                 .map_err(error::db_err)?
                 .into_iter()
@@ -104,13 +121,14 @@ pub async fn get_chat_members(
 pub async fn add_chat_member(
     user: AuthenticatedUser,
     Path((chat_id, user_id)): Path<(i64, i64)>,
+    State(state): State<AppState>,
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Got add_chat_member Request.");
-    if db::chats::is_user_in_chat(chat_id, user.id)
+    if db::chats::is_user_in_chat(chat_id, user.id, state.db.clone())
         .await
         .map_err(error::db_err)?
     {
-        db::chats::chat_add_user(chat_id, user_id)
+        db::chats::chat_add_user(chat_id, user_id, state.db.clone())
             .await
             .map_err(error::db_err)?;
         Ok(StatusCode::OK)
@@ -123,14 +141,15 @@ pub async fn add_chat_member(
 pub async fn is_user_in_chat(
     user: AuthenticatedUser,
     Path((chat_id, user_id)): Path<(i64, i64)>,
+    State(state): State<AppState>,
 ) -> Result<Json<bool>, StatusCode> {
     tracing::info!("Got is_user_in_chat Request");
-    if db::chats::is_user_in_chat(chat_id, user.id)
+    if db::chats::is_user_in_chat(chat_id, user.id, state.db.clone())
         .await
         .map_err(error::db_err)?
     {
         Ok(Json(
-            db::chats::is_user_in_chat(chat_id, user_id)
+            db::chats::is_user_in_chat(chat_id, user_id, state.db.clone())
                 .await
                 .map_err(error::db_err)?,
         ))
@@ -144,17 +163,18 @@ pub async fn is_user_in_chat(
 pub async fn remove_chat_member(
     user: AuthenticatedUser,
     Path((chat_id, user_id)): Path<(i64, i64)>,
+    State(state): State<AppState>,
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Got remove_chat_member Request.");
-    if db::chats::is_user_in_chat(chat_id, user.id)
+    if db::chats::is_user_in_chat(chat_id, user.id, state.db.clone())
         .await
         .map_err(error::db_err)?
     {
-        if db::chats::is_user_in_chat(chat_id, user_id)
+        if db::chats::is_user_in_chat(chat_id, user_id, state.db.clone())
             .await
             .map_err(error::db_err)?
         {
-            db::chats::chat_delete_user(chat_id, user_id)
+            db::chats::chat_delete_user(chat_id, user_id, state.db.clone())
                 .await
                 .map_err(error::db_err)?;
             Ok(StatusCode::OK)
@@ -172,6 +192,7 @@ pub async fn remove_chat_member(
 pub async fn update_chat(
     user: AuthenticatedUser,
     Path(id): Path<i64>,
+    State(state): State<AppState>,
     Json(body): Json<UpdateChatRequest>,
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Got update_chat Request.");
@@ -185,15 +206,18 @@ pub async fn update_chat(
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    if db::chats::is_user_in_chat(id, user.id)
+    if db::chats::is_user_in_chat(id, user.id, state.db.clone())
         .await
         .map_err(error::db_err)?
     {
-        db::chats::update_chat(BasicChat {
-            id,
-            chat_name: body.chat_name,
-            chat_desc: body.chat_desc,
-        })
+        db::chats::update_chat(
+            BasicChat {
+                id,
+                chat_name: body.chat_name,
+                chat_desc: body.chat_desc,
+            },
+            state.db.clone(),
+        )
         .await
         .map_err(error::db_err)?;
         Ok(StatusCode::OK)

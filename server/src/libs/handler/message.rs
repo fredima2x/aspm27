@@ -2,29 +2,36 @@ use crate::libs::{
     db, error,
     models::{
         api::requests::{GetChatMessagesRequest, SendMessageRequest},
+        app_state::AppState,
         db_objects::BasicMessage,
         misc::AuthenticatedUser,
     },
 };
-use axum::{Json, extract::Path, http::StatusCode};
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
 
 #[tracing::instrument]
 pub async fn save_message(
     user: AuthenticatedUser,
     Path(chat_id): Path<i64>,
+    State(state): State<AppState>,
     Json(body): Json<SendMessageRequest>,
 ) -> Result<Json<BasicMessage>, StatusCode> {
     tracing::info!("Got save_message Request.");
-    if db::chats::is_user_in_chat(chat_id, user.id)
+    if db::chats::is_user_in_chat(chat_id, user.id, state.db.clone())
         .await
         .map_err(error::db_err)?
     {
         tracing::info!("User {} is in chat {}.", user.id, chat_id);
         Ok(Json(
             db::message::get_message(
-                db::message::save_message(user.id, chat_id, &body.content)
+                db::message::save_message(user.id, chat_id, &body.content, state.db.clone())
                     .await
                     .map_err(error::db_err)?,
+                state.db.clone(),
             )
             .await
             .map_err(error::db_err)?
@@ -40,15 +47,16 @@ pub async fn save_message(
 pub async fn delete_message(
     user: AuthenticatedUser,
     Path(message_id): Path<i64>,
+    State(state): State<AppState>,
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Got delete_message Request.");
-    if db::message::get_message(message_id)
+    if db::message::get_message(message_id, state.db.clone())
         .await
         .map_err(error::db_err)?
         .owner_id
         == user.id
     {
-        db::message::message_soft_delete(message_id)
+        db::message::message_soft_delete(message_id, state.db.clone())
             .await
             .map_err(error::db_err)?;
         tracing::info!("Message {} deleted successfully.", message_id);
@@ -67,13 +75,14 @@ pub async fn delete_message(
 pub async fn get_message(
     user: AuthenticatedUser,
     Path(message_id): Path<i64>,
+    State(state): State<AppState>,
 ) -> Result<Json<BasicMessage>, StatusCode> {
     tracing::info!("Got get_message Request.");
-    let message = db::message::get_message(message_id)
+    let message = db::message::get_message(message_id, state.db.clone())
         .await
         .map_err(error::db_err)?;
     tracing::info!("Message {} retrieved successfully.", message_id);
-    if db::chats::is_user_in_chat(message.chat_id, user.id)
+    if db::chats::is_user_in_chat(message.chat_id, user.id, state.db.clone())
         .await
         .map_err(error::db_err)?
     {
@@ -93,13 +102,15 @@ pub async fn get_message(
 pub async fn get_chat_messages(
     user: AuthenticatedUser,
     Path(chat_id): Path<i64>,
+    State(state): State<AppState>,
     Json(body): Json<GetChatMessagesRequest>,
 ) -> Result<Json<Vec<BasicMessage>>, StatusCode> {
     tracing::info!("Got get_chat_messages Request.");
-    let messages = db::message::chat_get_messages(chat_id, body.limit, body.offset)
-        .await
-        .map_err(error::db_err)?;
-    if db::chats::is_user_in_chat(chat_id, user.id)
+    let messages =
+        db::message::chat_get_messages(chat_id, body.limit, body.offset, state.db.clone())
+            .await
+            .map_err(error::db_err)?;
+    if db::chats::is_user_in_chat(chat_id, user.id, state.db.clone())
         .await
         .map_err(error::db_err)?
     {
