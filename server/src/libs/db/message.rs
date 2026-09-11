@@ -3,8 +3,8 @@ use sqlx::SqlitePool;
 use uuid::Uuid;
 
 pub async fn save_message(
-    owner_id: &str,
-    chat_id: &str,
+    owner_id: Uuid,
+    chat_id: Uuid,
     content: &str,
     pool: SqlitePool,
 ) -> Result<Uuid, sqlx::Error> {
@@ -19,7 +19,7 @@ pub async fn save_message(
     Ok(user_id)
 }
 
-pub async fn get_message(message_id: &str, pool: SqlitePool) -> Result<DirectMessage, sqlx::Error> {
+pub async fn get_message(message_id: Uuid, pool: SqlitePool) -> Result<DirectMessage, sqlx::Error> {
     sqlx::query_as::<_, DirectMessage>(
         "SELECT * FROM messages WHERE id = ? AND soft_delete = FALSE",
     )
@@ -29,7 +29,7 @@ pub async fn get_message(message_id: &str, pool: SqlitePool) -> Result<DirectMes
 }
 
 #[allow(dead_code)]
-pub async fn delete_message(message_id: &str, pool: SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn delete_message(message_id: Uuid, pool: SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query("DELETE FROM messages WHERE id = ? AND soft_delete = FALSE")
         .bind(message_id)
         .execute(&pool)
@@ -40,7 +40,7 @@ pub async fn delete_message(message_id: &str, pool: SqlitePool) -> Result<(), sq
     Ok(())
 }
 
-pub async fn message_soft_delete(id: &str, pool: SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn message_soft_delete(id: Uuid, pool: SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query(
         "UPDATE messages SET soft_delete = TRUE, deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND soft_delete = FALSE",
     )
@@ -54,7 +54,7 @@ pub async fn message_soft_delete(id: &str, pool: SqlitePool) -> Result<(), sqlx:
 }
 
 pub async fn chat_get_messages(
-    chat_id: &str,
+    chat_id: Uuid,
     limit: i64,
     offset: i64,
     pool: SqlitePool,

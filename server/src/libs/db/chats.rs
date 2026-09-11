@@ -1,9 +1,10 @@
 use sqlx::SqlitePool;
+use uuid::Uuid;
 
 use crate::libs::models::db_objects::{BasicChat, DirectChat, DirectUser};
 
 pub async fn user_get_chats(
-    user_id: &str,
+    user_id: Uuid,
     pool: SqlitePool,
 ) -> Result<Vec<DirectChat>, sqlx::Error> {
     sqlx::query_as::<_, DirectChat>(
@@ -20,26 +21,28 @@ pub async fn user_get_chats(
     .await
 }
 
-pub async fn chat_create(chat_name: &str, pool: SqlitePool) -> Result<(), sqlx::Error> {
-    let result = sqlx::query("INSERT INTO chats (chat_name) VALUES (?)")
+pub async fn chat_create(chat_name: &str, pool: SqlitePool) -> Result<Uuid, sqlx::Error> {
+    let chat_id = Uuid::now_v7();
+    sqlx::query("INSERT INTO chats (id, chat_name) VALUES (?, ?)")
+        .bind(chat_id.to_string())
         .bind(chat_name)
         .execute(&pool)
         .await?;
-    Ok(())
+    Ok(chat_id)
 }
 
 ///
-pub async fn chat_get(chat_id: &str, pool: SqlitePool) -> Result<DirectChat, sqlx::Error> {
+pub async fn chat_get(chat_id: Uuid, pool: SqlitePool) -> Result<DirectChat, sqlx::Error> {
     sqlx::query_as::<_, DirectChat>("SELECT * FROM chats WHERE id = ? AND soft_delete = FALSE")
-        .bind(chat_id)
+        .bind(chat_id.to_string())
         .fetch_one(&pool)
         .await
 }
 
 #[allow(dead_code)]
-pub async fn chat_delete(chat_id: &str, pool: SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn chat_delete(chat_id: Uuid, pool: SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query("DELETE FROM chats WHERE id = ?")
-        .bind(chat_id)
+        .bind(chat_id.to_string())
         .execute(&pool)
         .await?;
     if result.rows_affected() == 0 {
@@ -48,9 +51,9 @@ pub async fn chat_delete(chat_id: &str, pool: SqlitePool) -> Result<(), sqlx::Er
     Ok(())
 }
 
-pub async fn chat_soft_delete(chat_id: &str, pool: SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn chat_soft_delete(chat_id: Uuid, pool: SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query("UPDATE chats SET soft_delete = TRUE, deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND soft_delete = FALSE")
-        .bind(chat_id)
+        .bind(chat_id.to_string())
         .execute(&pool)
         .await?;
     if result.rows_affected() == 0 {
@@ -61,33 +64,33 @@ pub async fn chat_soft_delete(chat_id: &str, pool: SqlitePool) -> Result<(), sql
 
 #[allow(dead_code)]
 pub async fn chat_add_user(
-    chat_id: &str,
-    user_id: &str,
+    chat_id: Uuid,
+    user_id: Uuid,
     pool: SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query("INSERT INTO chat_members (chat_id, user_id) VALUES (?, ?)")
-        .bind(chat_id)
-        .bind(user_id)
+        .bind(chat_id.to_string())
+        .bind(user_id.to_string())
         .execute(&pool)
         .await?;
     Ok(())
 }
 
 pub async fn chat_delete_user(
-    chat_id: &str,
-    user_id: &str,
+    chat_id: Uuid,
+    user_id: Uuid,
     pool: SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query("DELETE FROM chat_members WHERE chat_id = ? AND user_id = ?")
-        .bind(chat_id)
-        .bind(user_id)
+        .bind(chat_id.to_string())
+        .bind(user_id.to_string())
         .execute(&pool)
         .await?;
     Ok(())
 }
 
 pub async fn chat_get_members(
-    chat_id: &str,
+    chat_id: Uuid,
     pool: SqlitePool,
 ) -> Result<Vec<DirectUser>, sqlx::Error> {
     sqlx::query_as::<_, DirectUser>(
@@ -95,14 +98,14 @@ pub async fn chat_get_members(
          INNER JOIN chat_members ON users.id = chat_members.user_id
          WHERE chat_members.chat_id = ?",
     )
-    .bind(chat_id)
+    .bind(chat_id.to_string())
     .fetch_all(&pool)
     .await
 }
 
 pub async fn is_user_in_chat(
-    chat_id: &str,
-    user_id: &str,
+    chat_id: Uuid,
+    user_id: Uuid,
     pool: SqlitePool,
 ) -> Result<bool, sqlx::Error> {
     let user_chats = user_get_chats(user_id, pool).await;
@@ -118,7 +121,7 @@ pub async fn update_chat(chat: BasicChat, pool: SqlitePool) -> Result<(), sqlx::
     )
     .bind(chat.chat_name)
     .bind(chat.chat_desc)
-    .bind(chat.id)
+    .bind(chat.id.to_string())
     .execute(&pool)
     .await?;
     Ok(())

@@ -4,10 +4,11 @@ use argon2::{
 };
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
-    pub sub: String,
+    pub sub: Uuid,
     pub session_id: i64,
     pub exp: usize,
 }
@@ -28,13 +29,13 @@ pub fn verify_password(password: &str, password_hash: &str) -> bool {
         .is_ok()
 }
 
-pub fn create_token(user_id: &str, session_id: i64, secret: &str) -> String {
+pub fn create_token(user_id: Uuid, session_id: i64, secret: &str) -> String {
     let exp_time = chrono::Utc::now()
         .checked_add_signed(chrono::Duration::hours(24))
         .unwrap()
         .timestamp() as usize;
     let claims = Claims {
-        sub: user_id.to_string(),
+        sub: user_id,
         session_id: session_id,
         exp: exp_time,
     };

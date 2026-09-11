@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct DirectUser {
-    pub id: String,
+    pub id: Uuid,
     pub username: String,
     pub display_name: String,
     pub password_hash: String,
@@ -18,7 +19,7 @@ pub struct DirectUser {
 
 #[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct DirectChat {
-    pub id: String,
+    pub id: Uuid,
     pub chat_name: String,
     pub chat_desc: String,
     pub soft_delete: bool,
@@ -29,9 +30,9 @@ pub struct DirectChat {
 
 #[derive(Serialize, sqlx::FromRow)]
 pub struct DirectMessage {
-    pub id: String,
-    pub owner_id: String,
-    pub chat_id: String,
+    pub id: Uuid,
+    pub owner_id: Uuid,
+    pub chat_id: Uuid,
     pub content: String,
     pub soft_delete: bool,
     pub deleted_at: String,
@@ -41,29 +42,30 @@ pub struct DirectMessage {
 
 #[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct BasicUser {
-    pub id: String,
+    pub id: Uuid,
     pub username: String,
     pub display_name: String,
 }
 
 #[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct BasicChat {
-    pub id: String,
+    pub id: Uuid,
     pub chat_name: String,
     pub chat_desc: String,
 }
 
 #[derive(Serialize, sqlx::FromRow)]
 pub struct BasicMessage {
-    pub id: String,
-    pub owner_id: String,
-    pub chat_id: String,
+    pub id: Uuid,
+    pub owner_id: Uuid,
+    pub chat_id: Uuid,
     pub content: String,
 }
 
+#[allow(dead_code)]
 #[derive(sqlx::FromRow)]
 pub struct Session {
-    pub id: String,
+    pub id: Uuid,
     pub owner_id: String,
     pub last_update: String,
 }

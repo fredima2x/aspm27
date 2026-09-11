@@ -1,30 +1,24 @@
 use crate::libs::{
-    auth::hash_password,
-    models::db_objects::{BasicUser, DirectUser},
+    auth::hash_password, models::db_objects::{BasicUser, DirectUser},
 };
 use sqlx::SqlitePool;
-
-pub async fn user_getall(pool: SqlitePool) -> Result<Vec<DirectUser>, sqlx::Error> {
-    sqlx::query_as::<_, DirectUser>("SELECT * FROM users")
-        .fetch_all(&pool)
-        .await
-}
+use uuid::Uuid;
 
 pub async fn user_create(
     username: &str,
     password: &str,
     pool: SqlitePool,
-) -> Result<i64, sqlx::Error> {
-    let result =
-        sqlx::query("INSERT INTO users (id, username, display_name, password_hash) VALUES (?, ?, ?, ?)")
-            .bind(uuid::Uuid::now_v7().to_string())
-            .bind(username)
-            .bind(username)
-            .bind(hash_password(password))
-            .execute(&pool)
-            .await?;
+) -> Result<Uuid, sqlx::Error> {
+    let user_id: Uuid = Uuid::now_v7();
+    sqlx::query("INSERT INTO users (id, username, display_name, password_hash) VALUES (?, ?, ?, ?)")
+        .bind(user_id.to_string())
+        .bind(username)
+        .bind(username)
+        .bind(hash_password(password))
+        .execute(&pool)
+        .await?;
 
-    Ok(result.last_insert_rowid())
+    Ok(user_id)
 }
 
 pub async fn update_user(
@@ -43,7 +37,7 @@ pub async fn update_user(
 }
 
 #[allow(dead_code)]
-pub async fn user_delete(id: &str, pool: SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn user_delete(id: Uuid, pool: SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query("DELETE FROM users WHERE id = ?")
         .bind(id)
         .execute(&pool)
@@ -54,7 +48,7 @@ pub async fn user_delete(id: &str, pool: SqlitePool) -> Result<(), sqlx::Error> 
     Ok(())
 }
 
-pub async fn user_soft_delete(id: &str, pool: SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn user_soft_delete(id: Uuid, pool: SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query(
         "UPDATE users SET soft_delete = TRUE, deleted_at = CURRENT_TIMESTAMP WHERE id = ?",
     )
@@ -67,7 +61,7 @@ pub async fn user_soft_delete(id: &str, pool: SqlitePool) -> Result<(), sqlx::Er
     Ok(())
 }
 
-pub async fn user_get_by_id(id: &str, pool: SqlitePool) -> Result<DirectUser, sqlx::Error> {
+pub async fn user_get_by_id(id: Uuid, pool: SqlitePool) -> Result<DirectUser, sqlx::Error> {
     sqlx::query_as::<_, DirectUser>("SELECT * FROM users WHERE id = ?")
         .bind(id)
         .fetch_one(&pool)

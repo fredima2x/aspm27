@@ -11,6 +11,7 @@ use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;
 use axum::http::StatusCode;
+use uuid::Uuid;
 
 #[tracing::instrument]
 pub async fn create_user(
@@ -29,7 +30,7 @@ pub async fn create_user(
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    let id = db::user::user_create(&body.username, &body.password, state.db.clone())
+    let id: Uuid = db::user::user_create(&body.username, &body.password, state.db.clone())
         .await
         .map_err(error::db_err)?;
 
@@ -52,7 +53,7 @@ pub async fn delete_user(
 
 #[tracing::instrument]
 pub async fn get_user_by_id(
-    Path(id): Path<i64>,
+    Path(id): Path<Uuid>,
     State(state): State<AppState>,
 ) -> Result<Json<BasicUser>, StatusCode> {
     tracing::info!("Getting user by id");
