@@ -33,6 +33,7 @@ async fn main() {
     tracing::debug!("Creating APP Router...");
     let app = Router::new()
         .route("/", get(handler::hi::hi))
+        .route("/html", get(handler::hi::hiv2))
         .route(
             "/chats",
             get(handler::chats::get_chats).post(handler::chats::create_chat),
