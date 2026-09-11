@@ -13,12 +13,16 @@ impl FromRequestParts<AppState> for AuthenticatedUser {
             .headers
             .get("Authorization")
             .ok_or(StatusCode::UNAUTHORIZED)?;
+
         let auth_str = auth_header.to_str().map_err(|_| StatusCode::UNAUTHORIZED)?;
+
         let token = auth_str
             .strip_prefix("Bearer ")
             .ok_or(StatusCode::UNAUTHORIZED)?;
+
         let claims = auth::verify_token(token, &state.config.jwt_signing_secret)
             .map_err(|_| StatusCode::UNAUTHORIZED)?;
+        
         Ok(AuthenticatedUser {
             id: claims.sub,
             session_id: claims.session_id,

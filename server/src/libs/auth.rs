@@ -5,11 +5,9 @@ use argon2::{
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::libs::models::app_state::AppState;
-
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
-    pub sub: i64,
+    pub sub: String,
     pub session_id: i64,
     pub exp: usize,
 }
@@ -30,13 +28,13 @@ pub fn verify_password(password: &str, password_hash: &str) -> bool {
         .is_ok()
 }
 
-pub fn create_token(user_id: i64, session_id: i64, secret: &str) -> String {
+pub fn create_token(user_id: &str, session_id: i64, secret: &str) -> String {
     let exp_time = chrono::Utc::now()
         .checked_add_signed(chrono::Duration::hours(24))
         .unwrap()
         .timestamp() as usize;
     let claims = Claims {
-        sub: user_id,
+        sub: user_id.to_string(),
         session_id: session_id,
         exp: exp_time,
     };

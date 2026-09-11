@@ -3,7 +3,7 @@ use sqlx::SqlitePool;
 use crate::libs::models::db_objects::{BasicChat, DirectChat, DirectUser};
 
 pub async fn user_get_chats(
-    user_id: i64,
+    user_id: &str,
     pool: SqlitePool,
 ) -> Result<Vec<DirectChat>, sqlx::Error> {
     sqlx::query_as::<_, DirectChat>(
@@ -20,16 +20,16 @@ pub async fn user_get_chats(
     .await
 }
 
-pub async fn chat_create(chat_name: &str, pool: SqlitePool) -> Result<i64, sqlx::Error> {
+pub async fn chat_create(chat_name: &str, pool: SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query("INSERT INTO chats (chat_name) VALUES (?)")
         .bind(chat_name)
         .execute(&pool)
         .await?;
-    Ok(result.last_insert_rowid())
+    Ok(())
 }
 
 ///
-pub async fn chat_get(chat_id: i64, pool: SqlitePool) -> Result<DirectChat, sqlx::Error> {
+pub async fn chat_get(chat_id: &str, pool: SqlitePool) -> Result<DirectChat, sqlx::Error> {
     sqlx::query_as::<_, DirectChat>("SELECT * FROM chats WHERE id = ? AND soft_delete = FALSE")
         .bind(chat_id)
         .fetch_one(&pool)
@@ -37,7 +37,7 @@ pub async fn chat_get(chat_id: i64, pool: SqlitePool) -> Result<DirectChat, sqlx
 }
 
 #[allow(dead_code)]
-pub async fn chat_delete(chat_id: i64, pool: SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn chat_delete(chat_id: &str, pool: SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query("DELETE FROM chats WHERE id = ?")
         .bind(chat_id)
         .execute(&pool)
@@ -48,7 +48,7 @@ pub async fn chat_delete(chat_id: i64, pool: SqlitePool) -> Result<(), sqlx::Err
     Ok(())
 }
 
-pub async fn chat_soft_delete(chat_id: i64, pool: SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn chat_soft_delete(chat_id: &str, pool: SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query("UPDATE chats SET soft_delete = TRUE, deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND soft_delete = FALSE")
         .bind(chat_id)
         .execute(&pool)
@@ -61,8 +61,8 @@ pub async fn chat_soft_delete(chat_id: i64, pool: SqlitePool) -> Result<(), sqlx
 
 #[allow(dead_code)]
 pub async fn chat_add_user(
-    chat_id: i64,
-    user_id: i64,
+    chat_id: &str,
+    user_id: &str,
     pool: SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query("INSERT INTO chat_members (chat_id, user_id) VALUES (?, ?)")
@@ -74,8 +74,8 @@ pub async fn chat_add_user(
 }
 
 pub async fn chat_delete_user(
-    chat_id: i64,
-    user_id: i64,
+    chat_id: &str,
+    user_id: &str,
     pool: SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query("DELETE FROM chat_members WHERE chat_id = ? AND user_id = ?")
@@ -87,7 +87,7 @@ pub async fn chat_delete_user(
 }
 
 pub async fn chat_get_members(
-    chat_id: i64,
+    chat_id: &str,
     pool: SqlitePool,
 ) -> Result<Vec<DirectUser>, sqlx::Error> {
     sqlx::query_as::<_, DirectUser>(
@@ -101,8 +101,8 @@ pub async fn chat_get_members(
 }
 
 pub async fn is_user_in_chat(
-    chat_id: i64,
-    user_id: i64,
+    chat_id: &str,
+    user_id: &str,
     pool: SqlitePool,
 ) -> Result<bool, sqlx::Error> {
     let user_chats = user_get_chats(user_id, pool).await;

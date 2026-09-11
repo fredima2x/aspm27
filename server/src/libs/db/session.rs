@@ -26,7 +26,7 @@ pub async fn mark_update(session_id: i64, pool: SqlitePool) -> Result<(), sqlx::
     Ok(())
 }
 
-pub async fn create_session(owner_id: i64, pool: SqlitePool) -> Result<i64, sqlx::Error> {
+pub async fn create_session(owner_id: &str, pool: SqlitePool) -> Result<i64, sqlx::Error> {
     let result = sqlx::query("INSERT INTO sessions (owner_id) VALUES (?)")
         .bind(owner_id)
         .execute(&pool)

@@ -27,12 +27,12 @@ pub async fn login(
     let result: bool = auth::verify_password(&body.password, &user.password_hash);
 
     if result {
-        let session_id = db::session::create_session(user.id, state.db.clone())
+        let session_id = db::session::create_session(&user.id, state.db.clone())
             .await
             .map_err(error::db_err)?;
 
         let token_string =
-            auth::create_token(user.id, session_id, &state.config.jwt_signing_secret);
+            auth::create_token(&user.id, session_id, &state.config.jwt_signing_secret);
         tracing::info!("Login successful for user: {}", body.username);
         Ok(Json(LoginResponse {
             token_string: token_string,
@@ -65,7 +65,7 @@ pub async fn update_profile(
 
     db::user::update_user(
         BasicUser {
-            id: user.id,
+            id: user.id.to_string(),
             username: body.user.username,
             display_name: body.user.display_name,
         },
@@ -74,7 +74,7 @@ pub async fn update_profile(
     )
     .await
     .map_err(error::db_err)?;
-    tracing::info!("Updated profile for user: {}", user.id);
+    tracing::info!("Updated profile for user: {}", &user.id);
     Ok(StatusCode::OK)
 }
 
@@ -85,7 +85,7 @@ pub async fn get_profile(
 ) -> Result<Json<GetProfileResponse>, StatusCode> {
     tracing::info!("Getting profile for user: {}", user.id);
     Ok(Json(GetProfileResponse {
-        user: db::user::user_get_by_id(user.id, state.db.clone())
+        user: db::user::user_get_by_id(&user.id, state.db.clone())
             .await
             .map_err(error::db_err)?
             .into(),

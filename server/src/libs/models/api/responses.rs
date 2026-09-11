@@ -3,7 +3,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct CreateUserResponse {
-    pub id: i64,
+    pub id: String,
 }
 
 #[derive(Serialize)]
