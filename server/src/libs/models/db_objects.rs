@@ -9,7 +9,7 @@ pub struct DirectUser {
     pub password_hash: String,
 
     pub avatar_key: String,
-    pub avatar_v: String,
+    pub avatar_v: i64,
 
     pub soft_delete: bool,
     pub deleted_at: String,

@@ -24,7 +24,7 @@ pub async fn user_get_chats(
 pub async fn chat_create(chat_name: &str, pool: SqlitePool) -> Result<Uuid, sqlx::Error> {
     let chat_id = Uuid::now_v7();
     sqlx::query("INSERT INTO chats (id, chat_name) VALUES (?, ?)")
-        .bind(chat_id.to_string())
+        .bind(chat_id)
         .bind(chat_name)
         .execute(&pool)
         .await?;
@@ -34,7 +34,7 @@ pub async fn chat_create(chat_name: &str, pool: SqlitePool) -> Result<Uuid, sqlx
 ///
 pub async fn chat_get(chat_id: Uuid, pool: SqlitePool) -> Result<DirectChat, sqlx::Error> {
     sqlx::query_as::<_, DirectChat>("SELECT * FROM chats WHERE id = ? AND soft_delete = FALSE")
-        .bind(chat_id.to_string())
+        .bind(chat_id)
         .fetch_one(&pool)
         .await
 }
@@ -42,7 +42,7 @@ pub async fn chat_get(chat_id: Uuid, pool: SqlitePool) -> Result<DirectChat, sql
 #[allow(dead_code)]
 pub async fn chat_delete(chat_id: Uuid, pool: SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query("DELETE FROM chats WHERE id = ?")
-        .bind(chat_id.to_string())
+        .bind(chat_id)
         .execute(&pool)
         .await?;
     if result.rows_affected() == 0 {
@@ -53,7 +53,7 @@ pub async fn chat_delete(chat_id: Uuid, pool: SqlitePool) -> Result<(), sqlx::Er
 
 pub async fn chat_soft_delete(chat_id: Uuid, pool: SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query("UPDATE chats SET soft_delete = TRUE, deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND soft_delete = FALSE")
-        .bind(chat_id.to_string())
+        .bind(chat_id)
         .execute(&pool)
         .await?;
     if result.rows_affected() == 0 {
@@ -69,8 +69,8 @@ pub async fn chat_add_user(
     pool: SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query("INSERT INTO chat_members (chat_id, user_id) VALUES (?, ?)")
-        .bind(chat_id.to_string())
-        .bind(user_id.to_string())
+        .bind(chat_id)
+        .bind(user_id)
         .execute(&pool)
         .await?;
     Ok(())
@@ -82,8 +82,8 @@ pub async fn chat_delete_user(
     pool: SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query("DELETE FROM chat_members WHERE chat_id = ? AND user_id = ?")
-        .bind(chat_id.to_string())
-        .bind(user_id.to_string())
+        .bind(chat_id)
+        .bind(user_id)
         .execute(&pool)
         .await?;
     Ok(())
@@ -121,7 +121,7 @@ pub async fn update_chat(chat: BasicChat, pool: SqlitePool) -> Result<(), sqlx::
     )
     .bind(chat.chat_name)
     .bind(chat.chat_desc)
-    .bind(chat.id.to_string())
+    .bind(chat.id)
     .execute(&pool)
     .await?;
     Ok(())

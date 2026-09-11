@@ -8,15 +8,15 @@ pub async fn save_message(
     content: &str,
     pool: SqlitePool,
 ) -> Result<Uuid, sqlx::Error> {
-    let user_id = Uuid::now_v7();
+    let message_id = Uuid::now_v7();
     sqlx::query("INSERT INTO messages (id, owner_id, chat_id, content) VALUES (?, ?, ?, ?)")
-        .bind(user_id.to_string())
+        .bind(message_id)
         .bind(owner_id)
         .bind(chat_id)
         .bind(content)
         .execute(&pool)
         .await?;
-    Ok(user_id)
+    Ok(message_id)
 }
 
 pub async fn get_message(message_id: Uuid, pool: SqlitePool) -> Result<DirectMessage, sqlx::Error> {
