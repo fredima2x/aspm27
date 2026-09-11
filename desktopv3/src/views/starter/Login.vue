@@ -2,30 +2,51 @@
 import { login } from "../../api/requests/login";
 import { save_token } from "../../stores/token";
 import { ref } from "vue";
-
 import { useRouter } from "vue-router";
+import loadingIcon from "../../assets/loading-spinner.svg"
+import { onMounted } from "vue";
+
 const router = useRouter();
 
+const loadingStatus = ref(false)
 const usernameInput = ref("");
 const passwordInput = ref("");
 const warning = ref('');
 
+onMounted(() => {
+  loadingStatus.value = false;
+});
+
 async function handle_login() {
-  const data = await login(usernameInput.value, passwordInput.value);
+  const password = passwordInput.value;
+  const username = usernameInput.value;
+
+  loadingStatus.value = true;
+
+  if (!username || !password) {
+    warning.value = 'Username and Password cannot be empty!';
+    loadingStatus.value = false;
+    return;
+  }
+
+  const data = await login(username, password);
+
   if (data.ok) {
     const res = await data.json()
     console.log("Saved Auth_token", res);
     save_token(res.token_string);
+    loadingStatus.value = false;
     router.push("/chat");
   } else {
+    loadingStatus.value = false;
     if (data.status === 400) {
-      warning.value = 'Invalid Username or Password!';
+      warning.value = 'Invalid Username or Password! (400)';
     } else if (data.status === 404) {
-      warning.value = 'User does not exist!';
+      warning.value = 'User does not exist! (404)';
     } else if (data.status === 401) {
-      warning.value = 'Wrong Password!';
+      warning.value = 'Wrong Password! (401)';
     } else if (data.status === 500) {
-      warning.value = 'Internal Server Error, Please try again later.';
+      warning.value = 'Internal Server Error, Please try again later. (500)';
     } else {
       warning.value = 'An unknown Error occured. View console for more Information!'
       console.error("Invalid Server Response", data);
@@ -64,7 +85,10 @@ function handleInput() {
         <p v-show="warning" class="password-warn-text">{{ warning }}</p>
       </Transition>
 
-      <button class="sign-in-button" @click="handle_login">Sign in</button>
+      <button class="sign-in-button" @click="handle_login">
+        <template v-if="loadingStatus"><img :src="loadingIcon" class="loading-icon"></template>
+        <template v-else>Sign up</template>
+      </button>
 
       <p class="sign-up-text">
         Dont have an account yet?
@@ -98,6 +122,11 @@ function handleInput() {
   font-size: 14px;
 }
 
+.sign-in-button {
+  height: 32px;
+  width: 62px;
+}
+
 .sign-in-button:hover {
   opacity: 0.8;
 }
@@ -129,5 +158,18 @@ function handleInput() {
 
 .password-warn-text {
   color: var(--theme-red);
+}
+
+.loading-icon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  animation: drehen 1s linear infinite;
+}
+
+@keyframes drehen {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

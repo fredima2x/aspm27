@@ -50,9 +50,10 @@ async fn main() {
         )
         .route("/users", post(handler::users::create_user))
         .route(
-            "/users/{id}",
-            get(handler::users::get_user).delete(handler::users::delete_user),
+            "/users/id/{id}",
+            get(handler::users::get_user_by_id).delete(handler::users::delete_user),
         )
+        .route("/users/name/{name}", get(handler::users::get_user_by_name))
         .route(
             "/profile",
             get(handler::profile::get_profile).put(handler::profile::update_profile),

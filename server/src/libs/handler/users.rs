@@ -51,12 +51,23 @@ pub async fn delete_user(user: AuthenticatedUser) -> Result<StatusCode, StatusCo
 }
 
 #[tracing::instrument]
-pub async fn get_user(Path(id): Path<i64>) -> Result<Json<BasicUser>, StatusCode> {
-    tracing::info!("Getting user");
+pub async fn get_user_by_id(Path(id): Path<i64>) -> Result<Json<BasicUser>, StatusCode> {
+    tracing::info!("Getting user by id");
     let user: BasicUser = db::user::user_get_by_id(id)
         .await
         .map_err(error::db_err)?
         .into();
     tracing::info!("User retrieved successfully");
+    Ok(Json(user))
+}
+
+#[tracing::instrument]
+pub async fn get_user_by_name(Path(name): Path<String>) -> Result<Json<BasicUser>, StatusCode> {
+    tracing::info!("Getting user by name");
+    let user: BasicUser = db::user::user_get_by_name(&name)
+        .await
+        .map_err(error::db_err)?
+        .into();
+    tracing::info!("User retrieved succesfully");
     Ok(Json(user))
 }

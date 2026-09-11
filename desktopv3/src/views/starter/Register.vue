@@ -3,16 +3,24 @@ import { login } from '../../api/requests/login';
 import { register } from '../../api/requests/register';
 import { save_token } from '../../stores/token';
 
+import loadingIcon from '../../assets/loading-spinner.svg';
+
 import { useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { get_user } from '../../api/requests/get_user';
 const router = useRouter();
 
 const usernameWarning = ref('');
 const passwordWarning = ref('');
 const warning = ref('');
+const loadingStatus = ref(false)
 
 const usernameInput = ref('');
 const passwordInput = ref('');
+
+onMounted(() => {
+  loadingStatus.value = false;
+});
 
 function check_password(password) {
   if (password.length < 8) { return -1 }
@@ -22,7 +30,16 @@ function check_password(password) {
 function check_username(username) {
   if (username.length < 3) { return -1 }
   if (username.length > 24) { return 1 }
-  return 0
+  const data = get_user(username);
+  if (data.ok) {
+    return 2;
+  } else {
+    if (data.status = 404) {
+      return 0;
+    } else {
+      return 2;
+    }
+  }
 }
 
 function username_update(event) {
@@ -33,11 +50,11 @@ function username_update(event) {
 
   if (username_status === -1) {
     usernameWarning.value = 'Username is too short!';
-  }
-  if (username_status === 1) {
+  } else if (username_status === 1) {
     usernameWarning.value = 'Username is too long!';
-  }
-  if (username_status === 0) {
+  } else if (username_status === 2) {
+    usernameWarning.value = 'Username already exists!'
+  } else if (username_status === 0) {
     usernameWarning.value = '';
   }
 }
@@ -63,18 +80,31 @@ async function sign_up_handler() {
   const username = usernameInput.value;
   const password = passwordInput.value;
 
+  loadingStatus.value = true;
+
+  if (!username || !password) {
+    warning.value = 'Username and Password cannot be empty!';
+  }
+
+  if (check_password(password) != 0 || check_username(username) != 0) {
+    loadingStatus.value = false;
+    return;
+  }
+
   const data = await register(username, password);
   if (data.ok) {
     const res = await data.json();
     save_token(res.auth_token);
+    loadingStatus.value = false;
     router.push("/chat");
   } else {
+    loadingStatus.value = false;
     if (data.status === 400) {
-      warning.value = 'Invalid Username or Password!';
+      warning.value = 'Invalid Username or Password! (400)';
     } else if (data.status === 409) {
-      warning.value = 'User already Exists!';
+      warning.value = 'User already Exists! (409)';
     } else if (data.status === 500) {
-      warning.value = 'Internal Server Error, Please try again later.';
+      warning.value = 'Internal Server Error, Please try again later. (500)';
     } else {
       warning.value = 'An unknown Error occured. View console for more Information!'
       console.error("Invalid Server Response", data);
@@ -103,7 +133,10 @@ async function sign_up_handler() {
                 <p v-show="warning" class="password-warn-text">{{ warning }}</p>
             </Transition>
 
-            <button class="sign-up-button" @click="sign_up_handler">Sign up</button>
+            <button class="sign-up-button" @click="sign_up_handler">
+              <template v-if="loadingStatus"><img :src="loadingIcon" class="loading-icon"></template>
+              <template v-else>Sign up</template>
+            </button>
 
             <p class="sign-in-text">Already have an account?
                 <a @click="router.push('/login')" class="sign-in-link">Sign in</a>
@@ -157,6 +190,10 @@ async function sign_up_handler() {
   opacity: 1;
   transform: translateY(0);
 }
+.sign-up-button {
+  height: 32px;
+  width: 62px;
+}
 
 .sign-up-button:hover {
   opacity: 0.8;
@@ -172,5 +209,18 @@ async function sign_up_handler() {
 
 .sign-in-link {
   cursor: pointer;
+}
+
+.loading-icon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  animation: drehen 1s linear infinite;
+}
+
+@keyframes drehen {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
