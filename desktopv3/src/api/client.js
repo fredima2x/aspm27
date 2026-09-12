@@ -31,3 +31,15 @@ export async function apiFetch(endpoint, options = {}) {
     return null;
   }
 }
+
+export function generateUuid() {
+  if (globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (char) => {
+    const value = Math.floor(Math.random() * 16);
+    const replacement = char === "x" ? value : (value & 0x3) | 0x8;
+    return replacement.toString(16);
+  });
+}

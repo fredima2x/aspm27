@@ -1,15 +1,63 @@
 <script setup>
-import { ref } from "vue";
-import chat from "../components/chat.vue";
-import get_chats from '../api/requests/get_chats.js';
+import { ref, onMounted } from "vue";
+import Chat from "../components/chat.vue";
+import get_chats from "../api/requests/get_chats.js";
+import { deleteChat, removeChatFromLocalStorage } from "../api/requests/deleteChat.js";
+import { generateUuid } from "../api/client.js";
 
-const chats = get_chats();
+const chats = ref([]);
+const selectedChatId = ref(null);
 
-const selectedChatId = ref(67);
+onMounted(async () => {
+  try {
+    const payload = await get_chats();
+    chats.value = Array.isArray(payload)
+      ? payload.map((chat) => ({
+          chatId: chat.id,
+          chatName: chat.chat_name,
+          chatDesc: chat.chat_desc,
+        }))
+      : [];
+
+    localStorage.setItem("chats", JSON.stringify(chats.value));
+  } catch (error) {
+    console.error("Failed to load chats", error);
+
+    const cached = JSON.parse(localStorage.getItem("chats") || "[]");
+    chats.value = Array.isArray(cached) ? cached : [];
+  }
+});
 
 function chooseChat(chatId) {
   selectedChatId.value = chatId;
 }
+
+async function testRemoveChat(chatId = chats.value[0]?.chatId) {
+  if (!chatId) {
+    console.warn("testRemoveChat: no chat is available to remove");
+    return;
+  }
+
+  try {
+    console.log(`testRemoveChat: attempting to remove ${chatId}`);
+
+    await deleteChat(chatId);
+    removeChatFromLocalStorage(chatId);
+
+    chats.value = chats.value.filter((chat) => chat.chatId !== chatId);
+    localStorage.setItem("chats", JSON.stringify(chats.value));
+
+    if (selectedChatId.value === chatId) {
+      selectedChatId.value = null;
+    }
+
+    console.log(`testRemoveChat: removed ${chatId}; remaining=${chats.value.length}`);
+  } catch (error) {
+    console.error("testRemoveChat: failed to remove chat", error);
+  }
+}
+
+testRemoveChat('')
 </script>
 
 <template>
@@ -20,14 +68,14 @@ function chooseChat(chatId) {
         <input type="search" placeholder="Search Chats..." />
       </div>
       <div class="chat-list">
-        <chat
+        <Chat
           v-for="chat in chats"
           :key="chat.chatId"
           :chatName="chat.chatName"
           :chatDesc="chat.chatDesc"
           :chatId="chat.chatId"
           :selected="chat.chatId === selectedChatId"
-          @select="chooseChat"
+          @select="testRemoveChat(chatId)"
         />
       </div>
     </div>
