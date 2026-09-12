@@ -1,6 +1,6 @@
 <script setup>
 const props = defineProps({
-  chatId: Number,
+  chatId: String,
   chatName: String,
   chatDesc: String,
   selected: Boolean,
@@ -12,7 +12,6 @@ const emit = defineEmits(["select"]);
   <div class="chat" :class="{ selected: props.selected }" @click="emit('select', props.chatId)">
     <h2 class="chat-name">{{ props.chatName }}</h2>
     <p class="chat-desc">{{ props.chatDesc }}</p>
-    <p class="chat-id">{{ props.chatId }}</p>
   </div>
 </template>
 <style scoped>
