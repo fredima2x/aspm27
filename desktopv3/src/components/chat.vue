@@ -1,35 +1,44 @@
 <script setup>
-defineProps({
-  chat_id: BigInt,
-  chat_name: String,
-  chat_desc: String,
-
+const props = defineProps({
+  chatId: Number,
+  chatName: String,
+  chatDesc: String,
   selected: Boolean,
 });
+
+const emit = defineEmits(["select"]);
 </script>
 <template>
-    <div class="chat" :class="selected">
-        <p class="chat-name">{{ chat_name }}</p>
-        <p class="chat-desc">{{ chat_desc }}</p>
-    </div>
+  <div class="chat" :class="{ selected: props.selected }" @click="emit('select', props.chatId)">
+    <h2 class="chat-name">{{ props.chatName }}</h2>
+    <p class="chat-desc">{{ props.chatDesc }}</p>
+    <p class="chat-id">{{ props.chatId }}</p>
+  </div>
 </template>
 <style scoped>
+@import "../assets/styles/general.css";
+@import "../assets/styles/root.css";
+
 .chat {
-    margin: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    background-color: var(--theme-light-gray);
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: var(--theme-round-edges);
+  background-color: var(--theme-light-gray);
+	color: var(--theme-white);
+  cursor: pointer;
 }
-.chat .selected {
-    background-color: var(--theme-primary);
+
+.chat.selected {
+  background-color: var(--theme-primary);
 }
-.chat-name, .chat-desc {
-    margin: 0;
-}
+
 .chat-name {
-    color: var(--theme-white);
+  margin-bottom: 20px;
+	margin-top: 0;
 }
-.chat-desc {
-    color: var(--theme-white);
+
+.chat-desc,
+.chat-id {
+  margin-bottom: 2px;
 }
 </style>

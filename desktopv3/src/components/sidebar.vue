@@ -1,57 +1,113 @@
 <script setup>
+import { ref } from "vue";
+import chat from "../components/chat.vue";
 
+const chats = ref([
+  {
+    chatId: 67,
+    chatName: "test",
+    chatDesc: "this is a test chat",
+  },
+  {
+    chatId: 68,
+    chatName: "test2",
+    chatDesc: "this is another test chat",
+  },
+	{
+    chatId: 69,
+    chatName: "test3",
+    chatDesc: "this is another test chat",
+  },
+	{
+    chatId: 70,
+    chatName: "test4",
+    chatDesc: "this is another test chat",
+  },
+	{
+    chatId: 71,
+    chatName: "test5",
+    chatDesc: "this is another test chat",
+  }
+]);
+
+const selectedChatId = ref(67);
+
+function chooseChat(chatId) {
+  selectedChatId.value = chatId;
+}
 </script>
 
 <template>
   <div class="sidebar">
-    <div class="profile-panel widget">
-    </div>
+    <div class="profile-panel widget"></div>
     <div class="chat-panel widget">
-      <input type="search" placeholder="Search Chats...">
+      <div class="search-bar">
+        <input type="search" placeholder="Search Chats..." />
+      </div>
       <div class="chat-list">
-        <chat v-for="chat in chats" :chat_name="chat.chat_name" :chat_desc="chat.chat_desc" :chat_id="chat.chat_id" />
+        <chat
+          v-for="chat in chats"
+          :key="chat.chatId"
+          :chatName="chat.chatName"
+          :chatDesc="chat.chatDesc"
+          :chatId="chat.chatId"
+          :selected="chat.chatId === selectedChatId"
+          @select="chooseChat"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-@import '/src/assets/styles/general.css';
+@import "../assets/styles/general.css";
+@import "../assets/styles/root.css";
 
 .sidebar {
-	display: flex;
-	flex-direction: column;
-	flex: 1;
-	min-width: 0;
-	height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin: 0;
+  height: 100%;
 }
 
 .widget {
-	display: flex;
-	flex-direction: column;
-	margin: 10px;
-	padding: 10px;
-	background-color: rgb(30, 30, 30);
-	border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
+  padding: 10px;
+  background-color: var(--theme-gray);
+  border-radius: 10px;
 }
 
 .profile-panel {
-	flex: 0 0 100px;
-	margin-right: 0;
-	margin-bottom: 0;
+  flex: 0 0 100px;
+  margin-right: 0;
+  margin-bottom: 0;
 }
 
 .chat-panel {
-	flex: 1;
-	margin-right: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  margin-right: 0;
 }
 
 .chat-list {
-	flex: 1;
-	min-height: 0;
-	overflow-y: auto;
-	background-color: var(--theme-gray);
-	border: 4px solid var(--theme-primary);
-	border-radius: 10px;
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  background-color: var(--theme-gray);
+  border-radius: var(--theme-round-edges);
+}
+
+.search-bar {
+  border-bottom: 3px solid var(--theme-primary);
+}
+
+.search-bar input {
+  border: 1px solid var(--theme-light-gray);
 }
 </style>

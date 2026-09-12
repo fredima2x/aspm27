@@ -1,7 +1,7 @@
 <script setup>
 import sidebar from "../../components/sidebar.vue";
 import contentPanel from "../../components/contentPanel.vue";
-import Settings from '../settings/Settings.vue';
+import Settings from "../settings/Settings.vue";
 </script>
 
 <template>
@@ -19,8 +19,9 @@ import Settings from '../settings/Settings.vue';
 .app-background {
   display: flex;
   width: 100vw;
-  height: 100%;
+  height: 100vh;
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 </style>

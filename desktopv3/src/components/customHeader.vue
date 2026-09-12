@@ -76,7 +76,8 @@ header {
   left: 0;
   top: 0;
   height: 30px;
-  border-bottom: solid 2px var(--theme-primary);
+  border-bottom: solid 3px var(--theme-primary);
+  cursor: grab;
   z-index: 10;
 }
 

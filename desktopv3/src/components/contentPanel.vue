@@ -17,13 +17,14 @@
 </template>
 
 <style scoped>
-@import '/src/assets/styles/general.css';
+@import '../assets/styles/general.css';
+@import '../assets/styles/root.css';
 
 .content-panel {
 	display: flex;
 	flex: 2;
-	min-width: 0;
 	height: 100%;
+	margin: 0;
 }
 
 .widget {
@@ -31,7 +32,7 @@
 	flex-direction: column;
 	margin: 10px;
 	padding: 10px;
-	background-color: rgb(30, 30, 30);
+	background-color: var(--theme-gray);
 	border-radius: 10px;
 }
 
@@ -44,7 +45,6 @@
 	min-height: 0;
 	overflow-y: auto;
 	background-color: var(--theme-gray);
-	border: 4px solid var(--theme-primary);
 	border-radius: 10px;
 }
 
@@ -52,11 +52,13 @@
 	display: flex;
 	gap: 10px;
 	padding-top: 10px;
+	border-top: 3px solid var(--theme-primary);
 }
 
 .message-input input {
 	flex: 1;
 	margin: 0;
+	border: 1px solid var(--theme-light-gray);
 }
 
 .send-button {
