@@ -205,12 +205,13 @@ async function sign_up_handler() {
   opacity: 0.6;
 }
 
-.sign-in-text {
+.sign-in-text, .sign-in-link {
   color: var(--theme-light-gray);
 }
 
 .sign-in-link {
   cursor: pointer;
+  text-decoration: underline;
 }
 
 .loading-icon {

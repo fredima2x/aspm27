@@ -135,8 +135,13 @@ function handleInput() {
   opacity: 0.6;
 }
 
+.sign-up-text, .sign-up-link {
+  color: var(--theme-light-gray);
+}
+
 .sign-up-link {
   cursor: pointer;
+  text-decoration: underline;
 }
 
 .warning-enter-active,

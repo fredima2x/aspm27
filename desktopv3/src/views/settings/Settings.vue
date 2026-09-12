@@ -43,7 +43,9 @@
 
 .settings {
 	background-color: var(--theme-light-gray);
-	width: 100%;
-	height: 200px;
+	border-radius: var(--theme-round-edges);
+	display: flex;
+	width: 100px;
+	height: 200%;
 }
 </style>
