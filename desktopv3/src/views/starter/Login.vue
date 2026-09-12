@@ -31,21 +31,20 @@ async function handle_login() {
 
   const data = await login(username, password);
 
-  if (data.ok) {
-    const res = await data.json()
-    console.log("Saved Auth_token", res);
-    save_token(res.token_string);
+  if (data.raw.ok) {
+    console.log("Saved Auth_token", data.body);
+    save_token(data.body.token_string);
     loadingStatus.value = false;
     router.push("/chat");
   } else {
     loadingStatus.value = false;
-    if (data.status === 400) {
+    if (data.raw.status == 400) {
       warning.value = 'Invalid Username or Password! (400)';
-    } else if (data.status === 404) {
+    } else if (data.raw.status == 404) {
       warning.value = 'User does not exist! (404)';
-    } else if (data.status === 401) {
+    } else if (data.raw.status == 401) {
       warning.value = 'Wrong Password! (401)';
-    } else if (data.status === 500) {
+    } else if (data.raw.status == 500) {
       warning.value = 'Internal Server Error, Please try again later. (500)';
     } else {
       warning.value = 'An unknown Error occured. View console for more Information!'

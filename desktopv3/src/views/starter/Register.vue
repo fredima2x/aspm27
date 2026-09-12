@@ -39,10 +39,10 @@ async function check_username(username) {
     return 1;
   }
   const data = await get_user(username);
-  if (data.ok) {
+  if (data.raw.ok) {
     return 2;
   } else {
-    if (data.status == 404) {
+    if (data.raw.status == 404) {
       return 0;
     } else {
       return 2;
@@ -110,18 +110,17 @@ async function sign_up_handler() {
   }
 
   const data = await register(username, password);
-  if (data.ok) {
-    const res = await data.json();
-    save_token(res.auth_token);
+  if (data.raw.ok) {
+    save_token(data.body.auth_token);
     loadingStatus.value = false;
     router.push("/chat");
   } else {
     loadingStatus.value = false;
-    if (data.status === 400) {
+    if (data.raw.status == 400) {
       warning.value = "Invalid Username or Password! (400)";
-    } else if (data.status === 409) {
+    } else if (data.raw.status == 409) {
       warning.value = "User already Exists! (409)";
-    } else if (data.status === 500) {
+    } else if (data.raw.status == 500) {
       warning.value = "Internal Server Error, Please try again later. (500)";
     } else {
       warning.value =

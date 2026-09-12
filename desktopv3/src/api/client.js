@@ -15,23 +15,29 @@ export async function apiFetch(endpoint, options = {}) {
       headers: requestHeaders
     });
 
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`API request failed (${response.status}): ${text}`);
-    }
 
     const contentType = response.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
-      return await response.json();
+      return {
+        raw: response,
+        body: await response.json(),
+      };
+    } else {
+      return {
+        raw: response,
+        body: {
+          "non_json": true
+        },
+      }
     }
 
-    return await response.text();
   } catch (error) {
     console.error("Network error:", error);
     return null;
   }
 }
 
+// Testing
 export function generateUuid() {
   if (globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") {
     return globalThis.crypto.randomUUID();
