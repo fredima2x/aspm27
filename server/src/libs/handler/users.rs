@@ -44,6 +44,7 @@ pub async fn delete_user(
     State(state): State<AppState>,
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Deleting user");
+    db::session::delete_all_sessions(user.id, state.db.clone()).await.map_err(error::db_err);
     db::user::user_soft_delete(user.id, state.db.clone())
         .await
         .map_err(error::db_err)?;

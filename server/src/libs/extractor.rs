@@ -20,7 +20,7 @@ impl FromRequestParts<AppState> for AuthenticatedUser {
             .strip_prefix("Bearer ")
             .ok_or(StatusCode::UNAUTHORIZED)?;
 
-        let claims = auth::verify_token(token, &state.config.jwt_signing_secret)
+        let claims = auth::verify_token(token, &state.config.jwt_signing_secret, state.db.clone()).await
             .map_err(|_| StatusCode::UNAUTHORIZED)?;
         
         Ok(AuthenticatedUser {

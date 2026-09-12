@@ -1,5 +1,3 @@
-use std::result;
-
 use crate::libs::models::db_objects::Session;
 use sqlx::SqlitePool;
 use uuid::Uuid;
@@ -43,8 +41,29 @@ pub async fn create_session(owner_id: Uuid, pool: SqlitePool) -> Result<i64, sql
 pub async fn does_session_exist(session_id: i64, pool:  SqlitePool) -> Result<bool, ()> {
     let result = get_session(session_id, pool).await;
     match result {
-        Ok(T) => Ok(true),
+        Ok(_t) => Ok(true),
         Err(sqlx::Error::RowNotFound) => Ok(false),
         _ => Err(()),
     }
+}
+
+pub async fn validate_session(session_id: i64, pool: SqlitePool) -> Result<bool, ()> {
+    does_session_exist(session_id, pool).await
+}
+
+#[allow(dead_code)]
+pub async fn delete_session(session_id: i64, pool:  SqlitePool) -> Result<(), sqlx::Error> {
+    sqlx::query("DELETE * FROM sessions WHERE id = ?")
+        .bind(session_id)
+        .execute(&pool)
+        .await?;
+    Ok(())
+}
+
+pub async fn delete_all_sessions(user_id: Uuid, pool:  SqlitePool) -> Result<(), sqlx::Error> {
+    sqlx::query("DELETE * FROM sessions WHERE owner_id = ?")
+        .bind(user_id)
+        .execute(&pool)
+        .await?;
+    Ok(())
 }

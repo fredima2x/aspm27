@@ -4,7 +4,10 @@ use argon2::{
 };
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
+use sqlx::SqlitePool;
 use uuid::Uuid;
+
+use crate::libs::db;
 
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
@@ -47,14 +50,20 @@ pub fn create_token(user_id: Uuid, session_id: i64, secret: &str) -> String {
     .unwrap()
 }
 
-pub fn verify_token(
+pub async fn verify_token(
     token_string: &str,
     secret: &str,
-) -> Result<Claims, jsonwebtoken::errors::Error> {
+    pool: SqlitePool,
+) -> Result<Claims, ()> {
     let token_data = jsonwebtoken::decode::<Claims>(
         token_string,
         &DecodingKey::from_secret(secret.as_bytes()),
         &Validation::default(),
-    )?;
-    Ok(token_data.claims)
+    ).map_err(|_| ())?;
+
+    if db::session::validate_session(token_data.claims.session_id, pool).await? {
+        Ok(token_data.claims)
+    } else {
+        Err(())
+    }
 }
