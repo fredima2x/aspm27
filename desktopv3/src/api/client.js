@@ -1,35 +1,33 @@
 import { BASE_SERVER_URL } from "../config/config"
 import { get_token } from "../stores/token"
 
-
 export async function apiFetch(endpoint, options = {}) {
-  let res;
+  const token = get_token();
+  const requestHeaders = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {})
+  };
 
   try {
-    res = await fetch(`${BASE_SERVER_URL}${endpoint}`, {
+    const response = await fetch(`${BASE_SERVER_URL}${endpoint}`, {
       ...options,
-      headers: get_header()
+      headers: requestHeaders
     });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`API request failed (${response.status}): ${text}`);
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      return await response.json();
+    }
+
+    return await response.text();
   } catch (error) {
     console.error("Network error:", error);
     return null;
-  }
-
-  return res;
-}
-
-function get_header() {
-  const token = get_token();
-  if (!token) {
-    console.warn("Header was Created with no Token!");
-    return {
-      'Content-Type': 'application/json',
-    }
-  } else {
-    console.debug("Header was Created with a Token!", token);
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    }
   }
 }
