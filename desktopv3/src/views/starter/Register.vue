@@ -1,5 +1,4 @@
 <script setup>
-import { login } from "../../api/requests/login";
 import { register } from "../../api/requests/register";
 import { save_token } from "../../stores/token";
 
