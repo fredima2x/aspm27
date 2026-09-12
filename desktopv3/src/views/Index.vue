@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 const router = useRouter()
 
-router.push('/login')
+router.push('/register')
 </script>
 
 <template>

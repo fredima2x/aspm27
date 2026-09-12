@@ -87,7 +87,7 @@ function handleInput() {
 
       <button class="sign-in-button" @click="handle_login">
         <template v-if="loadingStatus"><img :src="loadingIcon" class="loading-icon"></template>
-        <template v-else>Sign up</template>
+        <template v-else>Sign in</template>
       </button>
 
       <p class="sign-up-text">
