@@ -1,34 +1,9 @@
 <script setup>
 import { ref } from "vue";
 import chat from "../components/chat.vue";
+import get_chats from '../api/requests/get_chats.js';
 
-const chats = ref([
-  {
-    chatId: 67,
-    chatName: "test",
-    chatDesc: "this is a test chat",
-  },
-  {
-    chatId: 68,
-    chatName: "test2",
-    chatDesc: "this is another test chat",
-  },
-	{
-    chatId: 69,
-    chatName: "test3",
-    chatDesc: "this is another test chat",
-  },
-	{
-    chatId: 70,
-    chatName: "test4",
-    chatDesc: "this is another test chat",
-  },
-	{
-    chatId: 71,
-    chatName: "test5",
-    chatDesc: "this is another test chat",
-  }
-]);
+const chats = get_chats();
 
 const selectedChatId = ref(67);
 
