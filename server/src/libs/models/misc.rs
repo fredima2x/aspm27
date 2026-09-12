@@ -1,5 +1,8 @@
+use uuid::Uuid;
+
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct AuthenticatedUser {
-    pub id: i64,
+    pub id: Uuid,
     pub session_id: i64,
 }

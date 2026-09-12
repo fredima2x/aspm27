@@ -12,11 +12,12 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
 };
+use uuid::Uuid;
 
 #[tracing::instrument]
 pub async fn save_message(
     user: AuthenticatedUser,
-    Path(chat_id): Path<i64>,
+    Path(chat_id): Path<Uuid>,
     State(state): State<AppState>,
     Json(body): Json<SendMessageRequest>,
 ) -> Result<Json<BasicMessage>, StatusCode> {
@@ -46,7 +47,7 @@ pub async fn save_message(
 #[tracing::instrument]
 pub async fn delete_message(
     user: AuthenticatedUser,
-    Path(message_id): Path<i64>,
+    Path(message_id): Path<Uuid>,
     State(state): State<AppState>,
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Got delete_message Request.");
@@ -74,7 +75,7 @@ pub async fn delete_message(
 #[tracing::instrument]
 pub async fn get_message(
     user: AuthenticatedUser,
-    Path(message_id): Path<i64>,
+    Path(message_id): Path<Uuid>,
     State(state): State<AppState>,
 ) -> Result<Json<BasicMessage>, StatusCode> {
     tracing::info!("Got get_message Request.");
@@ -101,7 +102,7 @@ pub async fn get_message(
 #[tracing::instrument]
 pub async fn get_chat_messages(
     user: AuthenticatedUser,
-    Path(chat_id): Path<i64>,
+    Path(chat_id): Path<Uuid>,
     State(state): State<AppState>,
     Json(body): Json<GetChatMessagesRequest>,
 ) -> Result<Json<Vec<BasicMessage>>, StatusCode> {

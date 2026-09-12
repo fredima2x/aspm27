@@ -6,7 +6,7 @@ use tower_http::cors::CorsLayer;
 use tracing_subscriber::EnvFilter;
 
 mod libs;
-use crate::libs::{config::load_config, handler, models::app_state::AppState};
+use crate::libs::{config::load_config, db::utility::get_pool, handler, models::app_state::AppState};
 
 #[tokio::main]
 async fn main() {
@@ -24,9 +24,7 @@ async fn main() {
     }
 
     tracing::info!("Connecting to Database...");
-    let db = sqlx::SqlitePool::connect(&config.database_url)
-        .await
-        .expect("Could not connect to database!");
+    let db = get_pool(&config.database_url).await;
 
     let state = AppState { config, db };
 

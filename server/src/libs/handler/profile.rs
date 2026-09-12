@@ -74,7 +74,7 @@ pub async fn update_profile(
     )
     .await
     .map_err(error::db_err)?;
-    tracing::info!("Updated profile for user: {}", user.id);
+    tracing::info!("Updated profile for user: {}", &user.id);
     Ok(StatusCode::OK)
 }
 

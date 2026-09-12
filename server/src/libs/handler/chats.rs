@@ -1,5 +1,6 @@
 use crate::libs::{
-    check, db, error,
+    check, db,
+    error::{self, db_err},
     models::{
         api::requests::{CreateChatRequest, UpdateChatRequest},
         app_state::AppState,
@@ -13,6 +14,7 @@ use axum::{
     http::StatusCode,
 };
 use tracing::instrument;
+use uuid::Uuid;
 
 pub async fn get_chats(
     user: AuthenticatedUser,
@@ -43,7 +45,7 @@ pub async fn create_chat(
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    let chat_id: i64 = db::chats::chat_create(&body.chat_name, state.db.clone())
+    let chat_id: Uuid = db::chats::chat_create(&body.chat_name, state.db.clone())
         .await
         .map_err(error::db_err)?;
     db::chats::chat_add_user(chat_id, user.id, state.db.clone())
@@ -60,22 +62,30 @@ pub async fn create_chat(
 
 #[instrument]
 pub async fn get_chat(
-    Path(id): Path<i64>,
+    user: AuthenticatedUser,
+    Path(id): Path<Uuid>,
     State(state): State<AppState>,
 ) -> Result<Json<BasicChat>, StatusCode> {
     tracing::info!("Got get_chat Request.");
-    Ok(Json(
-        db::chats::chat_get(id, state.db)
-            .await
-            .map_err(error::db_err)?
-            .into(),
-    ))
+    if db::chats::is_user_in_chat(id, user.id, state.db.clone())
+        .await
+        .map_err(db_err)?
+    {
+        Ok(Json(
+            db::chats::chat_get(id, state.db.clone())
+                .await
+                .map_err(error::db_err)?
+                .into(),
+        ))
+    } else {
+        Err(StatusCode::UNAUTHORIZED)
+    }
 }
 
 #[instrument]
 pub async fn delete_chat(
     user: AuthenticatedUser,
-    Path(id): Path<i64>,
+    Path(id): Path<Uuid>,
     State(state): State<AppState>,
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Got delete_chats Request.");
@@ -95,7 +105,7 @@ pub async fn delete_chat(
 #[instrument]
 pub async fn get_chat_members(
     user: AuthenticatedUser,
-    Path(id): Path<i64>,
+    Path(id): Path<Uuid>,
     State(state): State<AppState>,
 ) -> Result<Json<Vec<BasicUser>>, StatusCode> {
     tracing::info!("Got get_chat_members Request.");
@@ -120,7 +130,7 @@ pub async fn get_chat_members(
 #[tracing::instrument]
 pub async fn add_chat_member(
     user: AuthenticatedUser,
-    Path((chat_id, user_id)): Path<(i64, i64)>,
+    Path((chat_id, user_id)): Path<(Uuid, Uuid)>,
     State(state): State<AppState>,
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Got add_chat_member Request.");
@@ -140,7 +150,7 @@ pub async fn add_chat_member(
 #[tracing::instrument]
 pub async fn is_user_in_chat(
     user: AuthenticatedUser,
-    Path((chat_id, user_id)): Path<(i64, i64)>,
+    Path((chat_id, user_id)): Path<(Uuid, Uuid)>,
     State(state): State<AppState>,
 ) -> Result<Json<bool>, StatusCode> {
     tracing::info!("Got is_user_in_chat Request");
@@ -162,7 +172,7 @@ pub async fn is_user_in_chat(
 #[tracing::instrument]
 pub async fn remove_chat_member(
     user: AuthenticatedUser,
-    Path((chat_id, user_id)): Path<(i64, i64)>,
+    Path((chat_id, user_id)): Path<(Uuid, Uuid)>,
     State(state): State<AppState>,
 ) -> Result<StatusCode, StatusCode> {
     tracing::info!("Got remove_chat_member Request.");
@@ -191,7 +201,7 @@ pub async fn remove_chat_member(
 #[tracing::instrument]
 pub async fn update_chat(
     user: AuthenticatedUser,
-    Path(id): Path<i64>,
+    Path(id): Path<Uuid>,
     State(state): State<AppState>,
     Json(body): Json<UpdateChatRequest>,
 ) -> Result<StatusCode, StatusCode> {

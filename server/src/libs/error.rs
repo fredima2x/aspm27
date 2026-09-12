@@ -12,6 +12,7 @@ pub fn db_err(e: sqlx::Error) -> StatusCode {
     }
 }
 
+#[allow(dead_code)]
 pub fn internal_error<E: std::fmt::Display>(e: E) -> StatusCode {
     tracing::error!("Internal Error: {}", e);
     StatusCode::INTERNAL_SERVER_ERROR
