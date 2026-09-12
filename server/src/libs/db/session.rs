@@ -1,3 +1,5 @@
+use std::result;
+
 use crate::libs::models::db_objects::Session;
 use sqlx::SqlitePool;
 use uuid::Uuid;
@@ -36,4 +38,13 @@ pub async fn create_session(owner_id: Uuid, pool: SqlitePool) -> Result<i64, sql
         .execute(&pool)
         .await?;
     Ok(result.last_insert_rowid())
+}
+
+pub async fn does_session_exist(session_id: i64, pool:  SqlitePool) -> Result<bool, ()> {
+    let result = get_session(session_id, pool).await;
+    match result {
+        Ok(T) => Ok(true),
+        Err(sqlx::Error::RowNotFound) => Ok(false),
+        _ => Err(()),
+    }
 }
