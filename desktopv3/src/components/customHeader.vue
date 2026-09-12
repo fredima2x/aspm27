@@ -1,46 +1,65 @@
 <script setup>
-const isTauri = !!window.__TAURI_INTERNALS__;
-
-import { ref } from 'vue';
 import fullscreenIcon from "../assets/fullscreen-icon.svg";
 import quitIcon from "../assets/quit-icon.svg";
 
-let currentWindow;
-if (isTauri) {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+const isTauri =
+  typeof window !== "undefined" && Boolean(window.__TAURI_INTERNALS__);
+let currentWindow = null;
+
+async function attachCurrentWindow() {
+  if (!isTauri) {
+    return;
+  }
+
+  try {
+    const { getCurrentWindow } = await import("@tauri-apps/api/window");
     currentWindow = getCurrentWindow();
+  } catch {
+    currentWindow = null;
+  }
 }
 
-const reactiveIsTauri = ref(isTauri);
+attachCurrentWindow();
 
 function toggleFullscreen() {
-    if (!isTauri) {return}
-    currentWindow.setFullscreen(!currentWindow.isFullscreen());
+  if (!isTauri || !currentWindow) {
+    return;
+  }
+  currentWindow.setFullscreen(!currentWindow.isFullscreen());
 }
 
 function quit() {
-    if (!isTauri) {return}
-    currentWindow.close();
+  if (!isTauri || !currentWindow) {
+    return;
+  }
+  currentWindow.close();
 }
 
 function startDragging() {
-    if (!isTauri) {return}
-    currentWindow.startDragging();
+  if (!isTauri || !currentWindow) {
+    return;
+  }
+  currentWindow.startDragging();
 }
-
 </script>
 
 <template>
-  <header @mousedown="startDragging" v-if="reactiveIsTauri">
+  <header @mousedown="startDragging">
     <div class="app-controls">
       <button
+        v-if="isTauri"
         @click="toggleFullscreen"
         @mousedown.stop
         class="app-control-fullscreen"
       >
         <img :src="fullscreenIcon" class="icon" alt="Fullscreen" />
       </button>
-      <button @click="quit" @mousedown.stop class="app-control-quit">
+      <button
+        v-if="isTauri"
+        @click="quit"
+        @mousedown.stop
+        class="app-control-quit"
+      >
         <img :src="quitIcon" class="icon" alt="Quit" />
       </button>
     </div>
@@ -50,20 +69,22 @@ function startDragging() {
 <style scoped>
 header {
   background-color: var(--theme-gray);
-  display: fixed;
+  position: sticky;
   padding: 5px;
   margin: 0;
   right: 0;
   left: 0;
   top: 0;
-  height: 20px;
+  height: 30px;
   border-bottom: solid 2px var(--theme-primary);
+  z-index: 10;
 }
 
 .app-controls {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  min-height: 20px;
 }
 
 header .icon {

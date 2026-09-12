@@ -1,9 +1,9 @@
 <script setup>
-import CHeader from './components/c-header.vue';
+import customHeader from './components/customHeader.vue';
 </script>
 
 <template>
-    <c-header />
+    <customHeader />
     <router-view/>
 </template>
 
