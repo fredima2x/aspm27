@@ -61,7 +61,7 @@ function handleInput() {
 
 <template>
   <div class="app-background">
-    <div class="login-page">
+    <form class="login-page">
       <h2 class="heading">Welcome Back!</h2>
       <p class="sign-in-text">Sign in:</p>
 
@@ -94,7 +94,7 @@ function handleInput() {
         Dont have an account yet?
         <a class="sign-up-link" @click="router.push('/register')">Sign up</a>
       </p>
-    </div>
+    </form>
   </div>
 </template>
 
@@ -110,7 +110,7 @@ function handleInput() {
   width: min(100%, 360px);
   box-sizing: border-box;
   margin: 0;
-  animation: fadeIn 0.5s ease-in-out forwards;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 .heading {

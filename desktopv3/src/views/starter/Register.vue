@@ -1,36 +1,44 @@
 <script setup>
-import { login } from '../../api/requests/login';
-import { register } from '../../api/requests/register';
-import { save_token } from '../../stores/token';
+import { login } from "../../api/requests/login";
+import { register } from "../../api/requests/register";
+import { save_token } from "../../stores/token";
 
-import loadingIcon from '../../assets/loading-spinner.svg';
+import loadingIcon from "../../assets/loading-spinner.svg";
 
-import { useRouter } from 'vue-router';
-import { onMounted, ref } from 'vue';
-import { get_user } from '../../api/requests/get_user';
+import { useRouter } from "vue-router";
+import { onMounted, ref } from "vue";
+import { get_user } from "../../api/requests/get_user";
 const router = useRouter();
 
-const usernameWarning = ref('');
-const passwordWarning = ref('');
-const warning = ref('');
-const loadingStatus = ref(false)
+const usernameWarning = ref("");
+const passwordWarning = ref("");
+const warning = ref("");
+const loadingStatus = ref(false);
 
-const usernameInput = ref('');
-const passwordInput = ref('');
+const usernameInput = ref("");
+const passwordInput = ref("");
 
 onMounted(() => {
   loadingStatus.value = false;
 });
 
 async function check_password(password) {
-  if (password.length < 8) { return -1 }
-  if (password.length > 64) { return 1 }
-  return 0
+  if (password.length < 8) {
+    return -1;
+  }
+  if (password.length > 64) {
+    return 1;
+  }
+  return 0;
 }
 
 async function check_username(username) {
-  if (username.length < 3) { return -1 }
-  if (username.length > 24) { return 1 }
+  if (username.length < 3) {
+    return -1;
+  }
+  if (username.length > 24) {
+    return 1;
+  }
   const data = await get_user(username);
   if (data.ok) {
     return 2;
@@ -44,37 +52,43 @@ async function check_username(username) {
 }
 
 async function username_update(event) {
-  warning.value = '';
+  warning.value = "";
   const username = event.target.value;
-  if (!username) { usernameWarning.value = ''; return }
+  if (!username) {
+    usernameWarning.value = "";
+    return;
+  }
   const username_status = await check_username(username);
   console.debug(username_status);
 
   if (username_status === -1) {
-    usernameWarning.value = 'Username is too short!';
+    usernameWarning.value = "Username is too short!";
   } else if (username_status === 1) {
-    usernameWarning.value = 'Username is too long!';
+    usernameWarning.value = "Username is too long!";
   } else if (username_status === 2) {
-    usernameWarning.value = 'Username already exists!'
+    usernameWarning.value = "Username already exists!";
   } else if (username_status === 0) {
-    usernameWarning.value = '';
+    usernameWarning.value = "";
   }
 }
 
 async function password_update(event) {
-  warning.value = '';
+  warning.value = "";
   const password = event.target.value;
-  if (!password) { passwordWarning.value = ''; return }
+  if (!password) {
+    passwordWarning.value = "";
+    return;
+  }
   const password_status = await check_password(password);
 
   if (password_status === -1) {
-    passwordWarning.value = 'Password is too short!';
+    passwordWarning.value = "Password is too short!";
   }
   if (password_status === 1) {
-    passwordWarning.value = 'Password is too long!';
+    passwordWarning.value = "Password is too long!";
   }
   if (password_status === 0) {
-    passwordWarning.value = '';
+    passwordWarning.value = "";
   }
 }
 
@@ -85,10 +99,13 @@ async function sign_up_handler() {
   loadingStatus.value = true;
 
   if (!username || !password) {
-    warning.value = 'Username and Password cannot be empty!';
+    warning.value = "Username and Password cannot be empty!";
   }
 
-  if (await check_password(password) != 0 || await check_username(username) != 0) {
+  if (
+    (await check_password(password)) != 0 ||
+    (await check_username(username)) != 0
+  ) {
     loadingStatus.value = false;
     return;
   }
@@ -102,55 +119,75 @@ async function sign_up_handler() {
   } else {
     loadingStatus.value = false;
     if (data.status === 400) {
-      warning.value = 'Invalid Username or Password! (400)';
+      warning.value = "Invalid Username or Password! (400)";
     } else if (data.status === 409) {
-      warning.value = 'User already Exists! (409)';
+      warning.value = "User already Exists! (409)";
     } else if (data.status === 500) {
-      warning.value = 'Internal Server Error, Please try again later. (500)';
+      warning.value = "Internal Server Error, Please try again later. (500)";
     } else {
-      warning.value = 'An unknown Error occured. View console for more Information!'
+      warning.value =
+        "An unknown Error occured. View console for more Information!";
       console.error("Invalid Server Response", data);
     }
   }
 }
-
 </script>
 
 <template>
-    <div class="app-background">
-        <div class="register-page">
-            <h2 class="heading">Hello there!</h2>
-            <p class="sign-up-text">Sign up:</p>
+  <div class="app-background">
+    <form class="register-page">
+      <h2 class="heading">Hello there!</h2>
+      <p class="sign-up-text">Sign up:</p>
 
-            <input type="text" placeholder="Username" class="username-input" @input="username_update" @keydown.enter="sign_up_handler" v-model="usernameInput">
-            <Transition name="warning">
-                <p v-show="usernameWarning" class="password-warn-text">{{ usernameWarning }}</p>
-            </Transition>
+      <input
+        type="text"
+        placeholder="Username"
+        class="username-input"
+        @input="username_update"
+        @keydown.enter="sign_up_handler"
+        v-model="usernameInput"
+      />
+      <Transition name="warning">
+        <p v-show="usernameWarning" class="password-warn-text">
+          {{ usernameWarning }}
+        </p>
+      </Transition>
 
-            <input type="password" placeholder="Password" class="password-input" @input="password_update" @keydown.enter="sign_up_handler" v-model="passwordInput">
-            <Transition name="warning">
-                <p v-show="passwordWarning" class="password-warn-text">{{ passwordWarning }}</p>
-            </Transition>
-            <Transition name="warning">
-                <p v-show="warning" class="password-warn-text">{{ warning }}</p>
-            </Transition>
+      <input
+        type="password"
+        placeholder="Password"
+        class="password-input"
+        @input="password_update"
+        @keydown.enter="sign_up_handler"
+        v-model="passwordInput"
+      />
+      <Transition name="warning">
+        <p v-show="passwordWarning" class="password-warn-text">
+          {{ passwordWarning }}
+        </p>
+      </Transition>
+      <Transition name="warning">
+        <p v-show="warning" class="password-warn-text">{{ warning }}</p>
+      </Transition>
 
-            <button class="sign-up-button" @click="sign_up_handler">
-              <template v-if="loadingStatus"><img :src="loadingIcon" class="loading-icon"></template>
-              <template v-else>Sign up</template>
-            </button>
+      <button class="sign-up-button" @click="sign_up_handler">
+        <template v-if="loadingStatus"
+          ><img :src="loadingIcon" class="loading-icon"
+        /></template>
+        <template v-else>Sign up</template>
+      </button>
 
-            <p class="sign-in-text">Already have an account?
-                <a @click="router.push('/login')" class="sign-in-link">Sign in</a>
-            </p>
-        </div>
-    </div>
+      <p class="sign-in-text">
+        Already have an account?
+        <a @click="router.push('/login')" class="sign-in-link">Sign in</a>
+      </p>
+    </form>
+  </div>
 </template>
 
 <style scoped>
-@import '/src/assets/styles/general.css';
-@import '/src/assets/styles/utils/animations.css';
-
+@import "/src/assets/styles/general.css";
+@import "/src/assets/styles/utils/animations.css";
 
 .register-page {
   background-color: rgb(15, 15, 15);
@@ -178,7 +215,9 @@ async function sign_up_handler() {
 
 .warning-enter-active,
 .warning-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 
 .warning-enter-from,
@@ -205,7 +244,8 @@ async function sign_up_handler() {
   opacity: 0.6;
 }
 
-.sign-in-text, .sign-in-link {
+.sign-in-text,
+.sign-in-link {
   color: var(--theme-light-gray);
 }
 
@@ -227,4 +267,3 @@ async function sign_up_handler() {
   }
 }
 </style>
-
