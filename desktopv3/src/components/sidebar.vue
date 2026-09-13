@@ -2,61 +2,49 @@
 import { ref, onMounted } from "vue";
 import Chat from "../components/chat.vue";
 import get_chats from "../api/requests/get_chats.js";
-import { deleteChat, removeChatFromLocalStorage } from "../api/requests/deleteChat.js";
+import { get_cache, set_cache } from "../stores/cache.js";
 
 const chats = ref([]);
-const selectedChatId = ref(null);
+const selectedChatId = ref('');
+
+const props = defineProps({
+  current_user_id: String,
+});
+
+const emit = defineEmits([
+  "select_chat"
+]);
 
 onMounted(async () => {
+  chats.value = get_cache("chats");
+  console.debug("Getting Chats FROM cache", chats.value)
+  setInterval(async () => { await updateChat() }, 5000)
+});
+
+async function updateChat() {
   try {
     const payload = await get_chats();
-    chats.value = Array.isArray(payload)
-      ? payload.map((chat) => ({
-          chatId: chat.id,
-          chatName: chat.chat_name,
-          chatDesc: chat.chat_desc,
-        }))
-      : [];
-
-    localStorage.setItem("chats", JSON.stringify(chats.value));
-  } catch (error) {
-    console.error("Failed to load chats", error);
-
-    const cached = JSON.parse(localStorage.getItem("chats") || "[]");
-    chats.value = Array.isArray(cached) ? cached : [];
+    console.debug("Fetched Chats from Server", payload);
+    const chats_ = Array.isArray(payload.body)
+        ? payload.body.map((chat) => ({
+            chatId: chat.id,
+            chatName: chat.chat_name,
+            chatDesc: chat.chat_desc,
+          }))
+        : [];
+    chats.value = chats_;
+    set_cache("chats", chats_);
+  } catch {
+    console.error("Failed to Fetch Chats from API");
+    chats.value = get_cache("chats");
   }
-});
+}
 
 function chooseChat(chatId) {
   selectedChatId.value = chatId;
+  emit("select_chat", chatId)
 }
 
-async function testRemoveChat(chatId = chats.value[0]?.chatId) {
-  if (!chatId) {
-    console.warn("testRemoveChat: no chat is available to remove");
-    return;
-  }
-
-  try {
-    console.log(`testRemoveChat: attempting to remove ${chatId}`);
-
-    await deleteChat(chatId);
-    removeChatFromLocalStorage(chatId);
-
-    chats.value = chats.value.filter((chat) => chat.chatId !== chatId);
-    localStorage.setItem("chats", JSON.stringify(chats.value));
-
-    if (selectedChatId.value === chatId) {
-      selectedChatId.value = null;
-    }
-
-    console.log(`testRemoveChat: removed ${chatId}; remaining=${chats.value.length}`);
-  } catch (error) {
-    console.error("testRemoveChat: failed to remove chat", error);
-  }
-}
-
-testRemoveChat('')
 </script>
 
 <template>
@@ -74,7 +62,7 @@ testRemoveChat('')
           :chatDesc="chat.chatDesc"
           :chatId="chat.chatId"
           :selected="chat.chatId === selectedChatId"
-          @select="testRemoveChat(chatId)"
+          @select="chooseChat"
         />
       </div>
     </div>

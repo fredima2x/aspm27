@@ -1,12 +1,19 @@
 <script setup>
+import { ref } from 'vue';
+import Message from './message.vue';
 
+const props = defineProps({
+	current_user_id: String,
+});
+
+const messages = ref([]);
 </script>
 
 <template>
   <div class="content-panel">
     <div class="message-panel widget">
       <div class="message-list">
-        <message message="Hello!"/>
+        <Message v-for="message in messages" :message="message.content" :own="message.owner_id === current_user_id"/>
       </div>
       <div class="message-input">
         <input type="text" placeholder="Enter Message...">

@@ -1,12 +1,20 @@
 <script setup>
 import sidebar from "../../components/sidebar.vue";
 import contentPanel from "../../components/contentPanel.vue";
+import { ref } from "vue";
+
+const selected_chat_id = ref("")
+
+function handle_select_chat(chatId) {
+  selected_chat_id.value = chatId;
+}
+
 </script>
 
 <template>
   <div class="app-background">
-    <sidebar />
-    <contentPanel />
+    <sidebar @select_chat="handle_select_chat"/>
+    <contentPanel :selected_chat_id="handle_select_chat"/>
   </div>
 </template>
 
