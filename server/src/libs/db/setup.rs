@@ -3,8 +3,8 @@ use sqlx::SqlitePool;
 pub async fn setup(pool: SqlitePool) {
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS sessions (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            owner_id      INTEGER NOT NULL,
+            id            TEXT PRIMARY KEY,
+            owner_id      TEXT NOT NULL,
             last_update   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )",
     )

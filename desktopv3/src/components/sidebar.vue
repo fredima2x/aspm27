@@ -3,7 +3,6 @@ import { ref, onMounted } from "vue";
 import Chat from "../components/chat.vue";
 import get_chats from "../api/requests/get_chats.js";
 import { deleteChat, removeChatFromLocalStorage } from "../api/requests/deleteChat.js";
-import { generateUuid } from "../api/client.js";
 
 const chats = ref([]);
 const selectedChatId = ref(null);

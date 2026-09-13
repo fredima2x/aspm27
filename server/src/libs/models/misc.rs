@@ -4,5 +4,5 @@ use uuid::Uuid;
 #[derive(Debug)]
 pub struct AuthenticatedUser {
     pub id: Uuid,
-    pub session_id: i64,
+    pub session_id: Uuid,
 }

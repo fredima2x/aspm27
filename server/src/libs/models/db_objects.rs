@@ -66,7 +66,7 @@ pub struct BasicMessage {
 #[derive(sqlx::FromRow)]
 pub struct Session {
     pub id: Uuid,
-    pub owner_id: String,
+    pub owner_id: Uuid,
     pub last_update: String,
 }
 

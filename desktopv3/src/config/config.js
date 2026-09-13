@@ -1,1 +1,1 @@
-export const BASE_SERVER_URL = "https://api.aspm27.com";
+export const BASE_SERVER_URL = "http://127.0.0.1:3000";

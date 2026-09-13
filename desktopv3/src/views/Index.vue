@@ -2,11 +2,11 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router'
 import { get_token } from '../stores/token';
-import { get_chats } from '../api/requests/get_chats';
+import get_chats from '../api/requests/get_chats';
 const router = useRouter()
 
 onMounted(async () => {
-  if (get_token == "undefined") {
+  if (get_token() == "undefined") {
     router.push("/register");
   } else {
     const data = await get_chats();
