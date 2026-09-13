@@ -111,9 +111,8 @@ async function sign_up_handler() {
 
   const data = await register(username, password);
   if (data.raw.ok) {
-    save_token(data.body.auth_token);
     loadingStatus.value = false;
-    router.push("/chat");
+    router.push("/login");
   } else {
     loadingStatus.value = false;
     if (data.raw.status == 400) {

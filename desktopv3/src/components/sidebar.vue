@@ -1,10 +1,12 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import Chat from "../components/chat.vue";
+import sidebarChat from "./sidebarChat.vue";
+import { Chat } from "../api/requests/modelChat.js";
 import get_chats from "../api/requests/get_chats.js";
-import { deleteChat, removeChatFromLocalStorage } from "../api/requests/deleteChat.js";
+import { deleteChat } from "../api/requests/deleteChat.js";
 import { generateUuid } from "../api/client.js";
 
+const chat1 = new Chat(generateUuid(), "test", "test chat");
 const chats = ref([]);
 const selectedChatId = ref(null);
 
@@ -19,6 +21,7 @@ onMounted(async () => {
         }))
       : [];
 
+    chats.value.push(chat1);
     localStorage.setItem("chats", JSON.stringify(chats.value));
   } catch (error) {
     console.error("Failed to load chats", error);
@@ -31,33 +34,6 @@ onMounted(async () => {
 function chooseChat(chatId) {
   selectedChatId.value = chatId;
 }
-
-async function testRemoveChat(chatId = chats.value[0]?.chatId) {
-  if (!chatId) {
-    console.warn("testRemoveChat: no chat is available to remove");
-    return;
-  }
-
-  try {
-    console.log(`testRemoveChat: attempting to remove ${chatId}`);
-
-    await deleteChat(chatId);
-    removeChatFromLocalStorage(chatId);
-
-    chats.value = chats.value.filter((chat) => chat.chatId !== chatId);
-    localStorage.setItem("chats", JSON.stringify(chats.value));
-
-    if (selectedChatId.value === chatId) {
-      selectedChatId.value = null;
-    }
-
-    console.log(`testRemoveChat: removed ${chatId}; remaining=${chats.value.length}`);
-  } catch (error) {
-    console.error("testRemoveChat: failed to remove chat", error);
-  }
-}
-
-testRemoveChat('')
 </script>
 
 <template>
@@ -68,15 +44,23 @@ testRemoveChat('')
         <input type="search" placeholder="Search Chats..." />
       </div>
       <div class="chat-list">
-        <Chat
+        <sidebarChat
           v-for="chat in chats"
           :key="chat.chatId"
           :chatName="chat.chatName"
           :chatDesc="chat.chatDesc"
           :chatId="chat.chatId"
           :selected="chat.chatId === selectedChatId"
-          @select="testRemoveChat(chatId)"
+          @select="chooseChat(chat.chatId)"
+          @contextmenu.prevent="deleteChat(chat, chats)"
         />
+        <div class="add-chat-button-wrapper">
+          <div
+            class="add-chat-button"
+            @click="chats.unshift(new Chat(generateUuid(), 'test', 'test chat'))">
+            <p>+</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -85,6 +69,7 @@ testRemoveChat('')
 <style scoped>
 @import "../assets/styles/general.css";
 @import "../assets/styles/root.css";
+@import "../assets/styles/utils/animations.css";
 
 .sidebar {
   display: flex;
@@ -122,8 +107,12 @@ testRemoveChat('')
   min-height: 0;
   max-height: 100%;
   overflow-y: auto;
+  padding-top: 10px;
   background-color: var(--theme-gray);
   border-radius: var(--theme-round-edges);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .search-bar {
@@ -132,5 +121,29 @@ testRemoveChat('')
 
 .search-bar input {
   border: 1px solid var(--theme-light-gray);
+}
+
+.add-chat-button-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 10px;
+}
+
+.add-chat-button {
+  border-radius: 50%;
+  width: 4em;
+  height: 4em;
+  background-color: var(--theme-light-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: fadeInTop 0.5s ease-in-out;
+}
+
+.add-chat-button p {
+  font-size: 4em;
 }
 </style>

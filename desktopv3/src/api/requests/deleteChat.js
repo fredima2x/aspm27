@@ -1,22 +1,20 @@
-import { apiFetch, generateUuid } from "../client.js";
+export function deleteChat(chat, chatList) {
+  const targetId = chat.chatId ? chat.chatId : '';
+  const index = chatList.findIndex(chat => chat.chatId === targetId);
 
-export async function deleteChat(chatId) {
-  const uuid = typeof chatId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(chatId)
-    ? chatId
-    : generateUuid();
+  if (index >= 0) {
+    const removed = chatList[index];
+    chatList.splice(index, 1);
 
-  const response = await apiFetch(`/chats/${uuid}`, {
-    method: "DELETE"
-  });
+    if (removed?.deleteThisChat) {
+      removed.deleteThisChat();
+    }
 
-  if (response !== null) {
-    removeFromLocalStorage(chatId);
+    removeChatFromLocalStorage(targetId);
   }
-
-  return response;
 }
 
-export function removeChatFromLocalStorage(chatId) {
+function removeChatFromLocalStorage(chatId) {
   const raw = localStorage.getItem("chats");
   const chats = raw ? JSON.parse(raw) : [];
 
