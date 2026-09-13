@@ -1,10 +1,10 @@
 <script setup>
+import { onMounted } from "vue";
 import fullscreenIcon from "../assets/fullscreen-icon.svg";
 import quitIcon from "../assets/quit-icon.svg";
 
-const isTauri =
-  typeof window !== "undefined" && Boolean(window.__TAURI_INTERNALS__);
-let currentWindow = null;
+let isTauri = Boolean(window.__TAURI_INTERNALS__);
+let currentWindow;
 
 async function attachCurrentWindow() {
   if (!isTauri) {
@@ -16,20 +16,24 @@ async function attachCurrentWindow() {
     currentWindow = getCurrentWindow();
   } catch {
     currentWindow = null;
+    console.error("Issue Loading Current Window!, Removing Header...");
+    isTauri = false;
   }
 }
 
-attachCurrentWindow();
+onMounted(async () => {
+  await attachCurrentWindow();
+});
 
 function toggleFullscreen() {
-  if (!isTauri || !currentWindow) {
+  if (!isTauri) {
     return;
   }
   currentWindow.setFullscreen(!currentWindow.isFullscreen());
 }
 
 function quit() {
-  if (!isTauri || !currentWindow) {
+  if (!isTauri) {
     return;
   }
   currentWindow.close();
@@ -44,26 +48,26 @@ function startDragging() {
 </script>
 
 <template>
-  <header @mousedown="startDragging">
-    <div class="app-controls">
-      <button
-        v-if="isTauri"
-        @click="toggleFullscreen"
-        @mousedown.stop
-        class="app-control-fullscreen"
-      >
-        <img :src="fullscreenIcon" class="icon" alt="Fullscreen" />
-      </button>
-      <button
-        v-if="isTauri"
-        @click="quit"
-        @mousedown.stop
-        class="app-control-quit"
-      >
-        <img :src="quitIcon" class="icon" alt="Quit" />
-      </button>
-    </div>
-  </header>
+  <template v-if="isTauri">
+    <header @mousedown="startDragging">
+      <div class="app-controls">
+        <button
+          @click="toggleFullscreen"
+          @mousedown.stop
+          class="app-control-fullscreen"
+        >
+          <img :src="fullscreenIcon" class="icon" alt="Fullscreen" />
+        </button>
+        <button
+          @click="quit"
+          @mousedown.stop
+          class="app-control-quit"
+        >
+          <img :src="quitIcon" class="icon" alt="Quit" />
+        </button>
+      </div>
+    </header>
+  </template>
 </template>
 
 <style scoped>

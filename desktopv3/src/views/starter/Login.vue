@@ -13,10 +13,6 @@ const usernameInput = ref("");
 const passwordInput = ref("");
 const warning = ref('');
 
-onMounted(() => {
-  loadingStatus.value = false;
-});
-
 async function handle_login() {
   const password = passwordInput.value;
   const username = usernameInput.value;

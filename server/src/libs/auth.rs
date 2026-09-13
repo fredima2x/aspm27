@@ -6,13 +6,12 @@ use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use uuid::Uuid;
-
 use crate::libs::db;
 
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
     pub sub: Uuid,
-    pub session_id: i64,
+    pub session_id: Uuid,
     pub exp: usize,
 }
 
@@ -32,7 +31,7 @@ pub fn verify_password(password: &str, password_hash: &str) -> bool {
         .is_ok()
 }
 
-pub fn create_token(user_id: Uuid, session_id: i64, secret: &str) -> String {
+pub fn create_token(user_id: Uuid, session_id: Uuid, secret: &str) -> String {
     let exp_time = chrono::Utc::now()
         .checked_add_signed(chrono::Duration::hours(24))
         .unwrap()
@@ -50,20 +49,35 @@ pub fn create_token(user_id: Uuid, session_id: i64, secret: &str) -> String {
     .unwrap()
 }
 
+#[derive(Debug)]
+pub enum VerifyTokenError {
+    Jwt(jsonwebtoken::errors::Error),
+    Database(sqlx::Error),
+    InvalidSession,
+}
+
 pub async fn verify_token(
     token_string: &str,
     secret: &str,
     pool: SqlitePool,
-) -> Result<Claims, ()> {
+) -> Result<Claims, VerifyTokenError> {
     let token_data = jsonwebtoken::decode::<Claims>(
         token_string,
         &DecodingKey::from_secret(secret.as_bytes()),
         &Validation::default(),
-    ).map_err(|_| ())?;
+    )
+    .map_err(VerifyTokenError::Jwt)?;
 
-    if db::session::validate_session(token_data.claims.session_id, pool).await? {
-        Ok(token_data.claims)
-    } else {
-        Err(())
+    let valid = db::session::validate_session(
+        token_data.claims.session_id,
+        pool,
+    )
+    .await
+    .map_err(VerifyTokenError::Database)?;
+
+    if !valid {
+        return Err(VerifyTokenError::InvalidSession);
     }
+
+    Ok(token_data.claims)
 }

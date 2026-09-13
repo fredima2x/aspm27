@@ -1,7 +1,6 @@
 <script setup>
 import sidebar from "../../components/sidebar.vue";
 import contentPanel from "../../components/contentPanel.vue";
-import Settings from "../settings/Settings.vue";
 </script>
 
 <template>
