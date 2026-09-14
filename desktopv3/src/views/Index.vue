@@ -17,7 +17,7 @@ onMounted(async () => {
 
   if (data?.raw?.ok) {
     router.push("/chat");
-  } else if (data?.raw?.status === 401) {
+  } else if (data?.raw?.status == 401) {
     router.push("/login");
   }
 });

@@ -56,7 +56,7 @@ function handleInput() {
 
 <template>
   <div class="app-background">
-    <form class="login-page">
+    <form @submit.prevent class="login-page">
       <h2 class="heading">Welcome Back!</h2>
       <p class="sign-in-text">Sign in:</p>
 
