@@ -13,7 +13,7 @@ pub async fn user_get_chats(
         FROM chats c
         INNER JOIN chat_members cm
             ON c.id = cm.chat_id
-        WHERE cm.user_id = ?
+        WHERE cm.user_id = ? AND c.soft_delete = FALSE
         "#,
     )
     .bind(user_id)
@@ -62,7 +62,6 @@ pub async fn chat_soft_delete(chat_id: Uuid, pool: SqlitePool) -> Result<(), sql
     Ok(())
 }
 
-#[allow(dead_code)]
 pub async fn chat_add_user(
     chat_id: Uuid,
     user_id: Uuid,
