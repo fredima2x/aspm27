@@ -53,6 +53,20 @@ function create_chat() {
   //TODO
 }
 
+export function deleteChat(chat, chatList) {
+  const targetId = chat.chatId ? chat.chatId : '';
+  const index = chatList.findIndex(chat => chat.chatId === targetId);
+
+  if (index >= 0) {
+    const removed = chatList[index];
+    chatList.splice(index, 1);
+
+    if (removed?.deleteThisChat) {
+      removed.deleteThisChat();
+    }
+  }
+}
+
 </script>
 
 <template>

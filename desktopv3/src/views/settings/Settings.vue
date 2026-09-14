@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from "vue";
 
-
 const selectedSetting = ref("profile");
 </script>
 
