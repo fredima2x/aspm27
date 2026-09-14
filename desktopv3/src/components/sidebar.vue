@@ -92,6 +92,12 @@ async function deleteChat(chat) {
         <input type="search" placeholder="Search Chats..." />
       </div>
       <div class="chat-list">
+        <template v-if="!chats.length">
+          <div class="chats-placeholder-text-wrapper">
+            <p class="chats-placeholder-text">No chats were found</p>
+          </div>
+        </template>
+        
         <sidebarChat
           v-for="chat in chats"
           :key="chat.chatId"
@@ -198,5 +204,19 @@ async function deleteChat(chat) {
 
 .add-chat-button p {
   font-size: 4em;
+}
+
+.chats-placeholder-text-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.chats-placeholder-text {
+  color: var(--theme-light-gray);
+  margin: 0;
+  text-align: center;
+  font-size: 0.9em;
 }
 </style>
