@@ -30,6 +30,7 @@ const emit = defineEmits(["select"]);
 	color: var(--theme-white);
   cursor: pointer;
   animation: fadeInTop 0.5s ease-in-out;
+  position: relative;
 }
 
 .chat.selected {
