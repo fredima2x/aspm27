@@ -1,8 +1,7 @@
 import { apiFetch } from "../client.js";
 
-export function delete_chat(chat) {
-  const chatId = chat.chatId;
-  return apiFetch(`/users/${chatId}`, {
+export function delete_chat(chatId) {
+  return apiFetch(`/chats/${chatId}`, {
     method: 'DELETE'
   });
 }
