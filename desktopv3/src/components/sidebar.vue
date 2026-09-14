@@ -9,7 +9,7 @@ import { create_chat } from "../api/requests/create_chat.js";
 import { generateUuid } from "../api/client.js";
 
 const chat1 = new Chat(generateUuid(), "test", "test chat");
-const chats = ref(chat1);
+const chats = ref([chat1]);
 const selectedChatId = ref('');
 
 const props = defineProps({
@@ -22,8 +22,8 @@ const emit = defineEmits([
 
 onMounted(async () => {
   chats.value = get_cache("chats");
-  console.debug("Getting Chats FROM cache", chats.value)
-  setInterval(async () => { await updateChat() }, 5000)
+  console.debug("Getting Chats FROM cache", chats.value);
+  setInterval(async () => { await updateChat() }, 5000);
 });
 
 async function updateChat() {
@@ -63,10 +63,8 @@ async function createChat(chatName, chatDesc) {
   }
 }
 
-async function deleteChat(chat, chatList) {
+async function deleteChat(chat) {
   const targetId = chat.chatId ? chat.chatId : '';
-  chatList.splice(chatList.findIndex(chat => chat.chatId === targetId), 1);
-  JSON.parse(localStorage.getItem("chats"));
 
   try {
     await delete_chat(targetId);
