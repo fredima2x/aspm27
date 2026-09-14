@@ -38,14 +38,20 @@ pub async fn create_chat(
     Json(body): Json<CreateChatRequest>,
 ) -> Result<Json<BasicChat>, StatusCode> {
     tracing::info!("Got create_chats Request.");
+
+    let chat_desc = body.chat_desc.as_deref().unwrap_or("");
+
     // Checks
-    let chat_name_valid = check::check_chat_name(&body.chat_name).await;
-    if !chat_name_valid {
-        tracing::info!("Returned BAD_REQUEST because chat_name is invalid.");
+    let (chat_name_valid, chat_desc_valid) = tokio::join!(
+        check::check_chat_name(&body.chat_name),
+        check::check_chat_desc(chat_desc),
+    );
+    if !chat_name_valid || !chat_desc_valid {
+        tracing::info!("Returned BAD_REQUEST because chat_name or chat_desc is invalid.");
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    let chat_id: Uuid = db::chats::chat_create(&body.chat_name, state.db.clone())
+    let chat_id: Uuid = db::chats::chat_create(&body.chat_name, chat_desc, state.db.clone())
         .await
         .map_err(error::db_err)?;
     db::chats::chat_add_user(chat_id, user.id, state.db.clone())

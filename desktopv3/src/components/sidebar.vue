@@ -4,7 +4,8 @@ import sidebarChat from "./sidebarChat.vue";
 import { Chat } from "../api/requests/modelChat.js";
 import get_chats from "../api/requests/get_chats.js";
 import { get_cache, set_cache } from "../stores/cache.js";
-import { delete_chat } from "../api/requests/deleteChat.js";
+import { delete_chat } from "../api/requests/delete_chat.js";
+import { create_chat } from "../api/requests/create_chat.js";
 import { generateUuid } from "../api/client.js";
 
 const chat1 = new Chat(generateUuid(), "test", "test chat");
@@ -49,16 +50,27 @@ function chooseChat(chatId) {
   emit("select_chat", chatId)
 }
 
-function create_chat() {
-  //TODO
+async function createChat(chatName, chatDesc) {
+  try {
+    const response = await create_chat(chatName, chatDesc);
+    if (!response?.raw?.ok) {
+      console.error('Failed to create chat on server.', response);
+      return;
+    }
+    await updateChat();
+  } catch (error) {
+    console.error('Network error while creating chat.', error);
+  }
 }
 
 async function deleteChat(chat, chatList) {
   const targetId = chat.chatId ? chat.chatId : '';
   chatList.splice(chatList.findIndex(chat => chat.chatId === targetId), 1);
+  JSON.parse(localStorage.getItem("chats"));
 
   try {
     await delete_chat(targetId);
+    await updateChat();
   } catch(error) {
     console.error("Network Error while deleting Chats.", error);
   }
@@ -87,7 +99,7 @@ async function deleteChat(chat, chatList) {
         <div class="add-chat-button-wrapper">
           <div
             class="add-chat-button"
-            @click="create_chat">
+            @click="createChat('testChat', 'test chat description')">
             <p>+</p>
           </div>
         </div>

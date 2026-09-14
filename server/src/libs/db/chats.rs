@@ -21,11 +21,16 @@ pub async fn user_get_chats(
     .await
 }
 
-pub async fn chat_create(chat_name: &str, pool: SqlitePool) -> Result<Uuid, sqlx::Error> {
+pub async fn chat_create(
+    chat_name: &str,
+    chat_desc: &str,
+    pool: SqlitePool,
+) -> Result<Uuid, sqlx::Error> {
     let chat_id = Uuid::now_v7();
-    sqlx::query("INSERT INTO chats (id, chat_name) VALUES (?, ?)")
+    sqlx::query("INSERT INTO chats (id, chat_name, chat_desc) VALUES (?, ?, ?)")
         .bind(chat_id)
         .bind(chat_name)
+        .bind(chat_desc)
         .execute(&pool)
         .await?;
     Ok(chat_id)

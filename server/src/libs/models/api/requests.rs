@@ -3,6 +3,7 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 pub struct CreateChatRequest {
     pub chat_name: String,
+    pub chat_desc: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
