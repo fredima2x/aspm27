@@ -1,9 +1,13 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import Chat from "../components/chat.vue";
+import sidebarChat from "./sidebarChat.vue";
+import { Chat } from "../api/requests/modelChat.js";
 import get_chats from "../api/requests/get_chats.js";
 import { get_cache, set_cache } from "../stores/cache.js";
+import { deleteChat } from "../api/requests/deleteChat.js";
+import { generateUuid } from "../api/client.js";
 
+const chat1 = new Chat(generateUuid(), "test", "test chat");
 const chats = ref([]);
 const selectedChatId = ref('');
 
@@ -24,19 +28,21 @@ onMounted(async () => {
 async function updateChat() {
   try {
     const payload = await get_chats();
-    console.debug("Fetched Chats from Server", payload);
-    const chats_ = Array.isArray(payload.body)
-        ? payload.body.map((chat) => ({
-            chatId: chat.id,
-            chatName: chat.chat_name,
-            chatDesc: chat.chat_desc,
-          }))
-        : [];
-    chats.value = chats_;
-    set_cache("chats", chats_);
-  } catch {
-    console.error("Failed to Fetch Chats from API");
-    chats.value = get_cache("chats");
+    chats.value = Array.isArray(payload)
+      ? payload.map((chat) => ({
+          chatId: chat.id,
+          chatName: chat.chat_name,
+          chatDesc: chat.chat_desc,
+        }))
+      : [];
+
+    chats.value.push(chat1);
+    localStorage.setItem("chats", JSON.stringify(chats.value));
+  } catch (error) {
+    console.error("Failed to load chats", error);
+
+    const cached = JSON.parse(localStorage.getItem("chats") || "[]");
+    chats.value = Array.isArray(cached) ? cached : [];
   }
 }
 
@@ -44,7 +50,6 @@ function chooseChat(chatId) {
   selectedChatId.value = chatId;
   emit("select_chat", chatId)
 }
-
 </script>
 
 <template>
@@ -55,15 +60,23 @@ function chooseChat(chatId) {
         <input type="search" placeholder="Search Chats..." />
       </div>
       <div class="chat-list">
-        <Chat
+        <sidebarChat
           v-for="chat in chats"
           :key="chat.chatId"
           :chatName="chat.chatName"
           :chatDesc="chat.chatDesc"
           :chatId="chat.chatId"
           :selected="chat.chatId === selectedChatId"
-          @select="chooseChat"
+          @select="chooseChat(chat.chatId)"
+          @contextmenu.prevent="deleteChat(chat, chats)"
         />
+        <div class="add-chat-button-wrapper">
+          <div
+            class="add-chat-button"
+            @click="chats.unshift(new Chat(generateUuid(), 'test', 'test chat'))">
+            <p>+</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -72,6 +85,7 @@ function chooseChat(chatId) {
 <style scoped>
 @import "../assets/styles/general.css";
 @import "../assets/styles/root.css";
+@import "../assets/styles/utils/animations.css";
 
 .sidebar {
   display: flex;
@@ -109,8 +123,12 @@ function chooseChat(chatId) {
   min-height: 0;
   max-height: 100%;
   overflow-y: auto;
+  padding-top: 10px;
   background-color: var(--theme-gray);
   border-radius: var(--theme-round-edges);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .search-bar {
@@ -119,5 +137,29 @@ function chooseChat(chatId) {
 
 .search-bar input {
   border: 1px solid var(--theme-light-gray);
+}
+
+.add-chat-button-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 10px;
+}
+
+.add-chat-button {
+  border-radius: 50%;
+  width: 4em;
+  height: 4em;
+  background-color: var(--theme-light-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: fadeInTop 0.5s ease-in-out;
+}
+
+.add-chat-button p {
+  font-size: 4em;
 }
 </style>
