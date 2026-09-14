@@ -14,7 +14,7 @@ function handle_select_chat(chatId) {
 <template>
   <div class="app-background">
     <sidebar @select_chat="handle_select_chat"/>
-    <contentPanel :selected_chat_id="handle_select_chat"/>
+    <contentPanel :selected_chat_id="selected_chat_id"/>
   </div>
 </template>
 
