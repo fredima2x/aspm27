@@ -55,12 +55,12 @@ function create_chat() {
 
 async function deleteChat(chat, chatList) {
   const targetId = chat.chatId ? chat.chatId : '';
-  chatList.splice(chatList.findIndex(chat => chat.chatId === targetId), 1)
+  chatList.splice(chatList.findIndex(chat => chat.chatId === targetId), 1);
 
   try {
-    let res = await delete_chat(targetId);
-  } catch {
-    console.error("Network Error while deleting Chats.", res);
+    await delete_chat(targetId);
+  } catch(error) {
+    console.error("Network Error while deleting Chats.", error);
   }
 }
 
