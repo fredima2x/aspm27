@@ -8,7 +8,7 @@ import { deleteChat } from "../api/requests/deleteChat.js";
 import { generateUuid } from "../api/client.js";
 
 const chat1 = new Chat(generateUuid(), "test", "test chat");
-const chats = ref([]);
+const chats = ref(chat1);
 const selectedChatId = ref('');
 
 const props = defineProps({
@@ -28,21 +28,19 @@ onMounted(async () => {
 async function updateChat() {
   try {
     const payload = await get_chats();
-    chats.value = Array.isArray(payload)
-      ? payload.map((chat) => ({
+    chats.value = Array.isArray(payload.body)
+      ? payload.body.map((chat) => ({
           chatId: chat.id,
           chatName: chat.chat_name,
           chatDesc: chat.chat_desc,
         }))
       : [];
 
-    chats.value.push(chat1);
-    localStorage.setItem("chats", JSON.stringify(chats.value));
+    set_cache("chats", chats.value);
   } catch (error) {
     console.error("Failed to load chats", error);
 
-    const cached = JSON.parse(localStorage.getItem("chats") || "[]");
-    chats.value = Array.isArray(cached) ? cached : [];
+    chats.value = get_cache("chats"); 
   }
 }
 
@@ -50,6 +48,11 @@ function chooseChat(chatId) {
   selectedChatId.value = chatId;
   emit("select_chat", chatId)
 }
+
+function create_chat() {
+  //TODO
+}
+
 </script>
 
 <template>
@@ -73,7 +76,7 @@ function chooseChat(chatId) {
         <div class="add-chat-button-wrapper">
           <div
             class="add-chat-button"
-            @click="chats.unshift(new Chat(generateUuid(), 'test', 'test chat'))">
+            @click="create_chat">
             <p>+</p>
           </div>
         </div>
