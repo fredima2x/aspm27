@@ -28,7 +28,7 @@ onMounted(async () => {
 async function updateChat() {
   try {
     const payload = await get_chats();
-    chats.value = Array.isArray(payload)
+    chats.value = Array.isArray(payload.body)
       ? payload.map((chat) => ({
           chatId: chat.id,
           chatName: chat.chat_name,
@@ -36,7 +36,6 @@ async function updateChat() {
         }))
       : [];
 
-    chats.value.push(chat1);
     localStorage.setItem("chats", JSON.stringify(chats.value));
   } catch (error) {
     console.error("Failed to load chats", error);
