@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import sidebarChat from "./sidebarChat.vue";
+import chatCreationDialog from "./chatCreationDialog.vue";
 import { Chat } from "../api/requests/modelChat.js";
 import get_chats from "../api/requests/get_chats.js";
 import { get_cache, set_cache } from "../stores/cache.js";
@@ -11,6 +12,7 @@ import { generateUuid } from "../api/client.js";
 const chat1 = new Chat(generateUuid(), "test", "test chat");
 const chats = ref([chat1]);
 const selectedChatId = ref('');
+const displayChatCreationDialog = ref(false);
 
 const props = defineProps({
   current_user_id: String,
@@ -50,6 +52,10 @@ function chooseChat(chatId) {
   emit("select_chat", chatId)
 }
 
+function openDialog() {
+  displayChatCreationDialog.value = true;
+}
+
 async function createChat(chatName, chatDesc) {
   try {
     const response = await create_chat(chatName, chatDesc);
@@ -60,6 +66,8 @@ async function createChat(chatName, chatDesc) {
     await updateChat();
   } catch (error) {
     console.error('Network error while creating chat.', error);
+  } finally {
+    displayChatCreationDialog.value = false;
   }
 }
 
@@ -84,6 +92,12 @@ async function deleteChat(chat) {
         <input type="search" placeholder="Search Chats..." />
       </div>
       <div class="chat-list">
+        <template v-if="!chats.length">
+          <div class="chats-placeholder-text-wrapper">
+            <p class="chats-placeholder-text">No chats were found</p>
+          </div>
+        </template>
+        
         <sidebarChat
           v-for="chat in chats"
           :key="chat.chatId"
@@ -94,10 +108,15 @@ async function deleteChat(chat) {
           @select="chooseChat(chat.chatId)"
           @contextmenu.prevent="deleteChat(chat, chats)"
         />
+        <chatCreationDialog
+          v-if="displayChatCreationDialog"
+          @close="displayChatCreationDialog = false"
+          @create="createChat($event.chatName, $event.chatDesc)"
+        />
         <div class="add-chat-button-wrapper">
           <div
             class="add-chat-button"
-            @click="createChat('testChat', 'test chat description')">
+            @click="openDialog">
             <p>+</p>
           </div>
         </div>
@@ -185,5 +204,19 @@ async function deleteChat(chat) {
 
 .add-chat-button p {
   font-size: 4em;
+}
+
+.chats-placeholder-text-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.chats-placeholder-text {
+  color: var(--theme-light-gray);
+  margin: 0;
+  text-align: center;
+  font-size: 0.9em;
 }
 </style>

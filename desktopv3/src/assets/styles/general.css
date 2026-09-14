@@ -22,7 +22,8 @@ p {
   font-size: 12px;
 }
 
-input {
+input,
+textarea {
   display: block;
   width: 100%;
   box-sizing: border-box;
@@ -35,7 +36,8 @@ input {
   color: var(--theme-white);
 }
 
-input:focus {
+input:focus,
+textarea:focus {
   outline: none;
 }
 
