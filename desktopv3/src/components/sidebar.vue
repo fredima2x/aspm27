@@ -4,7 +4,7 @@ import sidebarChat from "./sidebarChat.vue";
 import { Chat } from "../api/requests/modelChat.js";
 import get_chats from "../api/requests/get_chats.js";
 import { get_cache, set_cache } from "../stores/cache.js";
-import { deleteChat } from "../api/requests/deleteChat.js";
+import { delete_chat } from "../api/requests/deleteChat.js";
 import { generateUuid } from "../api/client.js";
 
 const chat1 = new Chat(generateUuid(), "test", "test chat");
@@ -53,12 +53,12 @@ function create_chat() {
   //TODO
 }
 
-export async function deleteChat(chat, chatList) {
+async function deleteChat(chat, chatList) {
   const targetId = chat.chatId ? chat.chatId : '';
   chatList.splice(chatList.findIndex(chat => chat.chatId === targetId), 1)
 
   try {
-    let res = await deleteChat(targetId);
+    let res = await delete_chat(targetId);
   } catch {
     console.error("Network Error while deleting Chats.", res);
   }
