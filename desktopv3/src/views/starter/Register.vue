@@ -132,7 +132,7 @@ async function sign_up_handler() {
 
 <template>
   <div class="app-background">
-    <form class="register-page">
+    <form class="register-page" @submit.prevent>
       <h2 class="heading">Hello there!</h2>
       <p class="sign-up-text">Sign up:</p>
 

@@ -15,15 +15,6 @@ export async function apiFetch(endpoint, options = {}) {
       headers: requestHeaders
     });
 
-    if (!response.ok) {
-      const contentType = response.headers.get("content-type") || "";
-      let body = { non_json: true };
-      if (contentType.includes("application/json")) {
-        body = await response.json();
-      }
-      throw new Error(`HTTP ${response.status}: ${JSON.stringify(body)}`);
-    }
-
     const contentType = response.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
       return {

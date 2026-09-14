@@ -60,6 +60,7 @@ pub struct BasicMessage {
     pub owner_id: Uuid,
     pub chat_id: Uuid,
     pub content: String,
+    pub created_at: String,
 }
 
 #[allow(dead_code)]
@@ -97,6 +98,7 @@ impl From<DirectMessage> for BasicMessage {
             owner_id: message.owner_id,
             chat_id: message.chat_id,
             content: message.content,
+            created_at: message.created_at,
         }
     }
 }
