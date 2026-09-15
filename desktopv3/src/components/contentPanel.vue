@@ -17,20 +17,30 @@ const props = defineProps({
 let interval;
 
 onMounted(async () => {
-	if (!props.selected_chat_id) { return };
-	messages.value = get_cache(`messages?chatID=${props.selected_chat_id}`);
-	interval = setInterval(update_messages, 2000);
+    if (props.selected_chat_id) {
+        messages.value = get_cache(
+            `messages?chatID=${props.selected_chat_id}`
+        );
+        await update_messages();
+    }
+
+    interval = setInterval(update_messages, 2000);
 });
 
 onUnmounted(() => {
-	clearInterval(interval);
+    clearInterval(interval);
 });
 
-watch(() => props.selected_chat_id, async () => {
-	await update_messages();
-});
+watch(
+    () => props.selected_chat_id,
+    async () => {
+        await update_messages();
+    }
+);
 
 async function update_messages() {
+	console.log("Updating Messages");
+
 	if (!props.selected_chat_id) {
 		messages.value = [];
 	};
