@@ -112,7 +112,7 @@ async function sign_up_handler() {
   const data = await register(username, password);
   if (data.raw.ok) {
     loadingStatus.value = false;
-    router.push("/login");
+    router.push("/chat");
   } else {
     loadingStatus.value = false;
     if (data.raw.status == 400) {

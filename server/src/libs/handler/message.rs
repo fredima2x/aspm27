@@ -22,6 +22,11 @@ pub async fn save_message(
     Json(body): Json<SendMessageRequest>,
 ) -> Result<Json<BasicMessage>, StatusCode> {
     tracing::info!("Got save_message Request.");
+
+    if body.content.len() == 0 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
     if db::chats::is_user_in_chat(chat_id, user.id, state.db.clone())
         .await
         .map_err(error::db_err)?
