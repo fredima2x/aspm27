@@ -1,181 +1,198 @@
 <script setup>
-import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import Message from './message.vue';
-import get_messages from '../api/requests/get_messages.js';
-import { get_cache } from '../stores/cache.js';
-import send_message from '../api/requests/send_message.js';
+import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import Message from "./message.vue";
+import get_messages from "../api/requests/get_messages.js";
+import { get_cache } from "../stores/cache.js";
+import send_message from "../api/requests/send_message.js";
 
 const messages = ref([]);
-const message_input = ref('');
-const message_list = ref('');
+const message_input = ref("");
+const message_list = ref("");
 
 const props = defineProps({
-	current_user: Object,
-	selected_chat_id: String,
+  current_user: Object,
+  selected_chat_id: String,
 });
 
 let interval;
 
 onMounted(async () => {
-    if (props.selected_chat_id) {
-        messages.value = get_cache(
-            `messages?chatID=${props.selected_chat_id}`
-        );
-        await update_messages();
-    }
+  if (props.selected_chat_id) {
+    messages.value = get_cache(`messages?chatID=${props.selected_chat_id}`);
+    await update_messages();
+  }
 
-    interval = setInterval(update_messages, 2000);
+  interval = setInterval(update_messages, 2000);
 });
 
 onUnmounted(() => {
-    clearInterval(interval);
+  clearInterval(interval);
 });
 
 watch(
-    () => props.selected_chat_id,
-    async () => {
-        await update_messages();
-    }
+  () => props.selected_chat_id,
+  async () => {
+    await update_messages();
+  },
 );
 
 async function update_messages() {
-	console.log("Updating Messages");
+  console.log("Updating Messages");
 
-	if (!props.selected_chat_id) {
-		messages.value = [];
-	};
+  if (!props.selected_chat_id) {
+    messages.value = [];
+  }
 
-	console.debug("Current User", props.current_user)
+  console.debug("Current User", props.current_user);
 
-	try {
-		const res = await get_messages(props.selected_chat_id, 100, 0);
-		if (!res.raw.ok) {
-			console.log("Error fetching Messages!", res);
-		}
-		messages.value = res.body;
-	} catch(error) {
-		console.log("Error fetching Messages!", error);
-		messages.value = get_cache(`messages?chatID=${props.selected_chat_id}`)
-	} finally {
-		await scrollToBottom();
-	}
+  try {
+    const res = await get_messages(props.selected_chat_id, 100, 0);
+    if (!res.raw.ok) {
+      console.log("Error fetching Messages!", res);
+    }
+    messages.value = res.body;
+  } catch (error) {
+    console.log("Error fetching Messages!", error);
+    messages.value = get_cache(`messages?chatID=${props.selected_chat_id}`);
+  } finally {
+    await scrollToBottom();
+  }
 }
 
 async function sendMessage() {
-	if (!message_input.value) { return }
+  if (!message_input.value) {
+    return;
+  }
 
-	const res = await send_message(props.selected_chat_id, message_input.value);
+  const res = await send_message(props.selected_chat_id, message_input.value);
 
-	message_input.value = "";
+  message_input.value = "";
 
-	if (res.raw.ok) {
-		messages.value.push(res.body);
-	} else {
-		console.error("Failed to send Message!", res);
-	}
-	await scrollToBottom();
+  if (res.raw.ok) {
+    messages.value.push(res.body);
+  } else {
+    console.error("Failed to send Message!", res);
+  }
+  await scrollToBottom();
 }
 
 async function scrollToBottom() {
-    await nextTick();
+  await nextTick();
 
-    if (message_list.value) {
-        message_list.value.scrollTop = message_list.value.scrollHeight;
-    }
+  if (message_list.value) {
+    message_list.value.scrollTop = message_list.value.scrollHeight;
+  }
 }
-
 </script>
 
 <template>
   <div class="content-panel">
-	<template v-if="Boolean(selected_chat_id)">
-		<div class="message-panel widget">
-			<div class="message-list" ref="message_list">
-				<Message v-for="message in messages" :message="message.content" :own="String(message.owner_id) === String(current_user?.id)"/>
-				<div class="message-placeholder"></div>
-				</div>
-			<div class="message-input" >
-				<input v-model="message_input" @keydown.enter="sendMessage" type="text" placeholder="Enter Message...">
-				<button @click="sendMessage" class="send-button">Send</button>
-			</div>
-		</div>
-	</template>
-	<template v-else>
-		<h1>No Chat selected!</h1> <!-- TODO: Style -->
-	</template>
+    <template v-if="Boolean(selected_chat_id) || selected_chat_id !== ''">
+      <div class="message-panel widget">
+        <div class="message-list" ref="message_list">
+          <Message
+            v-for="message in messages"
+            :message="message.content"
+            :own="String(message.owner_id) === String(current_user?.id)"
+          />
+          <div class="message-placeholder"></div>
+        </div>
+        <div class="message-input">
+          <input
+            v-model="message_input"
+            @keydown.enter="sendMessage"
+            type="text"
+            placeholder="Enter Message..."
+          />
+          <button @click="sendMessage" class="send-button">Send</button>
+        </div>
+      </div>
+    </template>
+    <template v-else>
+      <div class="chat-placeholder">
+        <h1 class="chat-placeholder-text">You have no Chat selected!</h1>
+        <!-- TODO: Style -->
+        <img src="" alt="logo" class="chat-placeholder-img" />
+      </div>
+    </template>
   </div>
 </template>
 
 <style scoped>
-@import '../assets/styles/general.css';
-@import '../assets/styles/root.css';
+@import "../assets/styles/general.css";
+@import "../assets/styles/root.css";
 
 .content-panel {
-    display: flex;
-    flex: 2;
-    height: 100%;
-    min-width: 0;
-    margin: 0;
+  display: flex;
+  flex: 2;
+  height: 100%;
+  min-width: 0;
+  margin: 0;
 }
 
 .message-panel {
-    flex: 1;
-    min-width: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .message-list {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
 
-    overflow-y: auto;
-    overflow-x: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 
-    background-color: var(--theme-gray);
-    border-radius: 10px;
+  background-color: var(--theme-gray);
+  border-radius: 10px;
 }
 
 .message-list {
-    /* Scrollbar verstecken */
-    scrollbar-width: none;      /* Firefox */
-    -ms-overflow-style: none;   /* Internet Explorer */
+  /* Scrollbar verstecken */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer */
 }
 
 .message-list::-webkit-scrollbar {
-    display: none;              /* Chrome, Edge, Safari */
+  display: none; /* Chrome, Edge, Safari */
 }
 
 .widget {
-	display: flex;
-	flex-direction: column;
-	margin: 10px;
-	padding: 10px;
-	background-color: var(--theme-gray);
-	border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
+  padding: 10px;
+  background-color: var(--theme-gray);
+  border-radius: 10px;
 }
 
-
-
 .message-input {
-	display: flex;
-	gap: 10px;
-	padding-top: 10px;
-	border-top: 3px solid var(--theme-primary);
+  display: flex;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 3px solid var(--theme-primary);
 }
 
 .message-input input {
-	flex: 1;
-	margin: 0;
-	border: 1px solid var(--theme-light-gray);
+  flex: 1;
+  margin: 0;
+  border: 1px solid var(--theme-light-gray);
 }
 
 .send-button {
-	width: 80px;
-	margin: 0;
+  width: 80px;
+  margin: 0;
 }
 
 .message-placeholder {
+  width: 100%;
+  height: 10px;
+}
+
+.chat-placeholder {
 	width: 100%;
-	height: 10px;
+	height: 100%;
+	align-content: center;
+	justify-items: center;
 }
 </style>
