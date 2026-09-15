@@ -1,8 +1,8 @@
 <script setup>
-defineProps({
-  message: String,
-  own: Boolean,
-});
+  defineProps({
+    message: String,
+    own: Boolean,
+  });
 </script>
 
 <template>
@@ -14,19 +14,22 @@ defineProps({
 </template>
 
 <style scoped>
-.message-wrapper {
+  @import "../assets/styles/general.css";
+  @import "../assets/styles/root.css";
+
+  .message-wrapper {
     display: flex;
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
     padding: 0 10px;
-}
+  }
 
-.message-wrapper.own {
+  .message-wrapper.own {
     justify-content: flex-end;
-}
+  }
 
-.message {
+  .message {
     max-width: 70%;
     min-width: 0;
 
@@ -39,14 +42,14 @@ defineProps({
 
     overflow-wrap: anywhere;
     word-break: break-word;
-}
+  }
 
-.message.own {
-  background-color: var(--theme-primary);
-  color: var(--theme-black);
-}
+  .message.own {
+    background-color: var(--theme-primary);
+    color: var(--theme-black);
+  }
 
-.message p {
+  .message p {
     margin: 0;
-}
+  }
 </style>

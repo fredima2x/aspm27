@@ -69,6 +69,7 @@ function handle_input() {
           v-model="chatDesc"
           maxlength="25"
           placeholder="A short Description of your Chat! (optional)"
+          
         />
         <p v-show="warning" class="warn-text">{{ warning }}</p>
         <button type="submit">Save changes</button>
@@ -83,7 +84,9 @@ function handle_input() {
   @import "../assets/styles/root.css";
 
   textarea {
-    height: 70px;
+    height: 100px;
+    width: 300px;
+    resize: none;
   }
 
   .backdrop {

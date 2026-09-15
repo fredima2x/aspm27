@@ -58,7 +58,9 @@ function handle_input() {
   @import "../assets/styles/root.css";
 
   textarea {
-    height: 70px;
+    height: 100px;
+    width: 300px;
+    resize: none;
   }
 
   .backdrop {
