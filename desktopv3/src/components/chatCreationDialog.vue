@@ -31,6 +31,10 @@ function submitCreateChat() {
     chatDesc: trimmedDesc,
   });
 }
+
+async function handle_input() {
+  warning.value = '';
+}
 </script>
 
 <template>
@@ -38,9 +42,9 @@ function submitCreateChat() {
     <div class="chatCreationDialog">
       <form @submit.prevent="submitCreateChat">
         <p>Enter chat name:</p>
-        <input v-model="chatName" maxlength="24" type="text" placeholder="e.g. 'Class-chat'" />
+        <input @input="handle_input" v-model="chatName" maxlength="24" type="text" placeholder="e.g. 'Class-chat' or 'Goon-Corner'" />
         <p>Enter chat description:</p>
-        <textarea v-model="chatDesc" maxlength="60" placeholder="Optional" />
+        <textarea @input="handle_input" v-model="chatDesc" maxlength="60" placeholder="A short Description of your Chat! (optional)" />
         <p v-show="warning" class="warn-text">{{ warning }}</p>
         <button type="submit">Create chat</button>
         <p @click="closeDialog" class="close-button">x</p>
@@ -90,4 +94,5 @@ function submitCreateChat() {
   .warn-text {
     color: var(--theme-red);
   }
+
 </style>

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import Message from './message.vue';
 import get_messages from '../api/requests/get_messages.js';
 import { get_cache } from '../stores/cache.js';
@@ -13,9 +13,19 @@ const props = defineProps({
 	selected_chat_id: String,
 });
 
+let interval;
+
 onMounted(async () => {
-	messages.value = get_cache(`messages?chatID=${props.selected_chat_id}`)
-	setInterval(update_messages, 2000);
+	messages.value = get_cache(`messages?chatID=${props.selected_chat_id}`);
+	interval = setInterval(update_messages, 2000);
+});
+
+onUnmounted(() => {
+	clearInterval(interval);
+});
+
+watch(() => props.selected_chat_id, async () => {
+	await update_messages();
 });
 
 async function update_messages() {
@@ -25,8 +35,8 @@ async function update_messages() {
 			console.log("Error fetching Messages!", res);
 		}
 		messages.value = res.body;
-	} catch {
-		console.log("Error fetching Messages!", res);
+	} catch(error) {
+		console.log("Error fetching Messages!", error);
 		messages.value = get_cache(`messages?chatID=${props.selected_chat_id}`)
 	}
 }
