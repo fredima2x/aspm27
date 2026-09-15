@@ -25,6 +25,7 @@ const emit = defineEmits([
 
 onMounted(async () => {
   chats.value = get_cache("chats");
+  selectedChatId.value = get_cache('lastSelectedChat') ? get_cache('lastSelectedChat') : '';
   console.debug("Getting Chats FROM cache", chats.value);
   setInterval(async () => { await updateChat() }, 5000);
 });
@@ -49,7 +50,8 @@ async function updateChat() {
 }
 
 function chooseChat(chatId) {
-  selectedChatId.value = chatId;
+  selectedChatId.value = chatId ? chatId : get_cache('lastSelectedChat');
+  set_cache("lastSelectedChat", selectedChatId.value);
   emit("select_chat", chatId)
 }
 

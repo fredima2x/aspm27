@@ -3,12 +3,14 @@ import sidebar from "../../components/sidebar.vue";
 import contentPanel from "../../components/contentPanel.vue";
 import { onMounted, ref } from "vue";
 import get_profile from "../../api/requests/get_profile.js";
+import { get_cache, set_cache } from "../../stores/cache.js";
 
 const selected_chat_id = ref("")
 const current_user = ref("")
 
 function handle_select_chat(chatId) {
-  selected_chat_id.value = chatId;
+  selected_chat_id.value = chatId ? chatId : get_cache('lastSelectedChat');
+  set_cache("lastSelectedChat", selected_chat_id.value);
 }
 
 async function get_current_user() {
@@ -18,6 +20,7 @@ async function get_current_user() {
 }
 
 onMounted(async () => {
+  selected_chat_id.value = get_cache('lastSelectedChat') ? get_cache('lastSelectedChat') : '';
   await get_current_user();
 })
 
