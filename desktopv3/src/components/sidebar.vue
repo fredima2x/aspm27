@@ -7,6 +7,7 @@ import get_chats from "../api/requests/get_chats.js";
 import { get_cache, set_cache } from "../stores/cache.js";
 import { delete_chat } from "../api/requests/delete_chat.js";
 import { create_chat } from "../api/requests/create_chat.js";
+import { update_chat } from "../api/requests/update_chat.js";
 import { generateUuid } from "../api/client.js";
 
 const chat1 = new Chat(generateUuid(), "test", "test chat");
@@ -52,7 +53,7 @@ function chooseChat(chatId) {
   emit("select_chat", chatId)
 }
 
-function openDialog() {
+function openChatCreationDialog() {
   displayChatCreationDialog.value = true;
 }
 
@@ -68,6 +69,19 @@ async function createChat(chatName, chatDesc) {
     console.error('Network error while creating chat.', error);
   } finally {
     displayChatCreationDialog.value = false;
+  }
+}
+
+async function editChat(chat) {
+  try {
+    const response = await update_chat(chat.chatId, chat.chatName, chat.chatDesc);
+    if (!response?.raw?.ok) {
+      console.error('Failed to Edit chat on server.', response);
+      return;
+    }
+    await updateChat();
+  } catch(error) {
+    console.error('Network error while saving changes.', error);
   }
 }
 
@@ -106,6 +120,7 @@ async function deleteChat(chat) {
           :chatId="chat.chatId"
           :selected="chat.chatId === selectedChatId"
           @select="chooseChat(chat.chatId)"
+          @edit="editChat"
           @contextmenu.prevent="deleteChat(chat, chats)"
         />
         <chatCreationDialog
@@ -116,7 +131,7 @@ async function deleteChat(chat) {
         <div class="add-chat-button-wrapper">
           <div
             class="add-chat-button"
-            @click="openDialog">
+            @click="openChatCreationDialog">
             <p>+</p>
           </div>
         </div>

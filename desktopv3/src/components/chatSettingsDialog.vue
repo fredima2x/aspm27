@@ -1,17 +1,31 @@
 <script setup>
 import { ref } from 'vue';
 
-const emit = defineEmits(['close', 'create']);
+const props = defineProps({
+  chatName: {
+    type: String,
+    default: '',
+  },
+  chatDesc: {
+    type: String,
+    default: '',
+  },
+});
+
+const emit = defineEmits(['close', 'edit']);
 const chatName = ref('');
 const chatDesc = ref('');
 const warning = ref('');
+
+chatName.value = props.chatName;
+chatDesc.value = props.chatDesc;
 
 function closeDialog() {
   warning.value = '';
   emit('close');
 }
 
-function submitCreateChat() {
+function submitEditChat() {
   const trimmedName = chatName.value.trim();
   const trimmedDesc = chatDesc.value.trim();
 
@@ -26,7 +40,7 @@ function submitCreateChat() {
   }
 
   warning.value = '';
-  emit('create', {
+  emit('edit', {
     chatName: trimmedName,
     chatDesc: trimmedDesc,
   });
@@ -38,15 +52,26 @@ function handle_input() {
 </script>
 
 <template>
-  <div class="backdrop">
-    <div class="chatCreationDialog">
-      <form @submit.prevent="submitCreateChat">
-        <p>Enter chat name:</p>
-        <input @input="handle_input" v-model="chatName" maxlength="24" type="text" placeholder="e.g. 'Class-chat' or 'Goon-Corner'" />
-        <p>Enter chat description:</p>
-        <textarea @input="handle_input" v-model="chatDesc" maxlength="250" placeholder="A short Description of your Chat! (optional)" />
+  <div class="backdrop" @click.stop>
+    <div class="chatSettingsDialog">
+      <form @submit.prevent="submitEditChat">
+        <p>Enter new Chat name:</p>
+        <input
+          @input="handle_input"
+          v-model="chatName"
+          maxlength="24"
+          type="text"
+          placeholder="e.g. 'Goon-Corner'"
+        />
+        <p>Enter new Chat description:</p>
+        <textarea
+          @input="handle_input"
+          v-model="chatDesc"
+          maxlength="25"
+          placeholder="A short Description of your Chat! (optional)"
+        />
         <p v-show="warning" class="warn-text">{{ warning }}</p>
-        <button type="submit">Create chat</button>
+        <button type="submit">Save changes</button>
         <p @click="closeDialog" class="close-button">x</p>
       </form>
     </div>
@@ -74,7 +99,7 @@ function handle_input() {
     z-index: 10;
   }
 
-  .chatCreationDialog {
+  .chatSettingsDialog {
     background-color: var(--theme-light-gray);
     border-radius: var(--theme-round-edges);
     padding: 10px;
@@ -94,5 +119,4 @@ function handle_input() {
   .warn-text {
     color: var(--theme-red);
   }
-
 </style>

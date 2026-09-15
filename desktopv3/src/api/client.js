@@ -1,5 +1,5 @@
 import { BASE_SERVER_URL } from "../config/config"
-import { get_token } from "../stores/token"
+import { clear_token, get_token } from "../stores/token"
 
 export async function apiFetch(endpoint, options = {}) {
   const token = get_token();
@@ -14,6 +14,11 @@ export async function apiFetch(endpoint, options = {}) {
       ...options,
       headers: requestHeaders
     });
+
+    if (response.status === 401 && endpoint !== "/login") {
+      clear_token();
+      window.location.hash = "#/login";
+    }
 
     const contentType = response.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
