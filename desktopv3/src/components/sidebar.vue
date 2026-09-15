@@ -79,6 +79,8 @@ async function deleteChat(chat) {
     await updateChat();
   } catch(error) {
     console.error("Network Error while deleting Chats.", error);
+  } finally {
+    emit("select_chat", '');
   }
 }
 

@@ -26,7 +26,7 @@ onMounted(async () => {
 <template>
   <div class="app-background">
     <sidebar @select_chat="handle_select_chat"/>
-    <contentPanel :selected_chat_id="selected_chat_id"/>
+    <contentPanel :current_user="current_user" :selected_chat_id="selected_chat_id"/>
   </div>
 </template>
 

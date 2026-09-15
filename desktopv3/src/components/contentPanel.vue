@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import Message from './message.vue';
 import get_messages from '../api/requests/get_messages.js';
 import { get_cache } from '../stores/cache.js';
@@ -7,15 +7,17 @@ import send_message from '../api/requests/send_message.js';
 
 const messages = ref([]);
 const message_input = ref('');
+const message_list = ref('');
 
 const props = defineProps({
-	current_user_id: String,
+	current_user: Object,
 	selected_chat_id: String,
 });
 
 let interval;
 
 onMounted(async () => {
+	if (!props.selected_chat_id) { return };
 	messages.value = get_cache(`messages?chatID=${props.selected_chat_id}`);
 	interval = setInterval(update_messages, 2000);
 });
@@ -29,6 +31,12 @@ watch(() => props.selected_chat_id, async () => {
 });
 
 async function update_messages() {
+	if (!props.selected_chat_id) {
+		messages.value = [];
+	};
+
+	console.debug("Current User", props.current_user)
+
 	try {
 		const res = await get_messages(props.selected_chat_id, 100, 0);
 		if (!res.raw.ok) {
@@ -38,31 +46,53 @@ async function update_messages() {
 	} catch(error) {
 		console.log("Error fetching Messages!", error);
 		messages.value = get_cache(`messages?chatID=${props.selected_chat_id}`)
+	} finally {
+		await scrollToBottom();
 	}
 }
 
 async function sendMessage() {
-	const res = await send_message(props.selected_chat_id, message_input.value)
+	if (!message_input.value) { return }
+
+	const res = await send_message(props.selected_chat_id, message_input.value);
+
+	message_input.value = "";
+
 	if (res.raw.ok) {
 		messages.value.push(res.body);
 	} else {
 		console.error("Failed to send Message!", res);
 	}
+	await scrollToBottom();
+}
+
+async function scrollToBottom() {
+    await nextTick();
+
+    if (message_list.value) {
+        message_list.value.scrollTop = message_list.value.scrollHeight;
+    }
 }
 
 </script>
 
 <template>
   <div class="content-panel">
-    <div class="message-panel widget">
-      <div class="message-list">
-        <Message v-for="message in messages" :message="message.content" :own="message.owner_id === current_user_id"/>
-      </div>
-      <div class="message-input">
-        <input v-model="message_input" @keydown.enter="sendMessage" type="text" placeholder="Enter Message...">
-        <button @click="sendMessage" class="send-button">Send</button>
-      </div>
-    </div>
+	<template v-if="Boolean(selected_chat_id)">
+		<div class="message-panel widget">
+			<div class="message-list" ref="message_list">
+				<Message v-for="message in messages" :message="message.content" :own="String(message.owner_id) === String(current_user?.id)"/>
+				<div class="message-placeholder"></div>
+				</div>
+			<div class="message-input" >
+				<input v-model="message_input" @keydown.enter="sendMessage" type="text" placeholder="Enter Message...">
+				<button @click="sendMessage" class="send-button">Send</button>
+			</div>
+		</div>
+	</template>
+	<template v-else>
+		<h1>No Chat selected!</h1> <!-- TODO: Style -->
+	</template>
   </div>
 </template>
 
@@ -71,10 +101,38 @@ async function sendMessage() {
 @import '../assets/styles/root.css';
 
 .content-panel {
-	display: flex;
-	flex: 2;
-	height: 100%;
-	margin: 0;
+    display: flex;
+    flex: 2;
+    height: 100%;
+    min-width: 0;
+    margin: 0;
+}
+
+.message-panel {
+    flex: 1;
+    min-width: 0;
+}
+
+.message-list {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    background-color: var(--theme-gray);
+    border-radius: 10px;
+}
+
+.message-list {
+    /* Scrollbar verstecken */
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* Internet Explorer */
+}
+
+.message-list::-webkit-scrollbar {
+    display: none;              /* Chrome, Edge, Safari */
 }
 
 .widget {
@@ -86,17 +144,7 @@ async function sendMessage() {
 	border-radius: 10px;
 }
 
-.message-panel {
-	flex: 1;
-}
 
-.message-list {
-	flex: 1;
-	min-height: 0;
-	overflow-y: auto;
-	background-color: var(--theme-gray);
-	border-radius: 10px;
-}
 
 .message-input {
 	display: flex;
@@ -114,5 +162,10 @@ async function sendMessage() {
 .send-button {
 	width: 80px;
 	margin: 0;
+}
+
+.message-placeholder {
+	width: 100%;
+	height: 10px;
 }
 </style>
