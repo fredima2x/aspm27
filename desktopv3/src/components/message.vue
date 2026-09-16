@@ -30,7 +30,7 @@ defineProps({
 }
 
 .message {
-  max-width: 40%;
+  max-width: 60%;
   min-width: 0;
 
   padding: 8px 12px;

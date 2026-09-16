@@ -87,7 +87,8 @@ async function scrollToBottom() {
 
 <template>
   <div class="content-panel">
-    <template v-if="Boolean(selected_chat_id) || selected_chat_id !== ''">
+    <template v-if="selected_chat_id">
+      <div class="profile-panel widget"></div>
       <div class="message-panel widget">
         <div class="message-list" ref="message_list">
           <Message
@@ -124,15 +125,19 @@ async function scrollToBottom() {
 
 .content-panel {
   display: flex;
-  flex: 2;
-  height: 100%;
+  grid-column: 2;
+  flex-direction: column;
   min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
   margin: 0;
 }
 
 .message-panel {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
+  min-height: 0;
 }
 
 .message-list {
@@ -168,6 +173,7 @@ async function scrollToBottom() {
 
 .message-input {
   display: flex;
+  flex-shrink: 0;
   gap: 10px;
   padding-top: 10px;
   border-top: 3px solid var(--theme-primary);
@@ -194,5 +200,18 @@ async function scrollToBottom() {
 	height: 100%;
 	align-content: center;
 	justify-items: center;
+}
+
+@media (max-width: 500px) {
+  .content-panel {
+    grid-column: 1;
+  }
+}
+
+.profile-panel {
+  flex: 0 0 100px;
+  min-width: 0;
+  width: auto;
+  margin-bottom: 0;
 }
 </style>

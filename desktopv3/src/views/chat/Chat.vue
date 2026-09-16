@@ -39,11 +39,19 @@ onMounted(async () => {
 }
 
 .app-background {
-  display: flex;
+  display: grid;
+  grid-template-columns: clamp(360px, 50vw, 620px) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   width: 100vw;
   height: 100vh;
   margin: 0;
   padding: 0;
   overflow: hidden;
+}
+
+@media (max-width: 500px) {
+  .app-background {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

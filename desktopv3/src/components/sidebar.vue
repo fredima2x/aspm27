@@ -104,7 +104,7 @@ async function deleteChat(chat) {
 
 <template>
   <div class="sidebar">
-    <div class="profile-panel widget"></div>
+    
     <div class="chat-panel widget">
       <div class="search-bar">
         <input type="search" placeholder="Search Chats..." />
@@ -152,7 +152,9 @@ async function deleteChat(chat) {
 .sidebar {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  grid-column: 1;
+  min-width: 0;
+  width: 100%;
   margin: 0;
   height: 100%;
 }
@@ -237,5 +239,11 @@ async function deleteChat(chat) {
   margin: 0;
   text-align: center;
   font-size: 0.9em;
+}
+
+@media (max-width: 500px) {
+  .sidebar {
+    display: none;
+  }
 }
 </style>

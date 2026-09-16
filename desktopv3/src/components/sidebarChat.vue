@@ -36,7 +36,6 @@ function submitChatEdit(chat) {
   <div class="chat" :class="{ selected: props.selected }" @click="emit('select', props.chatId)">
     <h2 class="chat-name">{{ props.chatName }}</h2>
     <p class="chat-desc">{{ props.chatDesc }}</p>
-    <p class="chat-id">{{ props.chatId }}</p>
     <img src="../assets/kebab-menu-svgrepo-com.svg" alt="menu" class="menu" @click.stop="openChatEditDialog">
     <chatSettingsDialog
       v-if="displayChatSettingsDialog"
@@ -67,6 +66,11 @@ function submitChatEdit(chat) {
 
 .chat.selected {
   background-color: var(--theme-primary);
+}
+
+.chat.selected p,
+.chat.selected h2 {
+  color: var(--theme-gray);
 }
 
 .chat-name {
