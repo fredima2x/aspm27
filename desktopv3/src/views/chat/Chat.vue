@@ -40,7 +40,7 @@ onMounted(async () => {
 
 .app-background {
   display: grid;
-  grid-template-columns: clamp(360px, 50vw, 620px) minmax(0, 1fr);
+  grid-template-columns: clamp(200px, 35vw, 350px) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   width: 100vw;
   height: 100vh;
