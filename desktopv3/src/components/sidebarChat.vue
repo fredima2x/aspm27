@@ -6,6 +6,7 @@ const props = defineProps({
   chatId: String,
   chatName: String,
   chatDesc: String,
+  createdAt: String,
   selected: Boolean,
 });
 
@@ -41,6 +42,7 @@ function submitChatEdit(chat) {
       v-if="displayChatSettingsDialog"
       :chat-name="props.chatName"
       :chat-desc="props.chatDesc"
+      :created-at="props.createdAt"
       @close="closeChatEditDialog"
       @edit="submitChatEdit"
     />
