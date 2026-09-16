@@ -33,17 +33,14 @@ watch(
   () => props.selected_chat_id,
   async () => {
     await update_messages();
+    await scrollToBottom();
   },
 );
 
 async function update_messages() {
-  console.log("Updating Messages");
-
   if (!props.selected_chat_id) {
     messages.value = [];
   }
-
-  console.debug("Current User", props.current_user);
 
   try {
     const res = await get_messages(props.selected_chat_id, 100, 0);
@@ -54,9 +51,7 @@ async function update_messages() {
   } catch (error) {
     console.log("Error fetching Messages!", error);
     messages.value = get_cache(`messages?chatID=${props.selected_chat_id}`);
-  } finally {
-    await scrollToBottom();
-  }
+  } 
 }
 
 async function sendMessage() {
