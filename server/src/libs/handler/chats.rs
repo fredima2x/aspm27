@@ -227,11 +227,9 @@ pub async fn update_chat(
         .map_err(error::db_err)?
     {
         db::chats::update_chat(
-            BasicChat {
-                id,
-                chat_name: body.chat_name,
-                chat_desc: body.chat_desc,
-            },
+            id,
+            &body.chat_name,
+            &body.chat_desc,
             state.db.clone(),
         )
         .await

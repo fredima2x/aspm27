@@ -52,6 +52,7 @@ pub struct BasicChat {
     pub id: Uuid,
     pub chat_name: String,
     pub chat_desc: String,
+    pub created_at: String,
 }
 
 #[derive(Serialize, sqlx::FromRow)]
@@ -87,6 +88,7 @@ impl From<DirectChat> for BasicChat {
             id: chat.id,
             chat_name: chat.chat_name,
             chat_desc: chat.chat_desc,
+            created_at: chat.created_at,
         }
     }
 }
