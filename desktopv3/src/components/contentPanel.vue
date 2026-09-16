@@ -87,9 +87,9 @@ async function scrollToBottom() {
 
 <template>
   <div class="content-panel">
-    <template v-if="selected_chat_id">
-      <div class="profile-panel widget"></div>
-      <div class="message-panel widget">
+    <div class="profile-panel widget"></div>
+    <div class="message-panel widget">
+      <template v-if="selected_chat_id">
         <div class="message-list" ref="message_list">
           <Message
             v-for="message in messages"
@@ -107,15 +107,15 @@ async function scrollToBottom() {
           />
           <button @click="sendMessage" class="send-button">Send</button>
         </div>
-      </div>
-    </template>
-    <template v-else>
-      <div class="chat-placeholder">
-        <h1 class="chat-placeholder-text">You have no Chat selected!</h1>
-        <!-- TODO: Style -->
-        <img src="" alt="logo" class="chat-placeholder-img" />
-      </div>
-    </template>
+      </template>
+      <template v-else>
+        <div class="chat-placeholder">
+          <h1 class="chat-placeholder-text">You have no Chat selected!</h1>
+          <!-- TODO: Style -->
+          <img src="" alt="logo" class="chat-placeholder-img" />
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -196,10 +196,12 @@ async function scrollToBottom() {
 }
 
 .chat-placeholder {
-	width: 100%;
-	height: 100%;
-	align-content: center;
-	justify-items: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (max-width: 500px) {
