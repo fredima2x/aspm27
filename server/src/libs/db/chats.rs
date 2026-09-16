@@ -119,13 +119,13 @@ pub async fn is_user_in_chat(
     }
 }
 
-pub async fn update_chat(chat: BasicChat, pool: SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn update_chat(chat_id: Uuid,chat_name: &str, chat_desc: &str, pool: SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query(
         "UPDATE chats SET chat_name = ?, chat_desc = ? WHERE id = ? AND soft_delete = FALSE",
     )
-    .bind(chat.chat_name)
-    .bind(chat.chat_desc)
-    .bind(chat.id)
+    .bind(chat_name)
+    .bind(chat_desc)
+    .bind(chat_id)
     .execute(&pool)
     .await?;
     Ok(())
