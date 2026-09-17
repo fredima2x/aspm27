@@ -9,6 +9,6 @@ The project is in active development and will be the base for a new Chat-Provide
 
 **Development:** @fredima2x, @hi_anton
 **Idea & Concept:** @fredima2x, @hi_anton
-**Design & Consulting :** @hi_anton's Dad
-
+**Design & Consulting:** @hi_anton's Dad
+**Testing & Feedback:** William K.
 Thanks to: Everybody, that gives feedback, tests or contributes in any other way! ❤️
