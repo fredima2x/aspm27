@@ -2,12 +2,14 @@
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import Message from "./message.vue";
 import get_messages from "../api/requests/get_messages.js";
-import { get_cache } from "../stores/cache.js";
+import { get_cache, set_cache } from "../stores/cache.js";
 import send_message from "../api/requests/send_message.js";
+import { get_user } from "../api/requests/get_user.js";
 
 const messages = ref([]);
 const message_input = ref("");
 const message_list = ref("");
+const userCache = ref({});
 
 const props = defineProps({
   current_user: Object,
@@ -35,6 +37,17 @@ watch(
     await update_messages();
     await scrollToBottom();
   },
+);
+
+
+watch(
+  messages,
+  async (newMessages) => {
+    for (const message of newMessages) {
+      await get_message_owner(message.owner_id);
+    }
+  },
+  { immediate: true }
 );
 
 async function update_messages() {
@@ -78,21 +91,39 @@ async function scrollToBottom() {
     message_list.value.scrollTop = message_list.value.scrollHeight;
   }
 }
+
+async function get_message_owner(id) {
+  if (get_cache(`user?id=${id}`)) {
+    return get_cache(`user?id=${id}`);
+  }
+
+  const res = await get_user(id);
+
+  set_cache(`user?id=${id}`, res.body.username);
+
+  return res.body.username;
+}
+
 </script>
 
 <template>
   <div class="content-panel">
     <div class="profile-panel widget"></div>
+
     <div class="message-panel widget">
       <template v-if="selected_chat_id">
         <div class="message-list" ref="message_list">
           <Message
             v-for="message in messages"
+            :key="message.id"
             :message="message.content"
+            :message_owner="get_cache(`user?id=${message.owner}`) || '...'"
             :own="String(message.owner_id) === String(current_user?.id)"
           />
+
           <div class="message-placeholder"></div>
         </div>
+
         <div class="message-input">
           <input
             v-model="message_input"
@@ -100,13 +131,17 @@ async function scrollToBottom() {
             type="text"
             placeholder="Enter Message..."
           />
-          <button @click="sendMessage" class="send-button">Send</button>
+          <button @click="sendMessage" class="send-button">
+            Send
+          </button>
         </div>
       </template>
+
       <template v-else>
         <div class="chat-placeholder">
-          <h1 class="chat-placeholder-text">You have no Chat selected!</h1>
-          <!-- TODO: Style -->
+          <h1 class="chat-placeholder-text">
+            You have no Chat selected!
+          </h1>
           <img src="" alt="logo" class="chat-placeholder-img" />
         </div>
       </template>

@@ -2,9 +2,9 @@ import { apiFetch } from "../client";
 
 export function get_user(identifier) {
     function get_path(identifier) {
-        if (typeof identifier == "string") {
+        if (identifier.length < 32) {
             return `/users/name/${identifier}`
-        } else if (typeof identifier == "bigint") {
+        } else {
             return `/users/id/${identifier}`
         }
     }

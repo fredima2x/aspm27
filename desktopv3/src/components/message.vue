@@ -1,7 +1,8 @@
 <script setup>
-defineProps({
+const props = defineProps({
   message: String,
   own: Boolean,
+  message_owner: String,
 });
 </script>
 
@@ -10,6 +11,7 @@ defineProps({
     <div class="message" :class="{ own }">
       <p>{{ message }}</p>
     </div>
+    <p class="owner-name" v-if="!own">{{ message_owner }}</p>
   </div>
 </template>
 
@@ -17,16 +19,24 @@ defineProps({
 @import "../assets/styles/general.css";
 @import "../assets/styles/root.css";
 
+.owner-name {
+  color: var(--theme-light-light-gray);
+  margin-top: 0;
+}
+
 .message-wrapper {
   display: flex;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
   padding: 0 10px;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .message-wrapper.own {
   justify-content: flex-end;
+  align-items: flex-end;
 }
 
 .message {
