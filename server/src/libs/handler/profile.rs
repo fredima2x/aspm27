@@ -1,13 +1,8 @@
 use crate::libs::{
-    auth, check, db, error,
-    models::{
+    auth, check, db, error::{self, db_err}, models::{
         api::{
-            requests::{SimpleSendUserRequest, UpdateProfileRequest},
-            responses::{GetProfileResponse, LoginResponse},
-        },
-        app_state::AppState,
-        db_objects::BasicUser,
-        misc::AuthenticatedUser,
+            requests::{LogoutRequest, SimpleSendUserRequest, UpdateProfileRequest}, responses::{GetProfileResponse, LoginResponse},
+        }, app_state::AppState, db_objects::BasicUser, misc::AuthenticatedUser,
     },
 };
 use axum::http::StatusCode;
@@ -90,4 +85,32 @@ pub async fn get_profile(
             .map_err(error::db_err)?
             .into(),
     }))
+}
+
+#[tracing::instrument]
+pub async fn logout(
+    user: AuthenticatedUser,
+    State(state): State<AppState>,
+    Json(body): Json<LogoutRequest>,
+) -> Result<Json<LoginResponse>, StatusCode> {
+    tracing::info!("Logging Out User now");
+    if body.logout_all_devices {
+        db::session::delete_all_sessions(user.id, state.db.clone()).await.map_err(db_err);
+    } else {
+        db::session::delete_session(user.session_id, state.db.clone()).await.map_err(db_err);
+    } 
+    if body.send_new_token {
+        let session_id = db::session::create_session(user.id, state.db.clone())
+            .await
+            .map_err(error::db_err)?;
+
+        let token_string =
+            auth::create_token(user.id, session_id, &state.config.jwt_signing_secret);
+        tracing::info!("Login successful for user: {}", body.username);
+        Ok(Json(LoginResponse {
+            token_string: token_string,
+        }))
+    } else {
+        Ok(Json(LoginResponse { token_string: String::new() }))
+    }
 }

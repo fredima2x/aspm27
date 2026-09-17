@@ -40,3 +40,9 @@ pub struct UpdateChatRequest {
     pub chat_name: String,
     pub chat_desc: String,
 }
+
+#[derive(Deserialize, Debug)]
+pub struct LogoutRequest {
+    pub logout_all_devices: bool,
+    pub send_new_token: bool,
+}

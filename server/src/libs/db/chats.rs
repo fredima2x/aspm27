@@ -1,7 +1,7 @@
 use sqlx::SqlitePool;
 use uuid::Uuid;
 
-use crate::libs::models::db_objects::{BasicChat, DirectChat, DirectUser};
+use crate::libs::models::db_objects::{DirectChat, DirectUser};
 
 pub async fn user_get_chats(
     user_id: Uuid,
