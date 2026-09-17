@@ -1,34 +1,32 @@
-import { CACHE_PREFIX } from "./locations"
+import { CACHE_PREFIX } from "./locations";
+
+function load_cache() {
+    const raw = localStorage.getItem(CACHE_PREFIX);
+
+    if (!raw) return {};
+
+    try {
+        return JSON.parse(raw);
+    } catch {
+        localStorage.removeItem(CACHE_PREFIX);
+        return {};
+    }
+}
 
 export function set_cache(key, value) {
-    try {
-        if (!localStorage.getItem(CACHE_PREFIX)) { 
-            localStorage.setItem(CACHE_PREFIX, JSON.stringify({}));
-        }
+    const cache = load_cache();
 
-        const cache = JSON.parse(localStorage.getItem(CACHE_PREFIX));
-        cache[key] = value;
-        localStorage.setItem(CACHE_PREFIX, cache);
-        
-    } catch {
-        console.error("Failed to Cache", [key, value]);
-        return false
-    }
+    cache[key] = value;
+
+    localStorage.setItem(CACHE_PREFIX, JSON.stringify(cache));
 }
 
 export function get_cache(key) {
-    try {
-        const cache = JSON.parse(localStorage.getItem(CACHE_PREFIX));
-        if (!cache[key]) { return false } else { return cache[key] }
-    } catch {
-        console.error("Failed to read Cache", key);
-    }
+    const cache = load_cache();
+
+    return Object.hasOwn(cache, key) ? cache[key] : false;
 }
 
 export function clear_cache() {
-    try {
-        localStorage.removeItem(CACHE_PREFIX);
-    } catch {
-        console.error("Failed to delete Cache");
-    }
+    localStorage.removeItem(CACHE_PREFIX);
 }
