@@ -72,7 +72,7 @@ async fn main() {
             get(handler::profile::get_profile).put(handler::profile::update_profile),
         )
         .route("/login", post(handler::profile::login))
-        .route("/logout", handler::profile::logout))
+        .route("/logout", post(handler::profile::logout))
         // Erlaubt deinem Browser-Frontend Zugriffe
         .layer(CorsLayer::permissive())
         .with_state(state.clone());
