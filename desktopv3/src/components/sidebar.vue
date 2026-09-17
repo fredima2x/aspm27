@@ -38,6 +38,7 @@ async function updateChat() {
           chatId: chat.id,
           chatName: chat.chat_name,
           chatDesc: chat.chat_desc,
+          createdAt: chat.created_at,
         }))
       : [];
 
@@ -121,6 +122,7 @@ async function deleteChat(chat) {
           :key="chat.chatId"
           :chatName="chat.chatName"
           :chatDesc="chat.chatDesc"
+          :createdAt="chat.createdAt"
           :chatId="chat.chatId"
           :selected="chat.chatId === selectedChatId"
           @select="chooseChat(chat.chatId)"
