@@ -117,7 +117,7 @@ async function get_message_owner(id) {
             v-for="message in messages"
             :key="message.id"
             :message="message.content"
-            :message_owner="get_cache(`user?id=${message.owner}`) || '...'"
+            :message_owner="get_cache(`user?id=${message.owner_id}`) || '...'"
             :own="String(message.owner_id) === String(current_user?.id)"
           />
 

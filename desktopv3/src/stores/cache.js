@@ -2,7 +2,14 @@ import { CACHE_PREFIX } from "./locations"
 
 export function set_cache(key, value) {
     try {
-        localStorage.setItem(`${CACHE_PREFIX}_${key}`, JSON.stringify(value));
+        if (!localStorage.getItem(CACHE_PREFIX)) { 
+            localStorage.setItem(CACHE_PREFIX, JSON.stringify({}));
+        }
+
+        const cache = JSON.parse(localStorage.getItem(CACHE_PREFIX));
+        cache[key] = value;
+        localStorage.setItem(CACHE_PREFIX, cache);
+        
     } catch {
         console.error("Failed to Cache", [key, value]);
         return false
@@ -11,9 +18,17 @@ export function set_cache(key, value) {
 
 export function get_cache(key) {
     try {
-        const res = JSON.parse(localStorage.getItem(`${CACHE_PREFIX}_${key}`));
-        if (!res) { return false } else { return res }
+        const cache = JSON.parse(localStorage.getItem(CACHE_PREFIX));
+        if (!cache[key]) { return false } else { return cache[key] }
     } catch {
         console.error("Failed to read Cache", key);
+    }
+}
+
+export function clear_cache() {
+    try {
+        localStorage.removeItem(CACHE_PREFIX);
+    } catch {
+        console.error("Failed to delete Cache");
     }
 }
