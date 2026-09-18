@@ -3,11 +3,12 @@ const props = defineProps({
   message: String,
   own: Boolean,
   message_owner: String,
+  close: Boolean,
 });
 </script>
 
 <template>
-  <div class="message-wrapper" :class="{ own }">
+  <div class="message-wrapper" :class="{ own, close }">
     <div class="message" :class="{ own }">
       <p>{{ message }}</p>
     </div>
@@ -37,6 +38,16 @@ const props = defineProps({
 .message-wrapper.own {
   justify-content: flex-end;
   align-items: flex-end;
+}
+
+.message-wrapper.close,
+.message-wrapper.own.close {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.message-wrapper.close .message {
+  margin-top: 0;
 }
 
 .message {

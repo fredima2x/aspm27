@@ -114,11 +114,12 @@ async function get_message_owner(id) {
       <template v-if="selected_chat_id">
         <div class="message-list" ref="message_list">
           <Message
-            v-for="message in messages"
+            v-for="(message, index) in messages"
             :key="message.id"
             :message="message.content"
             :message_owner="get_cache(`user?id=${message.owner_id}`) || '...'"
             :own="String(message.owner_id) === String(current_user?.id)"
+            :close="index > 0 && String(message.owner_id) === String(messages[index - 1].owner_id)"
           />
 
           <div class="message-placeholder"></div>
