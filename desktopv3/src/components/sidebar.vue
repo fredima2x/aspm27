@@ -89,15 +89,19 @@ async function editChat(chat) {
 }
 
 async function deleteChat(chat) {
-  const targetId = chat.chatId ? chat.chatId : '';
-
   try {
-    await delete_chat(targetId);
+    const response = await delete_chat(chat.chatId);
+    if (!response?.raw?.ok) {
+      console.error('Failed to delete chat.', response);
+      return;
+    }
+
     await updateChat();
-  } catch(error) {
-    console.error("Network Error while deleting Chats.", error);
-  } finally {
-    emit("select_chat", '');
+    if (selectedChatId.value === chat.chatId) {
+      chooseChat('');
+    }
+  } catch (error) {
+    console.error('Network error while deleting chat.', error);
   }
 }
 
@@ -127,7 +131,7 @@ async function deleteChat(chat) {
           :selected="chat.chatId === selectedChatId"
           @select="chooseChat(chat.chatId)"
           @edit="editChat"
-          @contextmenu.prevent="deleteChat(chat, chats)"
+          @delete="deleteChat(chat)"
         />
         <chatCreationDialog
           v-if="displayChatCreationDialog"

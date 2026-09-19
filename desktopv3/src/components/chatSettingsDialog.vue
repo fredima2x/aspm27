@@ -16,7 +16,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["close", "edit"]);
+const emit = defineEmits(["close", "edit", "delete"]);
 const chatName = ref("");
 const chatDesc = ref("");
 const warning = ref("");
@@ -55,11 +55,15 @@ function submitEditChat() {
 function handle_input() {
   warning.value = "";
 }
+
+function deleteChat() {
+  emit("delete");
+}
 </script>
 
 <template>
   <div class="backdrop" @click.stop>
-    <div class="chatSettingsDialog">
+    <div class="chatSettingsDialog" @contextmenu.stop.prevent>
       <form @submit.prevent="submitEditChat">
         <p>Enter new Chat name:</p>
         <input
@@ -77,7 +81,10 @@ function handle_input() {
           placeholder="A short Description of your Chat! (optional)"
         />
         <p v-show="warning" class="warn-text">{{ warning }}</p>
-        <button type="submit">Save changes</button>
+        <div class="buttons">
+          <button type="submit">Save changes</button>
+          <button type="button" class="delete-button" @click="deleteChat">Delete Chat</button>
+        </div>
         <p class="created-at">Created: {{ createdAt }}</p>
         <p @click="closeDialog" class="close-button">x</p>
       </form>
@@ -127,5 +134,15 @@ textarea {
 
 .warn-text {
   color: var(--theme-red);
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.delete-button {
+  background-color: var(--theme-red);
 }
 </style>

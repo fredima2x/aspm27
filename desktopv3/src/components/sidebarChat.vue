@@ -10,7 +10,7 @@ const props = defineProps({
   selected: Boolean,
 });
 
-const emit = defineEmits(['select', 'edit']);
+const emit = defineEmits(['select', 'edit', 'delete']);
 
 const displayChatSettingsDialog = ref(false);
 
@@ -31,6 +31,11 @@ function submitChatEdit(chat) {
   closeChatEditDialog();
 }
 
+function deleteChat() {
+  emit('delete', props.chatId);
+  closeChatEditDialog();
+}
+
 </script>
 
 <template>
@@ -45,6 +50,7 @@ function submitChatEdit(chat) {
       :created-at="props.createdAt"
       @close="closeChatEditDialog"
       @edit="submitChatEdit"
+      @delete="deleteChat"
     />
   </div>
 </template>
